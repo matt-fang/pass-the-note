@@ -3,9 +3,21 @@
 import { useState, useEffect } from 'react';
 
 const NOTE_COLORS = [
-  { bg: 'var(--note-green)', secondary: 'var(--note-green-secondary)' },
-  { bg: 'var(--note-blue)', secondary: 'var(--note-blue-secondary)' },
-  { bg: 'var(--note-beige)', secondary: 'var(--note-beige-secondary)' }
+  { 
+    bg: 'var(--note-green)', 
+    secondary: 'var(--note-green-secondary)',
+    filter: 'brightness(0) saturate(100%) invert(49%) sepia(8%) saturate(1128%) hue-rotate(75deg) brightness(95%) contrast(87%)'
+  },
+  { 
+    bg: 'var(--note-blue)', 
+    secondary: 'var(--note-blue-secondary)',
+    filter: 'brightness(0) saturate(100%) invert(55%) sepia(18%) saturate(1045%) hue-rotate(166deg) brightness(95%) contrast(92%)'
+  },
+  { 
+    bg: 'var(--note-beige)', 
+    secondary: 'var(--note-beige-secondary)',
+    filter: 'brightness(0) saturate(100%) invert(71%) sepia(12%) saturate(361%) hue-rotate(351deg) brightness(97%) contrast(91%)'
+  }
 ];
 
 export default function Home() {
@@ -199,9 +211,9 @@ export default function Home() {
                 src="/shuffle.svg" 
                 alt="Shuffle"
                 style={{
-                  width: '16px',
-                  height: '16px',
-                  filter: `brightness(0) saturate(100%) invert(49%) sepia(8%) saturate(1128%) hue-rotate(75deg) brightness(95%) contrast(87%)`
+                  height: '14px',
+                  width: 'auto',
+                  filter: noteColor.filter
                 }}
               />
             </button>
