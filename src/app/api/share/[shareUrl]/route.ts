@@ -25,7 +25,7 @@ export async function GET(
     }
 
     // Check if this shareUrl has already been responded to
-    const hasNextResponse = await prisma.response.findFirst({
+    const nextResponse = await prisma.response.findFirst({
       where: {
         threadId: response.threadId,
         createdAt: { gt: response.createdAt }
@@ -34,7 +34,8 @@ export async function GET(
 
     return NextResponse.json({
       thread: response.thread,
-      canEdit: !hasNextResponse
+      canEdit: !nextResponse,
+      nextShareUrl: nextResponse?.shareUrl || null
     });
   } catch (error) {
     console.error('Error fetching shared thread:', error);

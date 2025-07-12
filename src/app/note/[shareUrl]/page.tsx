@@ -28,6 +28,7 @@ export default function NotePage() {
   const [authorName, setAuthorName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newShareUrl, setNewShareUrl] = useState('');
+  const [nextShareUrl, setNextShareUrl] = useState('');
 
   useEffect(() => {
     if (shareUrl) {
@@ -42,6 +43,7 @@ export default function NotePage() {
         const data = await response.json();
         setThread(data.thread);
         setCanEdit(data.canEdit);
+        setNextShareUrl(data.nextShareUrl || '');
       } else {
         console.error('Thread not found');
       }
@@ -195,6 +197,28 @@ export default function NotePage() {
               />
               <button
                 onClick={copyToClipboard}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded transition-colors"
+              >
+                Copy
+              </button>
+            </div>
+          </div>
+        ) : nextShareUrl ? (
+          <div className="bg-blue-100 border-l-4 border-blue-400 p-6 rounded-lg">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">This note has been responded to!</h3>
+            <p className="text-gray-700 mb-4">Share this link to continue the chain:</p>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={`${window.location.origin}/note/${nextShareUrl}`}
+                readOnly
+                className="flex-1 p-2 border border-gray-300 rounded"
+              />
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(`${window.location.origin}/note/${nextShareUrl}`);
+                  alert('Link copied to clipboard!');
+                }}
                 className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded transition-colors"
               >
                 Copy
