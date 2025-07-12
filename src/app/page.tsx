@@ -1,11 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function Home() {
   const [shareUrl, setShareUrl] = useState('');
   const [question, setQuestion] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Load question immediately when component mounts
+  useEffect(() => {
+    createNewNote();
+  }, []);
 
   const createNewNote = async () => {
     setIsLoading(true);
@@ -47,24 +52,6 @@ export default function Home() {
     }
   };
 
-  const copyToClipboard = async () => {
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      // Show a subtle feedback instead of alert
-      const button = document.querySelector('.copy-btn');
-      if (button) {
-        const originalText = button.textContent;
-        button.textContent = 'copied!';
-        setTimeout(() => {
-          button.textContent = originalText;
-        }, 1000);
-      }
-    } catch {
-      // Fallback for older browsers
-      alert('Link copied to clipboard!');
-    }
-  };
-
   const shareNatively = async () => {
     if (navigator.share) {
       try {
@@ -74,134 +61,124 @@ export default function Home() {
           url: shareUrl,
         });
       } catch {
-        // User cancelled or error occurred, fallback to copy
-        copyToClipboard();
+        // User cancelled, do nothing
       }
-    } else {
-      // No native share support, fallback to copy
-      copyToClipboard();
     }
   };
 
   return (
-    <div className="min-h-screen">
-      <div className="container">
-        {/* Logo */}
-        <div className="text-center pt-16 pb-12 fade-in">
-          <div className="logo">
-            Little Notes<sup style={{fontSize: '0.6em', verticalAlign: 'super'}}>™</sup>
+    <div style={{
+      minHeight: '100vh',
+      overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'var(--cream)',
+      padding: '0 20px'
+    }}>
+      {/* Logo */}
+      <div style={{
+        position: 'absolute',
+        top: '60px',
+        left: '50%',
+        transform: 'translateX(-50%)'
+      }}>
+        <img 
+          src="/littlenoteslogo.png" 
+          alt="Little Notes" 
+          style={{
+            height: '24px',
+            width: 'auto'
+          }}
+        />
+      </div>
+
+      {/* Main Content */}
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '32px'
+      }}>
+        {/* Text above note */}
+        <div style={{
+          textAlign: 'center',
+          fontFamily: 'var(--font-sans)',
+          fontWeight: '500',
+          fontSize: '14px',
+          lineHeight: '20px',
+          color: 'var(--text-dark)'
+        }}>
+          pass a little note to a friend.<br />
+          start a big conversation.
+        </div>
+
+        {/* Note - Perfect Square */}
+        <div style={{
+          width: '300px',
+          height: '300px',
+          background: 'var(--note-white)',
+          boxShadow: 'var(--note-shadow)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '40px',
+          boxSizing: 'border-box'
+        }}>
+          <div style={{
+            fontFamily: 'var(--font-handwritten)',
+            fontSize: '18px',
+            lineHeight: '1.4',
+            color: 'var(--text-dark)',
+            textAlign: 'center',
+            width: '100%'
+          }}>
+            {isLoading ? 'getting your question...' : question}
           </div>
         </div>
 
-        {!shareUrl ? (
-          <div className="fade-in">
-            {/* Tagline */}
-            <div className="text-center mb-12">
-              <p className="font-sans text-base leading-relaxed">
-                pass a little note to a friend.<br />
-                start a big conversation.
-              </p>
-            </div>
+        {/* Share button */}
+        <button
+          onClick={shareNatively}
+          disabled={isLoading || !shareUrl}
+          style={{
+            background: 'none',
+            border: 'none',
+            fontFamily: 'var(--font-sans)',
+            fontWeight: '500',
+            fontSize: '16px',
+            color: 'var(--text-dark)',
+            textDecoration: 'underline',
+            textUnderlineOffset: '3px',
+            cursor: 'pointer',
+            padding: '12px',
+            opacity: isLoading || !shareUrl ? 0.5 : 1
+          }}
+        >
+          share with a friend
+        </button>
 
-            {/* Note Card */}
-            <div className="note-card p-8 mb-12 text-center">
-              <div className="font-handwritten text-xl mb-6" style={{lineHeight: '1.4'}}>
-                {question || 'Click below to get a question!'}
-              </div>
-              
-              {question && (
-                <button 
-                  onClick={getNewQuestion}
-                  disabled={isLoading}
-                  className="btn-link text-sm"
-                  aria-label="Get a new question"
-                >
-                  {isLoading ? '⟳' : '⚀⚁'} {isLoading ? 'getting new question...' : ''}
-                </button>
-              )}
-            </div>
-
-            {/* Create Button */}
-            <div className="text-center">
-              <button
-                onClick={createNewNote}
-                disabled={isLoading}
-                className="btn-link text-lg"
-              >
-                {isLoading ? 'creating your note...' : question ? 'share with a friend' : 'get a question to share'}
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="fade-in">
-            {/* Note Preview */}
-            <div className="note-card p-8 mb-8 text-center">
-              <div className="font-handwritten text-xl mb-4" style={{lineHeight: '1.4'}}>
-                {question}
-              </div>
-              <button 
-                onClick={getNewQuestion}
-                disabled={isLoading}
-                className="btn-link text-sm"
-                aria-label="Get a new question"
-              >
-                {isLoading ? '⟳' : '⚀⚁'} {isLoading ? 'getting new question...' : ''}
-              </button>
-            </div>
-
-            {/* Share Section */}
-            <div className="space-y-6">
-              <div className="text-center">
-                <button
-                  onClick={shareNatively}
-                  className="btn-link text-lg mb-4"
-                >
-                  share with a friend
-                </button>
-              </div>
-
-              {/* Manual Copy Option */}
-              <div className="text-center">
-                <div className="text-sm mb-2 font-sans" style={{color: 'var(--text-light)'}}>
-                  or copy the link:
-                </div>
-                <div className="flex gap-2 items-center">
-                  <input
-                    type="text"
-                    value={shareUrl}
-                    readOnly
-                    className="input-clean text-sm flex-1 text-center"
-                    style={{
-                      background: 'rgba(255,255,255,0.7)',
-                      borderRadius: '6px',
-                      padding: '8px 12px',
-                      border: '1px solid rgba(42,42,42,0.1)'
-                    }}
-                  />
-                  <button
-                    onClick={copyToClipboard}
-                    className="copy-btn btn-link text-sm"
-                  >
-                    copy
-                  </button>
-                </div>
-              </div>
-
-              {/* Start Over */}
-              <div className="text-center pt-8">
-                <button
-                  onClick={() => {
-                    setShareUrl('');
-                    setQuestion('');
-                  }}
-                  className="btn-link text-sm"
-                  style={{opacity: 0.6}}
-                >
-                  start over
-                </button>
-              </div>
-            </div>
-          </div>
+        {/* Random button */}
+        {question && !isLoading && (
+          <button
+            onClick={getNewQuestion}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontFamily: 'var(--font-sans)',
+              fontWeight: '500',
+              fontSize: '12px',
+              color: 'var(--text-light)',
+              textDecoration: 'underline',
+              textUnderlineOffset: '2px',
+              cursor: 'pointer',
+              padding: '8px',
+              opacity: 0.7
+            }}
+          >
+            ⚀⚁
+          </button>
         )}
       </div>
     </div>
