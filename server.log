@@ -107,3 +107,22 @@
  ✓ Compiled in 94ms
  ✓ Compiled in 83ms
  ✓ Compiled in 34ms
+ ✓ Compiled in 50ms
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ✓ Compiled in 44ms
+ ⚠ metadataBase property in metadata export is not set for resolving social open graph or twitter images, using "http://localhost:3000". See https://nextjs.org/docs/app/api-reference/functions/generate-metadata#metadatabase
+ ⨯ ReferenceError: questionOpacity is not defined
+    at Home (src/app/page.tsx:183:23)
+  181 |               width: '100%',
+  182 |               transform: `translate(${textOffset.x}px, ${textOffset.y}px)`,
+> 183 |               opacity: questionOpacity,
+      |                       ^
+  184 |               transition: 'opacity 0.2s ease-in-out'
+  185 |             }}>
+  186 |               {question} {
+  digest: '808129071'
+}
+ GET / 500 in 238ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 288ms
+ GET /favicon.ico 200 in 277ms
+ ✓ Compiled in 201ms

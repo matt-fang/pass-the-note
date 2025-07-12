@@ -25,7 +25,7 @@ export default function Home() {
   const [question, setQuestion] = useState('');
   const [noteColor, setNoteColor] = useState(NOTE_COLORS[0]);
   const [textOffset, setTextOffset] = useState({ x: 0, y: 0 });
-  const [questionOpacity, setQuestionOpacity] = useState(1);
+  const [noteOpacity, setNoteOpacity] = useState(1);
 
   // Load question immediately when component mounts
   useEffect(() => {
@@ -61,7 +61,7 @@ export default function Home() {
 
   const getNewQuestion = async () => {
     // Instant fade out
-    setQuestionOpacity(0);
+    setNoteOpacity(0);
     
     try {
       const response = await fetch('/api/thread', {
@@ -87,11 +87,11 @@ export default function Home() {
         });
         
         // Fade back in
-        setTimeout(() => setQuestionOpacity(1), 50);
+        setTimeout(() => setNoteOpacity(1), 50);
       }
     } catch (error) {
       console.error('Error getting new question:', error);
-      setQuestionOpacity(1); // Reset opacity on error
+      setNoteOpacity(1); // Reset opacity on error
     }
   };
 
@@ -100,7 +100,7 @@ export default function Home() {
       try {
         await navigator.share({
           title: 'Little Notes',
-          text: 'I sent you a little note ✨',
+          text: 'i sent you a little note.',
           url: shareUrl,
         });
       } catch {
@@ -166,6 +166,8 @@ export default function Home() {
             height: '320px',
             background: noteColor.bg,
             boxShadow: 'var(--note-shadow)',
+            opacity: noteOpacity,
+            transition: 'opacity 0.2s ease-in-out',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -180,7 +182,7 @@ export default function Home() {
               textAlign: 'center',
               width: '100%',
               transform: `translate(${textOffset.x}px, ${textOffset.y}px)`,
-              opacity: questionOpacity,
+              opacity: noteOpacity,
               transition: 'opacity 0.2s ease-in-out'
             }}>
               {question}
@@ -206,16 +208,16 @@ export default function Home() {
                 justifyContent: 'center'
               }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img 
-                src="/shuffle.svg" 
-                alt="Shuffle"
-                style={{
-                  height: '14px',
-                  width: 'auto',
-                  filter: noteColor.filter
-                }}
-              />
+              <span style={{
+                fontFamily: 'var(--font-sans)',
+                fontSize: '12px',
+                fontWeight: '500',
+                color: 'var(--text-dark)',
+                opacity: noteOpacity,
+                transition: 'opacity 0.2s ease-in-out'
+              }}>
+                shuffle
+              </span>
             </button>
           )}
         </div>
@@ -238,7 +240,7 @@ export default function Home() {
             opacity: !shareUrl ? 0.5 : 1
           }}
         >
-          share with a friend
+          share this question to a friend
         </button>
       </div>
     </div>
