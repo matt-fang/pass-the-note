@@ -1,0 +1,36 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model NoteThread {
+  id          String    @id @default(cuid())
+  question    String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  responses   Response[]
+  
+  @@map("note_threads")
+}
+
+model Response {
+  id            String      @id @default(cuid())
+  threadId      String
+  thread        NoteThread  @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  drawingData   String      // Base64 encoded canvas data
+  authorName    String?     // Optional name for the responder
+  createdAt     DateTime    @default(now())
+  shareUrl      String      @unique // Unique URL for sharing to next person
+  
+  @@map("responses")
+}

@@ -1,0 +1,74 @@
+
+> pass-the-note@0.1.0 dev
+> next dev --turbopack
+
+   ▲ Next.js 15.3.5 (Turbopack)
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.0.101:3000
+   - Environments: .env
+
+ ✓ Starting...
+ ✓ Ready in 644ms
+ ○ Compiling / ...
+ ✓ Compiled / in 1157ms
+ HEAD / 200 in 1280ms
+ GET / 200 in 56ms
+ ✓ Compiled /favicon.ico in 260ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 539ms
+ ✓ Compiled /api/thread in 217ms
+ POST /api/thread 200 in 730ms
+ ○ Compiling /note/[shareUrl] ...
+ ✓ Compiled /note/[shareUrl] in 1405ms
+ GET /note/8bc4d855-10fe-472d-857e-485fd54a90f6 200 in 1767ms
+ ✓ Compiled /api/share/[shareUrl] in 193ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 231ms
+ GET /api/share/8bc4d855-10fe-472d-857e-485fd54a90f6 200 in 441ms
+ ✓ Compiled /api/response in 209ms
+ POST /api/response 200 in 227ms
+ GET /api/share/8bc4d855-10fe-472d-857e-485fd54a90f6 200 in 21ms
+ GET /favicon.ico 200 in 239ms
+ GET /note/e67b4253-f9dc-47d5-b735-195803395a5f 200 in 55ms
+ ✓ Compiled /_not-found/page in 379ms
+ GET /apple-touch-icon-precomposed.png 404 in 439ms
+ GET /apple-touch-icon.png 404 in 441ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 227ms
+ GET /note/e67b4253-f9dc-47d5-b735-195803395a5f 200 in 56ms
+ GET /api/share/e67b4253-f9dc-47d5-b735-195803395a5f 200 in 26ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 228ms
+ GET /note/e67b4253-f9dc-47d5-b735-195803395a5f 200 in 64ms
+ GET /api/share/e67b4253-f9dc-47d5-b735-195803395a5f 200 in 96ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 230ms
+ POST /api/response 200 in 36ms
+ GET /api/share/e67b4253-f9dc-47d5-b735-195803395a5f 200 in 21ms
+ GET /note/905b9a59-fd14-4c9c-9427-11cc0daf2f2c 200 in 69ms
+ GET /api/share/905b9a59-fd14-4c9c-9427-11cc0daf2f2c 200 in 35ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 238ms
+ POST /api/response 200 in 38ms
+ GET /api/share/905b9a59-fd14-4c9c-9427-11cc0daf2f2c 200 in 23ms
+ GET /note/905b9a59-fd14-4c9c-9427-11cc0daf2f2c 200 in 82ms
+ GET /api/share/905b9a59-fd14-4c9c-9427-11cc0daf2f2c 200 in 27ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 230ms
+ GET /note/905b9a59-fd14-4c9c-9427-11cc0daf2f2c 200 in 62ms
+ GET /api/share/905b9a59-fd14-4c9c-9427-11cc0daf2f2c 200 in 29ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 229ms
+ POST /api/response 200 in 38ms
+ GET /api/share/905b9a59-fd14-4c9c-9427-11cc0daf2f2c 200 in 22ms
+ GET /note/905b9a59-fd14-4c9c-9427-11cc0daf2f2c 200 in 64ms
+ GET /api/share/905b9a59-fd14-4c9c-9427-11cc0daf2f2c 200 in 28ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 229ms
+ GET /note/905b9a59-fd14-4c9c-9427-11cc0daf2f2c 200 in 72ms
+ GET /api/share/905b9a59-fd14-4c9c-9427-11cc0daf2f2c 200 in 36ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 235ms
+ GET /note/8bc4d855-10fe-472d-857e-485fd54a90f6 200 in 74ms
+ GET /api/share/8bc4d855-10fe-472d-857e-485fd54a90f6 200 in 25ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 234ms
+ GET /note/905b9a59-fd14-4c9c-9427-11cc0daf2f2c 200 in 61ms
+ GET /api/share/905b9a59-fd14-4c9c-9427-11cc0daf2f2c 200 in 27ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 224ms
+ GET / 200 in 69ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 270ms
+ GET /note/e67b4253-f9dc-47d5-b735-195803395a5f 200 in 133ms
+ GET /api/share/e67b4253-f9dc-47d5-b735-195803395a5f 200 in 105ms
+ POST /api/response 200 in 45ms
+ GET /api/share/e67b4253-f9dc-47d5-b735-195803395a5f 200 in 19ms
+ GET / 200 in 53ms
