@@ -11,7 +11,6 @@ const NOTE_COLORS = [
 export default function Home() {
   const [shareUrl, setShareUrl] = useState('');
   const [question, setQuestion] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [noteColor, setNoteColor] = useState(NOTE_COLORS[0]);
   const [textOffset, setTextOffset] = useState({ x: 0, y: 0 });
   const [questionOpacity, setQuestionOpacity] = useState(1);
@@ -22,7 +21,6 @@ export default function Home() {
   }, []);
 
   const createNewNote = async () => {
-    setIsLoading(true);
     try {
       const response = await fetch('/api/thread', {
         method: 'POST',
@@ -46,8 +44,6 @@ export default function Home() {
       }
     } catch (error) {
       console.error('Error creating note:', error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -119,6 +115,7 @@ export default function Home() {
         left: '50%',
         transform: 'translateX(-50%)'
       }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img 
           src="/littlenoteslogo.png" 
           alt="Little Notes" 
@@ -197,6 +194,7 @@ export default function Home() {
                 justifyContent: 'center'
               }}
             >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img 
                 src="/shuffle.svg" 
                 alt="Shuffle"
