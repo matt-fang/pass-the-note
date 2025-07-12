@@ -17,6 +17,8 @@ interface Thread {
   responses: Response[];
 }
 
+const NOTE_COLORS = ['note-blue', 'note-yellow', 'note-pink'];
+
 export default function NotePage() {
   const params = useParams();
   const shareUrl = params.shareUrl as string;
@@ -29,10 +31,14 @@ export default function NotePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newShareUrl, setNewShareUrl] = useState('');
   const [nextShareUrl, setNextShareUrl] = useState('');
+  const [noteColor, setNoteColor] = useState('note-blue');
 
   useEffect(() => {
     if (shareUrl) {
       loadThread();
+      // Randomly select a note color
+      const randomColor = NOTE_COLORS[Math.floor(Math.random() * NOTE_COLORS.length)];
+      setNoteColor(randomColor);
     }
   }, [shareUrl]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -76,7 +82,7 @@ export default function NotePage() {
         const fullUrl = `${window.location.origin}/note/${data.shareUrl}`;
         setNewShareUrl(fullUrl);
         setCanEdit(false);
-        await loadThread(); // Reload to see the new response
+        await loadThread();
       }
     } catch (error) {
       console.error('Error submitting response:', error);
@@ -85,151 +91,277 @@ export default function NotePage() {
     }
   };
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(newShareUrl);
-    alert('Link copied to clipboard!');
+  const shareNatively = async (url: string) => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Little Notes',
+          text: 'I sent you a little note ✨',
+          url: url,
+        });
+      } catch (err) {
+        // User cancelled or error occurred, fallback to copy
+        copyToClipboard(url);
+      }
+    } else {
+      // No native share support, fallback to copy
+      copyToClipboard(url);
+    }
+  };
+
+  const copyToClipboard = async (url: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      const button = document.querySelector('.copy-btn');
+      if (button) {
+        const originalText = button.textContent;
+        button.textContent = 'copied!';
+        setTimeout(() => {
+          button.textContent = originalText;
+        }, 1000);
+      }
+    } catch (err) {
+      alert('Link copied to clipboard!');
+    }
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-xl">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="font-sans">loading...</div>
       </div>
     );
   }
 
   if (!thread) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full text-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">Note Not Found</h1>
-          <p className="text-gray-600">This note link is invalid or has expired.</p>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="container text-center">
+          <div className="note-card p-8">
+            <h1 className="font-sans-bold text-xl mb-4">Note Not Found</h1>
+            <p className="font-sans">This note link is invalid or has expired.</p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">
-          Pass The Note
-        </h1>
-        
-        {/* Question */}
-        <div className="bg-yellow-100 border-l-4 border-yellow-400 p-6 rounded-lg mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">Question:</h2>
-          <p className="text-lg text-gray-700">{thread.question}</p>
+    <div className="min-h-screen">
+      <div className="container">
+        {/* Logo */}
+        <div className="text-center pt-16 pb-8 fade-in">
+          <div className="logo">
+            Little Notes<sup style={{fontSize: '0.6em', verticalAlign: 'super'}}>™</sup>
+          </div>
         </div>
 
-        {/* All Responses */}
-        <div className="space-y-6 mb-8">
-          {thread.responses.map((response, index) => (
-            response.drawingData && (
-              <div key={response.id} className="bg-white rounded-lg shadow-md p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-semibold text-gray-800">
-                    {response.authorName}
-                  </h3>
-                  <span className="text-sm text-gray-500">
-                    Response #{index}
-                  </span>
-                </div>
-                <div className="flex justify-center">
-                  <DrawingCanvas
-                    width={400}
-                    height={300}
-                    initialData={response.drawingData}
-                    disabled={true}
-                  />
+        {/* Instruction Text */}
+        {canEdit && !newShareUrl && (
+          <div className="text-center mb-8 fade-in">
+            <p className="font-sans text-base leading-relaxed">
+              your friend passed you this note.<br />
+              write your answer below.
+            </p>
+          </div>
+        )}
+
+        {/* Note Card with Question and Drawing Area */}
+        {canEdit && !newShareUrl ? (
+          <div className="fade-in">
+            <div className={`note-card ${noteColor} p-0 mb-8 overflow-hidden`}>
+              {/* Question at top of note */}
+              <div className="p-6 pb-4">
+                <div className="font-handwritten text-lg" style={{lineHeight: '1.4'}}>
+                  {thread.question}
                 </div>
               </div>
-            )
-          ))}
-        </div>
+              
+              {/* Drawing Area */}
+              <div className="px-6 pb-6">
+                <div className="drawing-area p-4 relative">
+                  <DrawingCanvas
+                    width={340}
+                    height={240}
+                    onDrawingChange={setDrawingData}
+                    showClearButton={false}
+                  />
+                  {!drawingData && (
+                    <div 
+                      className="absolute inset-0 pointer-events-none flex items-center justify-center"
+                      style={{
+                        color: 'var(--text-light)',
+                        fontSize: '0.9rem',
+                        fontFamily: 'var(--font-handwritten)'
+                      }}
+                    >
+                      ANSWER HERE
+                    </div>
+                  )}
+                </div>
+              </div>
 
-        {/* Drawing Area (if can edit) */}
-        {canEdit && !newShareUrl ? (
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">Your Response:</h3>
-            
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Your Name (optional):
-              </label>
-              <input
-                type="text"
-                value={authorName}
-                onChange={(e) => setAuthorName(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded"
-                placeholder="Enter your name..."
-              />
+              {/* Name Input */}
+              <div className="px-6 pb-6">
+                <input
+                  type="text"
+                  value={authorName}
+                  onChange={(e) => setAuthorName(e.target.value)}
+                  className="input-clean text-sm"
+                  placeholder="your name (optional)"
+                  style={{
+                    background: 'rgba(255,255,255,0.7)',
+                    borderRadius: '6px',
+                    padding: '8px 12px',
+                    border: '1px solid rgba(42,42,42,0.1)',
+                    width: '100%'
+                  }}
+                />
+              </div>
             </div>
 
-            <div className="mb-6 flex justify-center">
-              <DrawingCanvas
-                width={400}
-                height={300}
-                onDrawingChange={setDrawingData}
-              />
-            </div>
-
-            <div className="text-center">
-              <button
-                onClick={submitResponse}
-                disabled={!drawingData || isSubmitting}
-                className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white px-8 py-3 rounded-lg font-semibold transition-colors"
-              >
-                {isSubmitting ? 'Submitting...' : 'Submit Response & Share'}
-              </button>
-            </div>
+            {/* Submit Button - only show when there's drawing data */}
+            {drawingData && (
+              <div className="text-center mb-8 fade-in">
+                <button
+                  onClick={submitResponse}
+                  disabled={isSubmitting}
+                  className="btn-link text-lg"
+                >
+                  {isSubmitting ? 'sending your note...' : 'done? pass the note to another friend'}
+                </button>
+              </div>
+            )}
           </div>
-        ) : canEdit && newShareUrl ? (
-          <div className="bg-green-100 border-l-4 border-green-400 p-6 rounded-lg">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">Response Submitted!</h3>
-            <p className="text-gray-700 mb-4">Share this link with the next person:</p>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={newShareUrl}
-                readOnly
-                className="flex-1 p-2 border border-gray-300 rounded"
-              />
+        ) : newShareUrl ? (
+          // After submitting - show share options
+          <div className="fade-in">
+            <div className="text-center mb-8">
+              <p className="font-sans text-base leading-relaxed mb-6">
+                your note has been added to the chain!
+              </p>
+              
               <button
-                onClick={copyToClipboard}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded transition-colors"
+                onClick={() => shareNatively(newShareUrl)}
+                className="btn-link text-lg mb-6"
               >
-                Copy
+                pass the note to another friend
               </button>
+
+              <div>
+                <div className="text-sm mb-2 font-sans" style={{color: 'var(--text-light)'}}>
+                  or copy the link:
+                </div>
+                <div className="flex gap-2 items-center">
+                  <input
+                    type="text"
+                    value={newShareUrl}
+                    readOnly
+                    className="input-clean text-sm flex-1 text-center"
+                    style={{
+                      background: 'rgba(255,255,255,0.7)',
+                      borderRadius: '6px',
+                      padding: '8px 12px',
+                      border: '1px solid rgba(42,42,42,0.1)'
+                    }}
+                  />
+                  <button
+                    onClick={() => copyToClipboard(newShareUrl)}
+                    className="copy-btn btn-link text-sm"
+                  >
+                    copy
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         ) : nextShareUrl ? (
-          <div className="bg-blue-100 border-l-4 border-blue-400 p-6 rounded-lg">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">This note has been responded to!</h3>
-            <p className="text-gray-700 mb-4">Share this link to continue the chain:</p>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={`${window.location.origin}/note/${nextShareUrl}`}
-                readOnly
-                className="flex-1 p-2 border border-gray-300 rounded"
-              />
+          // If someone already responded - show next link
+          <div className="fade-in">
+            <div className="text-center mb-8">
+              <p className="font-sans text-base leading-relaxed mb-6">
+                this note has been responded to!<br />
+                but you can still continue the chain.
+              </p>
+              
               <button
-                onClick={() => {
-                  navigator.clipboard.writeText(`${window.location.origin}/note/${nextShareUrl}`);
-                  alert('Link copied to clipboard!');
-                }}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded transition-colors"
+                onClick={() => shareNatively(`${window.location.origin}/note/${nextShareUrl}`)}
+                className="btn-link text-lg mb-6"
               >
-                Copy
+                pass the note to another friend
               </button>
+
+              <div>
+                <div className="text-sm mb-2 font-sans" style={{color: 'var(--text-light)'}}>
+                  or copy the link:
+                </div>
+                <div className="flex gap-2 items-center">
+                  <input
+                    type="text"
+                    value={`${window.location.origin}/note/${nextShareUrl}`}
+                    readOnly
+                    className="input-clean text-sm flex-1 text-center"
+                    style={{
+                      background: 'rgba(255,255,255,0.7)',
+                      borderRadius: '6px',
+                      padding: '8px 12px',
+                      border: '1px solid rgba(42,42,42,0.1)'
+                    }}
+                  />
+                  <button
+                    onClick={() => copyToClipboard(`${window.location.origin}/note/${nextShareUrl}`)}
+                    className="copy-btn btn-link text-sm"
+                  >
+                    copy
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         ) : (
-          <div className="bg-gray-100 border-l-4 border-gray-400 p-6 rounded-lg text-center">
-            <p className="text-gray-600">
-              This note has already been responded to. You can view all responses above.
-            </p>
+          // Default message if no next URL
+          <div className="text-center fade-in">
+            <div className="note-card p-8">
+              <p className="font-sans">
+                This note has already been responded to.<br />
+                The chain continues elsewhere!
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Show Previous Responses if Any */}
+        {thread.responses.length > 0 && (
+          <div className="mt-12 fade-in">
+            <div className="text-center mb-6">
+              <p className="font-sans text-sm" style={{color: 'var(--text-light)'}}>
+                previous responses in this chain:
+              </p>
+            </div>
+            
+            <div className="space-y-6">
+              {thread.responses.map((response, index) => {
+                const responseColor = NOTE_COLORS[index % NOTE_COLORS.length];
+                return response.drawingData ? (
+                  <div key={response.id} className={`note-card ${responseColor} p-6`}>
+                    <div className="mb-4">
+                      <div className="font-handwritten text-base mb-2">
+                        {response.authorName || 'Anonymous'}
+                      </div>
+                    </div>
+                    <div className="flex justify-center">
+                      <DrawingCanvas
+                        width={300}
+                        height={200}
+                        initialData={response.drawingData}
+                        disabled={true}
+                        showClearButton={false}
+                      />
+                    </div>
+                  </div>
+                ) : null;
+              })}
+            </div>
           </div>
         )}
       </div>

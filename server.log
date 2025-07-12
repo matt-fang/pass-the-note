@@ -75,3 +75,8 @@
  GET / 200 in 52ms
  POST /api/thread 200 in 163ms
  ✓ Compiled in 61ms
+ ✓ Compiled in 290ms
+ ✓ Compiled in 260ms
+ ✓ Compiled in 69ms
+ ✓ Compiled in 137ms
+ ✓ Compiled in 203ms

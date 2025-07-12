@@ -8,6 +8,7 @@ interface DrawingCanvasProps {
   onDrawingChange?: (dataUrl: string) => void;
   initialData?: string;
   disabled?: boolean;
+  showClearButton?: boolean;
 }
 
 export default function DrawingCanvas({ 
@@ -15,7 +16,8 @@ export default function DrawingCanvas({
   height = 300, 
   onDrawingChange,
   initialData,
-  disabled = false
+  disabled = false,
+  showClearButton = true
 }: DrawingCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -28,69 +30,98 @@ export default function DrawingCanvas({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set up canvas
+    // High DPI support for crisp drawing
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    
+    ctx.scale(dpr, dpr);
+    canvas.style.width = rect.width + 'px';
+    canvas.style.height = rect.height + 'px';
+
+    // Set up canvas for smooth drawing
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = '#2a2a2a';
+    ctx.imageSmoothingEnabled = true;
 
     // Load initial data if provided
     if (initialData) {
       const img = new Image();
       img.onload = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0);
+        ctx.drawImage(img, 0, 0, rect.width, rect.height);
       };
       img.src = initialData;
     } else {
-      // Clear canvas with white background
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // Clear canvas with transparent background
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
-  }, [initialData]);
+  }, [initialData, width, height]);
 
-  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (disabled) return;
-    
+  const getEventPos = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) return { x: 0, y: 0 };
 
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    setIsDrawing(true);
-    setLastPos({ x, y });
+    const dpr = window.devicePixelRatio || 1;
+    
+    if ('touches' in e) {
+      // Touch event
+      const touch = e.touches[0] || e.changedTouches[0];
+      return {
+        x: (touch.clientX - rect.left) * dpr,
+        y: (touch.clientY - rect.top) * dpr
+      };
+    } else {
+      // Mouse event
+      return {
+        x: (e.clientX - rect.left) * dpr,
+        y: (e.clientY - rect.top) * dpr
+      };
+    }
   };
 
-  const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    if (disabled) return;
+    
+    e.preventDefault();
+    const pos = getEventPos(e);
+    setIsDrawing(true);
+    setLastPos(pos);
+  };
+
+  const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (!isDrawing || disabled) return;
 
+    e.preventDefault();
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const pos = getEventPos(e);
 
     ctx.beginPath();
     ctx.moveTo(lastPos.x, lastPos.y);
-    ctx.lineTo(x, y);
+    ctx.lineTo(pos.x, pos.y);
     ctx.stroke();
 
-    setLastPos({ x, y });
+    setLastPos(pos);
 
     // Notify parent of changes
     if (onDrawingChange) {
-      const dataUrl = canvas.toDataURL();
+      const dataUrl = canvas.toDataURL('image/png', 1.0);
       onDrawingChange(dataUrl);
     }
   };
 
-  const stopDrawing = () => {
+  const stopDrawing = (e?: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    if (e) e.preventDefault();
     setIsDrawing(false);
   };
 
@@ -103,34 +134,41 @@ export default function DrawingCanvas({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     if (onDrawingChange) {
-      const dataUrl = canvas.toDataURL();
-      onDrawingChange(dataUrl);
+      onDrawingChange('');
     }
   };
 
   return (
-    <div className="border-2 border-gray-300 inline-block">
+    <div className="relative">
       <canvas
         ref={canvasRef}
-        width={width}
-        height={height}
+        style={{ 
+          width: `${width}px`, 
+          height: `${height}px`,
+          touchAction: 'none',
+          borderRadius: '8px',
+          background: 'transparent'
+        }}
         onMouseDown={startDrawing}
         onMouseMove={draw}
         onMouseUp={stopDrawing}
         onMouseLeave={stopDrawing}
-        className={`block ${disabled ? 'cursor-not-allowed' : 'cursor-crosshair'}`}
-        style={{ touchAction: 'none' }}
+        onTouchStart={startDrawing}
+        onTouchMove={draw}
+        onTouchEnd={stopDrawing}
+        onTouchCancel={stopDrawing}
+        className={`block ${disabled ? 'cursor-not-allowed' : 'cursor-crosshair'} select-none`}
       />
-      {!disabled && (
+      {!disabled && showClearButton && (
         <button
           onClick={clearCanvas}
-          className="mt-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+          className="btn-link text-xs mt-2"
+          style={{opacity: 0.6}}
         >
-          Clear
+          clear
         </button>
       )}
     </div>
