@@ -99,7 +99,7 @@ export default function NotePage() {
           text: 'I sent you a little note ✨',
           url: url,
         });
-      } catch (err) {
+      } catch {
         // User cancelled or error occurred, fallback to copy
         copyToClipboard(url);
       }
@@ -120,7 +120,7 @@ export default function NotePage() {
           button.textContent = originalText;
         }, 1000);
       }
-    } catch (err) {
+    } catch {
       alert('Link copied to clipboard!');
     }
   };

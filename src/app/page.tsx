@@ -59,7 +59,7 @@ export default function Home() {
           button.textContent = originalText;
         }, 1000);
       }
-    } catch (err) {
+    } catch {
       // Fallback for older browsers
       alert('Link copied to clipboard!');
     }
@@ -73,7 +73,7 @@ export default function Home() {
           text: 'I sent you a little note ✨',
           url: shareUrl,
         });
-      } catch (err) {
+      } catch {
         // User cancelled or error occurred, fallback to copy
         copyToClipboard();
       }
