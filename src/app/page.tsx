@@ -14,6 +14,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [noteColor, setNoteColor] = useState(NOTE_COLORS[0]);
   const [textOffset, setTextOffset] = useState({ x: 0, y: 0 });
+  const [questionOpacity, setQuestionOpacity] = useState(1);
 
   // Load question immediately when component mounts
   useEffect(() => {
@@ -51,7 +52,9 @@ export default function Home() {
   };
 
   const getNewQuestion = async () => {
-    setIsLoading(true);
+    // Instant fade out
+    setQuestionOpacity(0);
+    
     try {
       const response = await fetch('/api/thread', {
         method: 'POST',
@@ -59,6 +62,8 @@ export default function Home() {
       
       if (response.ok) {
         const data = await response.json();
+        
+        // Update everything instantly
         setQuestion(data.question);
         const fullUrl = `${window.location.origin}/note/${data.shareUrl}`;
         setShareUrl(fullUrl);
@@ -72,11 +77,13 @@ export default function Home() {
           x: (Math.random() - 0.5) * 6, // -3px to 3px
           y: (Math.random() - 0.5) * 4  // -2px to 2px
         });
+        
+        // Fade back in
+        setTimeout(() => setQuestionOpacity(1), 50);
       }
     } catch (error) {
       console.error('Error getting new question:', error);
-    } finally {
-      setIsLoading(false);
+      setQuestionOpacity(1); // Reset opacity on error
     }
   };
 
@@ -93,13 +100,6 @@ export default function Home() {
       }
     }
   };
-
-  const ShuffleIcon = ({ color }: { color: string }) => (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M13 3L10 6L13 9V7H15V5H13V3Z" fill={color}/>
-      <path d="M1 5H3L7 9L11 5H13V3L10 6L13 9V7H11L7 11L3 7H1V5Z" fill={color}/>
-    </svg>
-  );
 
   return (
     <div style={{
@@ -134,7 +134,7 @@ export default function Home() {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: '32px'
+        gap: '40px'
       }}>
         {/* Text above note */}
         <div style={{
@@ -142,7 +142,7 @@ export default function Home() {
           fontFamily: 'var(--font-sans)',
           fontWeight: '500',
           fontSize: '16px',
-          lineHeight: '18px',
+          lineHeight: '22px',
           color: 'var(--text-dark)'
         }}>
           pass a little note to a friend.<br />
@@ -170,14 +170,16 @@ export default function Home() {
               color: 'var(--text-dark)',
               textAlign: 'center',
               width: '100%',
-              transform: `translate(${textOffset.x}px, ${textOffset.y}px)`
+              transform: `translate(${textOffset.x}px, ${textOffset.y}px)`,
+              opacity: questionOpacity,
+              transition: 'opacity 0.2s ease-in-out'
             }}>
-              {isLoading ? 'getting your question...' : question}
+              {question}
             </div>
           </div>
 
           {/* Shuffle button - positioned at bottom of note */}
-          {question && !isLoading && (
+          {question && (
             <button
               onClick={getNewQuestion}
               style={{
@@ -195,7 +197,15 @@ export default function Home() {
                 justifyContent: 'center'
               }}
             >
-              <ShuffleIcon color={noteColor.secondary} />
+              <img 
+                src="/shuffle.svg" 
+                alt="Shuffle"
+                style={{
+                  width: '16px',
+                  height: '16px',
+                  filter: `brightness(0) saturate(100%) invert(49%) sepia(8%) saturate(1128%) hue-rotate(75deg) brightness(95%) contrast(87%)`
+                }}
+              />
             </button>
           )}
         </div>
@@ -203,7 +213,7 @@ export default function Home() {
         {/* Share button */}
         <button
           onClick={shareNatively}
-          disabled={isLoading || !shareUrl}
+          disabled={!shareUrl}
           style={{
             background: 'none',
             border: 'none',
@@ -215,7 +225,7 @@ export default function Home() {
             textUnderlineOffset: '3px',
             cursor: 'pointer',
             padding: '12px',
-            opacity: isLoading || !shareUrl ? 0.5 : 1
+            opacity: !shareUrl ? 0.5 : 1
           }}
         >
           share with a friend

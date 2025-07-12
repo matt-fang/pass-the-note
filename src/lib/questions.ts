@@ -1,4 +1,5 @@
 export const deepQuestions = [
+  // Original questions
   "What's a childhood memory that still makes you smile?",
   "If you could have dinner with anyone, living or dead, who would it be and why?",
   "What's something you've learned about yourself this year?",
@@ -18,7 +19,56 @@ export const deepQuestions = [
   "What's something that always makes you laugh?",
   "What's a goal you're working toward right now?",
   "What's something you admire about your closest friends?",
-  "What's a small act of kindness that had a big impact on you?"
+  "What's a small act of kindness that had a big impact on you?",
+  
+  // New questions
+  "What was the best part of your day? Week? Year?",
+  "Tell me something about yourself that you wouldn't mention the first time you met someone.",
+  "What's the best gift you've ever given or received?",
+  "What's your aesthetic? How did you arrive at it?",
+  "Do you have any nicknames? If so, what's the story behind them?",
+  "When was the last time you did something for the first time?",
+  "What is your latest discovery about or in the city in which you live?",
+  "Would you like to be famous? In what way or for what?",
+  "What's your best memory from high school?",
+  "What's the best compliment you've ever received?",
+  "What would constitute a perfect day for you?",
+  "If you could gain any quality or ability, what would it be?",
+  "Give the choice of anyone in the world, who would you want as a dinner guest?",
+  "What's a work (book, movie, etc.) that shaped the person you are today?",
+  "Tell me about a time that you were spontaneous.",
+  "What's the most illegal act you've ever done and are comfortable sharing?",
+  "When did you last leave your comfort zone?",
+  "What was your last epiphany?",
+  "Would you pick a different career path if you did life again?",
+  "What's one specific fact about what it's like to live in your particular body?",
+  
+  // Deep questions
+  "What was your most memorable first kiss?",
+  "With whom do you have the best connection in your family? Why?",
+  "What's the most memorable date you've ever had?",
+  "Tell me about your biggest crush.",
+  "Who do you respect most in your life? Why?",
+  "Do you have an enemy? If so, why?",
+  "How did your best friend become your best friend?",
+  "How did your parents' values shape your career choice?",
+  "What do you value most in a friendship?",
+  "For what in the past year do you feel most grateful?",
+  "Is there something you've dreamed of doing for a long time? Why haven't you done it?",
+  "What's your greatest accomplishment?",
+  "What's an embarrassing moment in your life that you still remember?",
+  "What does it mean to you to live a good life?",
+  "What experience have you had that made you a more compassionate person?",
+  "When was the last time you faced a big ethical dilemma? What did you do?",
+  "What brings you joy?",
+  "Do you feel fulfilled by your work? Why or why not?",
+  "When was the last time you were really proud of yourself?",
+  "What's the most important self-discovery you made about yourself in the past year?",
+  "What's an experience in your past that really shaped your worldview? Why?",
+  "How do you hope you'll change as a person in the future?",
+  "What excites you most about the world in which we live?",
+  "What frustrates you most about the world in which we live?",
+  "What are three of your personal qualities of which you're most proud?"
 ];
 
 export function getRandomQuestion(): string {
