@@ -2,10 +2,18 @@
 
 import { useState, useEffect } from 'react';
 
+const NOTE_COLORS = [
+  { bg: 'var(--note-green)', secondary: 'var(--note-green-secondary)' },
+  { bg: 'var(--note-blue)', secondary: 'var(--note-blue-secondary)' },
+  { bg: 'var(--note-beige)', secondary: 'var(--note-beige-secondary)' }
+];
+
 export default function Home() {
   const [shareUrl, setShareUrl] = useState('');
   const [question, setQuestion] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [noteColor, setNoteColor] = useState(NOTE_COLORS[0]);
+  const [textOffset, setTextOffset] = useState({ x: 0, y: 0 });
 
   // Load question immediately when component mounts
   useEffect(() => {
@@ -24,6 +32,16 @@ export default function Home() {
         setQuestion(data.question);
         const fullUrl = `${window.location.origin}/note/${data.shareUrl}`;
         setShareUrl(fullUrl);
+        
+        // Set random note color
+        const randomColor = NOTE_COLORS[Math.floor(Math.random() * NOTE_COLORS.length)];
+        setNoteColor(randomColor);
+        
+        // Set random text offset
+        setTextOffset({
+          x: (Math.random() - 0.5) * 6, // -3px to 3px
+          y: (Math.random() - 0.5) * 4  // -2px to 2px
+        });
       }
     } catch (error) {
       console.error('Error creating note:', error);
@@ -44,6 +62,16 @@ export default function Home() {
         setQuestion(data.question);
         const fullUrl = `${window.location.origin}/note/${data.shareUrl}`;
         setShareUrl(fullUrl);
+        
+        // Set random note color
+        const randomColor = NOTE_COLORS[Math.floor(Math.random() * NOTE_COLORS.length)];
+        setNoteColor(randomColor);
+        
+        // Set random text offset
+        setTextOffset({
+          x: (Math.random() - 0.5) * 6, // -3px to 3px
+          y: (Math.random() - 0.5) * 4  // -2px to 2px
+        });
       }
     } catch (error) {
       console.error('Error getting new question:', error);
@@ -65,6 +93,13 @@ export default function Home() {
       }
     }
   };
+
+  const ShuffleIcon = ({ color }: { color: string }) => (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M13 3L10 6L13 9V7H15V5H13V3Z" fill={color}/>
+      <path d="M1 5H3L7 9L11 5H13V3L10 6L13 9V7H11L7 11L3 7H1V5Z" fill={color}/>
+    </svg>
+  );
 
   return (
     <div style={{
@@ -106,36 +141,63 @@ export default function Home() {
           textAlign: 'center',
           fontFamily: 'var(--font-sans)',
           fontWeight: '500',
-          fontSize: '14px',
-          lineHeight: '20px',
+          fontSize: '16px',
+          lineHeight: '18px',
           color: 'var(--text-dark)'
         }}>
           pass a little note to a friend.<br />
           start a big conversation.
         </div>
 
-        {/* Note - Perfect Square */}
-        <div style={{
-          width: '300px',
-          height: '300px',
-          background: 'var(--note-white)',
-          boxShadow: 'var(--note-shadow)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '40px',
-          boxSizing: 'border-box'
-        }}>
+        {/* Note Container - with shuffle button positioned on top */}
+        <div style={{ position: 'relative' }}>
+          {/* Note - Perfect Square, slightly bigger */}
           <div style={{
-            fontFamily: 'var(--font-handwritten)',
-            fontSize: '18px',
-            lineHeight: '1.4',
-            color: 'var(--text-dark)',
-            textAlign: 'center',
-            width: '100%'
+            width: '320px',
+            height: '320px',
+            background: noteColor.bg,
+            boxShadow: 'var(--note-shadow)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '40px',
+            boxSizing: 'border-box'
           }}>
-            {isLoading ? 'getting your question...' : question}
+            <div style={{
+              fontFamily: 'var(--font-handwritten)',
+              fontSize: '18px',
+              lineHeight: '1.4',
+              color: 'var(--text-dark)',
+              textAlign: 'center',
+              width: '100%',
+              transform: `translate(${textOffset.x}px, ${textOffset.y}px)`
+            }}>
+              {isLoading ? 'getting your question...' : question}
+            </div>
           </div>
+
+          {/* Shuffle button - positioned at bottom of note */}
+          {question && !isLoading && (
+            <button
+              onClick={getNewQuestion}
+              style={{
+                position: 'absolute',
+                bottom: '12px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '8px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <ShuffleIcon color={noteColor.secondary} />
+            </button>
+          )}
         </div>
 
         {/* Share button */}
@@ -158,28 +220,6 @@ export default function Home() {
         >
           share with a friend
         </button>
-
-        {/* Random button */}
-        {question && !isLoading && (
-          <button
-            onClick={getNewQuestion}
-            style={{
-              background: 'none',
-              border: 'none',
-              fontFamily: 'var(--font-sans)',
-              fontWeight: '500',
-              fontSize: '12px',
-              color: 'var(--text-light)',
-              textDecoration: 'underline',
-              textUnderlineOffset: '2px',
-              cursor: 'pointer',
-              padding: '8px',
-              opacity: 0.7
-            }}
-          >
-            ⚀⚁
-          </button>
-        )}
       </div>
     </div>
   );

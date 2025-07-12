@@ -24,13 +24,18 @@
   --text-light: #666;
   
   /* Note Colors */
-  --note-blue: #d6e8f5;
-  --note-yellow: #f5f1e6;
-  --note-pink: #f5e6e8;
+  --note-green: #E4E5E4;
+  --note-blue: #DAE2E5;
+  --note-beige: #F0EAE3;
   --note-white: #ffffff;
   
+  /* Note Secondary Colors */
+  --note-green-secondary: #828A82;
+  --note-blue-secondary: #869DA6;
+  --note-beige-secondary: #BAAEA1;
+  
   /* Shadow */
-  --note-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --note-shadow: -6px 61px 17px 0px rgba(4, 2, 1, 0.00), -4px 39px 16px 0px rgba(4, 2, 1, 0.01), -2px 22px 13px 0px rgba(4, 2, 1, 0.03), -1px 10px 10px 0px rgba(4, 2, 1, 0.04), 0px 2px 5px 0px rgba(4, 2, 1, 0.05);
   --note-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.15);
   
   /* Fonts */
@@ -99,16 +104,16 @@ body {
   transform: translateY(-1px);
 }
 
+.note-green {
+  background: var(--note-green);
+}
+
 .note-blue {
   background: var(--note-blue);
 }
 
-.note-yellow {
-  background: var(--note-yellow);
-}
-
-.note-pink {
-  background: var(--note-pink);
+.note-beige {
+  background: var(--note-beige);
 }
 
 /* Button Styles */
