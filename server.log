@@ -72,3 +72,5 @@
  POST /api/response 200 in 45ms
  GET /api/share/e67b4253-f9dc-47d5-b735-195803395a5f 200 in 19ms
  GET / 200 in 53ms
+ GET / 200 in 52ms
+ POST /api/thread 200 in 163ms
