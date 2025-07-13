@@ -48,29 +48,32 @@ export default function NotePage() {
   const [newShareUrl, setNewShareUrl] = useState('');
   const [nextShareUrl, setNextShareUrl] = useState('');
   const [noteColor, setNoteColor] = useState(NOTE_COLORS[0]);
-  const [noteOffsets, setNoteOffsets] = useState<Array<{x: number, y: number, rotation: number, color: typeof NOTE_COLORS[0]}>>([]);
+  const [textOffset, setTextOffset] = useState({ x: 0, y: 0 });
+  const [responseNoteOffset, setResponseNoteOffset] = useState({ x: 0, y: 0, rotation: 0, color: NOTE_COLORS[0] });
+  const [existingResponseOffsets, setExistingResponseOffsets] = useState<Array<{x: number, y: number, rotation: number, color: typeof NOTE_COLORS[0]}>>([]);
 
   useEffect(() => {
     if (shareUrl) {
       loadThread();
-      // Set random note color for current note
+      // Set random note color
       const randomColor = NOTE_COLORS[Math.floor(Math.random() * NOTE_COLORS.length)];
       setNoteColor(randomColor);
+      
+      // Set random text offset
+      setTextOffset({
+        x: (Math.random() - 0.5) * 6, // -3px to 3px
+        y: (Math.random() - 0.5) * 4  // -2px to 2px
+      });
+      
+      // Set random response note positioning
+      setResponseNoteOffset({
+        x: (Math.random() - 0.5) * 40, // -20px to 20px
+        y: Math.random() * 6 - 6, // -6px to 0px (touching to slight overlap)
+        rotation: (Math.random() - 0.5) * 8, // -4deg to 4deg
+        color: NOTE_COLORS[(Math.floor(Math.random() * NOTE_COLORS.length) + 1) % NOTE_COLORS.length]
+      });
     }
   }, [shareUrl]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    // Generate random offsets and colors for existing notes when thread loads
-    if (thread && thread.responses.length > 0) {
-      const offsets = thread.responses.map(() => ({
-        x: (Math.random() - 0.5) * 8, // -4px to 4px
-        y: (Math.random() - 0.5) * 6, // -3px to 3px  
-        rotation: (Math.random() - 0.5) * 4, // -2deg to 2deg
-        color: NOTE_COLORS[Math.floor(Math.random() * NOTE_COLORS.length)]
-      }));
-      setNoteOffsets(offsets);
-    }
-  }, [thread]);
 
   const loadThread = async () => {
     try {
@@ -89,6 +92,19 @@ export default function NotePage() {
       setIsLoading(false);
     }
   };
+  
+  useEffect(() => {
+    // Generate random offsets for existing responses when thread loads
+    if (thread && thread.responses.length > 0) {
+      const offsets = thread.responses.map((_, index) => ({
+        x: (Math.random() - 0.5) * 40, // -20px to 20px
+        y: (Math.random() - 0.5) * 20, // -10px to 10px
+        rotation: (Math.random() - 0.5) * 8, // -4deg to 4deg
+        color: NOTE_COLORS[index % NOTE_COLORS.length]
+      }));
+      setExistingResponseOffsets(offsets);
+    }
+  }, [thread]);
 
   const submitResponse = async () => {
     if (!drawingData || !thread) return;
@@ -135,30 +151,17 @@ export default function NotePage() {
     }
   };
 
-  const copyToClipboard = async (url: string) => {
-    try {
-      await navigator.clipboard.writeText(url);
-      const button = document.querySelector('.copy-btn');
-      if (button) {
-        const originalText = button.textContent;
-        button.textContent = 'copied!';
-        setTimeout(() => {
-          button.textContent = originalText;
-        }, 1000);
-      }
-    } catch {
-      alert('Link copied to clipboard!');
-    }
-  };
-
   if (isLoading) {
     return (
       <div style={{
         minHeight: '100vh',
+        overflow: 'hidden',
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'var(--cream)'
+        background: 'var(--cream)',
+        padding: '0 20px'
       }}>
         <div style={{
           fontFamily: 'var(--font-sans)',
@@ -174,40 +177,71 @@ export default function NotePage() {
     return (
       <div style={{
         minHeight: '100vh',
+        overflow: 'hidden',
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         background: 'var(--cream)',
         padding: '0 20px'
       }}>
+        {/* Logo */}
         <div style={{
-          width: '320px',
-          height: '320px',
-          background: 'var(--note-beige)',
-          boxShadow: 'var(--note-shadow)',
+          position: 'absolute',
+          top: '60px',
+          left: '50%',
+          transform: 'translateX(-50%)'
+        }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img 
+            src="/littlenoteslogo.png" 
+            alt="Little Notes" 
+            style={{
+              height: '24px',
+              width: 'auto'
+            }}
+          />
+        </div>
+
+        {/* Main Content */}
+        <div style={{
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'center',
-          padding: '40px',
-          boxSizing: 'border-box',
-          textAlign: 'center'
+          gap: '40px'
         }}>
           <div style={{
-            fontFamily: 'var(--font-handwritten)',
-            fontSize: '18px',
-            lineHeight: '1.4',
-            color: 'var(--text-dark)',
-            marginBottom: '12px'
-          }}>
-            Note Not Found
-          </div>
-          <div style={{
+            textAlign: 'center',
             fontFamily: 'var(--font-sans)',
-            fontSize: '14px',
+            fontWeight: '500',
+            fontSize: '16px',
+            lineHeight: '22px',
             color: 'var(--text-dark)'
           }}>
-            This note link is invalid or has expired.
+            note not found.
+          </div>
+
+          <div style={{
+            width: '320px',
+            height: '320px',
+            background: 'var(--note-beige)',
+            boxShadow: 'var(--note-shadow)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '40px',
+            boxSizing: 'border-box'
+          }}>
+            <div style={{
+              fontFamily: 'var(--font-handwritten)',
+              fontSize: '18px',
+              lineHeight: '1.4',
+              color: 'var(--text-dark)',
+              textAlign: 'center',
+              width: '100%'
+            }}>
+              This note link is invalid or has expired.
+            </div>
           </div>
         </div>
       </div>
@@ -218,12 +252,18 @@ export default function NotePage() {
     <div style={{
       minHeight: '100vh',
       overflow: 'auto',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: thread.responses.length > 0 ? 'flex-start' : 'center',
       background: 'var(--cream)',
-      padding: '0 20px'
+      padding: '0 20px',
+      paddingTop: thread.responses.length > 0 ? '140px' : '0',
+      paddingBottom: thread.responses.length > 0 ? '60px' : '0'
     }}>
       {/* Logo */}
       <div style={{
-        position: 'fixed',
+        position: thread.responses.length > 0 ? 'fixed' : 'absolute',
         top: '60px',
         left: '50%',
         transform: 'translateX(-50%)',
@@ -245,11 +285,9 @@ export default function NotePage() {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        paddingTop: '140px',
-        paddingBottom: '60px',
         gap: '40px'
       }}>
-        {/* Instruction Text */}
+        {/* Text above note */}
         {canEdit && !newShareUrl && (
           <div style={{
             textAlign: 'center',
@@ -264,45 +302,72 @@ export default function NotePage() {
           </div>
         )}
 
-        {canEdit && !newShareUrl ? (
-          /* Question Note + Drawing Area */
+        {newShareUrl && (
           <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '40px'
+            textAlign: 'center',
+            fontFamily: 'var(--font-sans)',
+            fontWeight: '500',
+            fontSize: '16px',
+            lineHeight: '22px',
+            color: 'var(--text-dark)'
           }}>
-            {/* Question Note */}
-            <div style={{
-              width: '320px',
-              height: '320px',
-              background: noteColor.bg,
-              boxShadow: 'var(--note-shadow)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '40px',
-              boxSizing: 'border-box'
-            }}>
-              <div style={{
-                fontFamily: 'var(--font-handwritten)',
-                fontSize: '18px',
-                lineHeight: '1.4',
-                color: 'var(--text-dark)',
-                textAlign: 'center',
-                width: '100%'
-              }}>
-                {thread.question}
-              </div>
-            </div>
+            your note has been added to the chain!
+          </div>
+        )}
 
-            {/* Drawing Note */}
+        {nextShareUrl && !canEdit && !newShareUrl && (
+          <div style={{
+            textAlign: 'center',
+            fontFamily: 'var(--font-sans)',
+            fontWeight: '500',
+            fontSize: '16px',
+            lineHeight: '22px',
+            color: 'var(--text-dark)'
+          }}>
+            this note has been responded to!<br />
+            but you can still continue the chain.
+          </div>
+        )}
+
+        {/* Note Container */}
+        <div style={{ position: 'relative' }}>
+          {/* Main Question Note */}
+          <div style={{
+            width: '320px',
+            height: '320px',
+            background: noteColor.bg,
+            boxShadow: 'var(--note-shadow)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '40px',
+            boxSizing: 'border-box'
+          }}>
             <div style={{
+              fontFamily: 'var(--font-handwritten)',
+              fontSize: '18px',
+              lineHeight: '1.4',
+              color: 'var(--text-dark)',
+              textAlign: 'center',
+              width: '100%',
+              transform: `translate(${textOffset.x}px, ${textOffset.y}px)`
+            }}>
+              {thread.question}
+            </div>
+          </div>
+
+          {/* Response Note - positioned below with overlap and random positioning */}
+          {canEdit && !newShareUrl && (
+            <div style={{
+              position: 'absolute',
+              top: `${314 + responseNoteOffset.y}px`, // Touch or slight overlap (-6px to 0px)
+              left: `${responseNoteOffset.x}px`, // Random horizontal offset
               width: '320px',
-              background: noteColor.bg,
+              background: responseNoteOffset.color.bg,
               boxShadow: 'var(--note-shadow)',
               padding: '40px',
               boxSizing: 'border-box',
+              transform: `rotate(${responseNoteOffset.rotation}deg)`, // Random rotation
               display: 'flex',
               flexDirection: 'column',
               gap: '20px'
@@ -310,7 +375,7 @@ export default function NotePage() {
               {/* Drawing Area */}
               <div style={{
                 width: '100%',
-                minHeight: '200px',
+                minHeight: '160px',
                 background: 'rgba(255,255,255,0.3)',
                 borderRadius: '8px',
                 position: 'relative',
@@ -320,7 +385,7 @@ export default function NotePage() {
               }}>
                 <DrawingCanvas
                   width={240}
-                  height={180}
+                  height={140}
                   onDrawingChange={setDrawingData}
                   showClearButton={false}
                 />
@@ -356,258 +421,123 @@ export default function NotePage() {
                 }}
               />
             </div>
-
-            {/* Submit Button */}
-            {drawingData && (
-              <button
-                onClick={submitResponse}
-                disabled={isSubmitting}
+          )}
+          
+          {/* Existing Response Notes - stacked below */}
+          {thread.responses.length > 0 && thread.responses.map((response, index) => {
+            if (!response.drawingData) return null;
+            
+            const offset = existingResponseOffsets[index] || { x: 0, y: 0, rotation: 0, color: NOTE_COLORS[0] };
+            const stackOffset = index * 40; // Stack them closer vertically
+            
+            return (
+              <div 
+                key={response.id}
                 style={{
-                  background: 'none',
-                  border: 'none',
-                  fontFamily: 'var(--font-sans)',
-                  fontWeight: '500',
-                  fontSize: '16px',
-                  color: 'var(--text-dark)',
-                  textDecoration: 'underline',
-                  textUnderlineOffset: '3px',
-                  cursor: 'pointer',
-                  padding: '12px',
-                  opacity: isSubmitting ? 0.5 : 1
+                  position: 'absolute',
+                  top: `${320 + stackOffset + offset.y}px`, // Below the main note + stack offset
+                  left: `${offset.x}px`, // Random horizontal offset
+                  width: '320px',
+                  background: offset.color.bg,
+                  boxShadow: 'var(--note-shadow)',
+                  padding: '40px',
+                  boxSizing: 'border-box',
+                  transform: `rotate(${offset.rotation}deg)`, // Random rotation
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '20px'
                 }}
               >
-                {isSubmitting ? 'sending your note...' : 'share this question to a friend'}
-              </button>
-            )}
-          </div>
-        ) : newShareUrl ? (
-          /* After Submitting */
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '40px'
-          }}>
-            <div style={{
-              textAlign: 'center',
-              fontFamily: 'var(--font-sans)',
-              fontWeight: '500',
-              fontSize: '16px',
-              lineHeight: '22px',
-              color: 'var(--text-dark)'
-            }}>
-              your note has been added to the chain!
-            </div>
-            
-            <button
-              onClick={() => shareNatively(newShareUrl)}
-              style={{
-                background: 'none',
-                border: 'none',
-                fontFamily: 'var(--font-sans)',
-                fontWeight: '500',
-                fontSize: '16px',
-                color: 'var(--text-dark)',
-                textDecoration: 'underline',
-                textUnderlineOffset: '3px',
-                cursor: 'pointer',
-                padding: '12px'
-              }}
-            >
-              share this question to a friend
-            </button>
+                <div style={{
+                  fontFamily: 'var(--font-handwritten)',
+                  fontSize: '16px',
+                  color: 'var(--text-dark)',
+                  textAlign: 'center'
+                }}>
+                  {response.authorName || 'Anonymous'}
+                </div>
+                
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  background: 'rgba(255,255,255,0.3)',
+                  borderRadius: '8px',
+                  padding: '20px'
+                }}>
+                  <DrawingCanvas
+                    width={240}
+                    height={140}
+                    initialData={response.drawingData}
+                    disabled={true}
+                    showClearButton={false}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
 
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '12px'
-            }}>
-              <div style={{
-                fontFamily: 'var(--font-sans)',
-                fontSize: '14px',
-                color: 'var(--text-light)'
-              }}>
-                or copy the link:
-              </div>
-              <div style={{
-                display: 'flex',
-                gap: '8px',
-                alignItems: 'center'
-              }}>
-                <input
-                  type="text"
-                  value={newShareUrl}
-                  readOnly
-                  style={{
-                    background: 'rgba(255,255,255,0.7)',
-                    border: '1px solid rgba(42,42,42,0.1)',
-                    borderRadius: '6px',
-                    padding: '8px 12px',
-                    fontFamily: 'var(--font-sans)',
-                    fontSize: '12px',
-                    color: 'var(--text-dark)',
-                    width: '200px',
-                    textAlign: 'center'
-                  }}
-                />
-                <button
-                  onClick={() => copyToClipboard(newShareUrl)}
-                  className="copy-btn"
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    fontFamily: 'var(--font-sans)',
-                    fontSize: '12px',
-                    color: 'var(--text-dark)',
-                    textDecoration: 'underline',
-                    cursor: 'pointer',
-                    padding: '4px'
-                  }}
-                >
-                  copy
-                </button>
-              </div>
-            </div>
-          </div>
-        ) : nextShareUrl ? (
-          /* If Someone Already Responded */
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '40px'
-          }}>
-            <div style={{
-              textAlign: 'center',
+        {/* Share/Submit button */}
+        {canEdit && !newShareUrl && drawingData && (
+          <button
+            onClick={submitResponse}
+            disabled={isSubmitting}
+            style={{
+              background: 'none',
+              border: 'none',
               fontFamily: 'var(--font-sans)',
               fontWeight: '500',
               fontSize: '16px',
-              lineHeight: '22px',
-              color: 'var(--text-dark)'
-            }}>
-              this note has been responded to!<br />
-              but you can still continue the chain.
-            </div>
-            
-            <button
-              onClick={() => shareNatively(`${window.location.origin}/note/${nextShareUrl}`)}
-              style={{
-                background: 'none',
-                border: 'none',
-                fontFamily: 'var(--font-sans)',
-                fontWeight: '500',
-                fontSize: '16px',
-                color: 'var(--text-dark)',
-                textDecoration: 'underline',
-                textUnderlineOffset: '3px',
-                cursor: 'pointer',
-                padding: '12px'
-              }}
-            >
-              share this question to a friend
-            </button>
-          </div>
-        ) : (
-          /* Default Message */
-          <div style={{
-            width: '320px',
-            height: '320px',
-            background: 'var(--note-beige)',
-            boxShadow: 'var(--note-shadow)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '40px',
-            boxSizing: 'border-box',
-            textAlign: 'center'
-          }}>
-            <div style={{
-              fontFamily: 'var(--font-handwritten)',
-              fontSize: '18px',
-              lineHeight: '1.4',
-              color: 'var(--text-dark)'
-            }}>
-              This note has already been responded to.<br />
-              The chain continues elsewhere!
-            </div>
-          </div>
+              color: 'var(--text-dark)',
+              textDecoration: 'underline',
+              textUnderlineOffset: '3px',
+              cursor: 'pointer',
+              padding: '12px',
+              opacity: isSubmitting ? 0.5 : 1
+            }}
+          >
+            {isSubmitting ? 'sending your note...' : 'share this question to a friend'}
+          </button>
         )}
 
-        {/* Stacked Previous Notes */}
-        {thread.responses.length > 0 && (
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '60px',
-            marginTop: '60px'
-          }}>
-            <div style={{
-              textAlign: 'center',
+        {newShareUrl && (
+          <button
+            onClick={() => shareNatively(newShareUrl)}
+            style={{
+              background: 'none',
+              border: 'none',
               fontFamily: 'var(--font-sans)',
-              fontSize: '14px',
-              color: 'var(--text-light)'
-            }}>
-              previous responses in this chain:
-            </div>
-            
-            <div style={{
-              position: 'relative',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '40px'
-            }}>
-              {thread.responses.map((response, index) => {
-                if (!response.drawingData) return null;
-                
-                const offset = noteOffsets[index] || { x: 0, y: 0, rotation: 0, color: NOTE_COLORS[0] };
-                
-                return (
-                  <div 
-                    key={response.id}
-                    style={{
-                      width: '320px',
-                      background: offset.color.bg,
-                      boxShadow: 'var(--note-shadow)',
-                      padding: '40px',
-                      boxSizing: 'border-box',
-                      transform: `translate(${offset.x}px, ${offset.y}px) rotate(${offset.rotation}deg)`,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '20px'
-                    }}
-                  >
-                    <div style={{
-                      fontFamily: 'var(--font-handwritten)',
-                      fontSize: '16px',
-                      color: 'var(--text-dark)',
-                      textAlign: 'center'
-                    }}>
-                      {response.authorName || 'Anonymous'}
-                    </div>
-                    
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'center',
-                      background: 'rgba(255,255,255,0.3)',
-                      borderRadius: '8px',
-                      padding: '20px'
-                    }}>
-                      <DrawingCanvas
-                        width={240}
-                        height={180}
-                        initialData={response.drawingData}
-                        disabled={true}
-                        showClearButton={false}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+              fontWeight: '500',
+              fontSize: '16px',
+              color: 'var(--text-dark)',
+              textDecoration: 'underline',
+              textUnderlineOffset: '3px',
+              cursor: 'pointer',
+              padding: '12px'
+            }}
+          >
+            share this question to a friend
+          </button>
+        )}
+
+        {nextShareUrl && !canEdit && !newShareUrl && (
+          <button
+            onClick={() => shareNatively(`${window.location.origin}/note/${nextShareUrl}`)}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontFamily: 'var(--font-sans)',
+              fontWeight: '500',
+              fontSize: '16px',
+              color: 'var(--text-dark)',
+              textDecoration: 'underline',
+              textUnderlineOffset: '3px',
+              cursor: 'pointer',
+              padding: '12px'
+            }}
+          >
+            share this question to a friend
+          </button>
         )}
       </div>
     </div>
