@@ -363,63 +363,43 @@ export default function NotePage() {
               top: `${314 + responseNoteOffset.y}px`, // Touch or slight overlap (-6px to 0px)
               left: `${responseNoteOffset.x}px`, // Random horizontal offset
               width: '320px',
+              height: '320px',
               background: responseNoteOffset.color.bg,
               boxShadow: 'var(--note-shadow)',
               padding: '40px',
               boxSizing: 'border-box',
-              transform: `rotate(${responseNoteOffset.rotation}deg)`, // Random rotation
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '20px'
+              transform: `rotate(${responseNoteOffset.rotation}deg)` // Random rotation
             }}>
-              {/* Drawing Area */}
+              {/* Full note drawing area */}
               <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
                 width: '100%',
-                minHeight: '160px',
-                background: 'rgba(255,255,255,0.3)',
-                borderRadius: '8px',
-                position: 'relative',
+                height: '100%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
                 <DrawingCanvas
-                  width={240}
-                  height={140}
+                  width={320}
+                  height={320}
                   onDrawingChange={setDrawingData}
                   showClearButton={false}
                 />
                 {!drawingData && (
                   <div style={{
                     position: 'absolute',
-                    color: 'var(--text-light)',
-                    fontSize: '14px',
+                    color: responseNoteOffset.color.secondary,
+                    fontSize: '18px',
                     fontFamily: 'var(--font-handwritten)',
-                    pointerEvents: 'none'
+                    pointerEvents: 'none',
+                    textAlign: 'center'
                   }}>
-                    write your answer here
+                    WRITE HERE!
                   </div>
                 )}
               </div>
-
-              {/* Name Input */}
-              <input
-                type="text"
-                value={authorName}
-                onChange={(e) => setAuthorName(e.target.value)}
-                placeholder="your name (optional)"
-                style={{
-                  background: 'rgba(255,255,255,0.5)',
-                  border: '1px solid rgba(42,42,42,0.1)',
-                  borderRadius: '6px',
-                  padding: '12px 16px',
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: '14px',
-                  color: 'var(--text-dark)',
-                  width: '100%',
-                  boxSizing: 'border-box'
-                }}
-              />
             </div>
           )}
           
@@ -477,7 +457,7 @@ export default function NotePage() {
           })}
         </div>
 
-        {/* Share/Submit button */}
+        {/* Share/Submit button - positioned like sender screen */}
         {canEdit && !newShareUrl && drawingData && (
           <button
             onClick={submitResponse}
@@ -493,7 +473,8 @@ export default function NotePage() {
               textUnderlineOffset: '3px',
               cursor: 'pointer',
               padding: '12px',
-              opacity: isSubmitting ? 0.5 : 1
+              opacity: isSubmitting ? 0.5 : 1,
+              marginTop: thread.responses.length > 0 ? '60px' : '40px'
             }}
           >
             {isSubmitting ? 'sending your note...' : 'share this question to a friend'}

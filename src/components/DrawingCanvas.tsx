@@ -30,30 +30,24 @@ export default function DrawingCanvas({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // High DPI support for crisp drawing
-    const dpr = window.devicePixelRatio || 1;
-    const rect = canvas.getBoundingClientRect();
-    
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    
-    ctx.scale(dpr, dpr);
-    canvas.style.width = rect.width + 'px';
-    canvas.style.height = rect.height + 'px';
+    // Set canvas dimensions directly
+    canvas.width = width;
+    canvas.height = height;
 
-    // Set up canvas for smooth drawing
+    // Set up canvas for ultra-smooth drawing
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     ctx.lineWidth = 2.5;
     ctx.strokeStyle = '#2a2a2a';
     ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
 
     // Load initial data if provided
     if (initialData) {
       const img = new Image();
       img.onload = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0, rect.width, rect.height);
+        ctx.drawImage(img, 0, 0, width, height);
       };
       img.src = initialData;
     } else {
@@ -67,20 +61,19 @@ export default function DrawingCanvas({
     if (!canvas) return { x: 0, y: 0 };
 
     const rect = canvas.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
     
     if ('touches' in e) {
       // Touch event
       const touch = e.touches[0] || e.changedTouches[0];
       return {
-        x: (touch.clientX - rect.left) * dpr,
-        y: (touch.clientY - rect.top) * dpr
+        x: touch.clientX - rect.left,
+        y: touch.clientY - rect.top
       };
     } else {
       // Mouse event
       return {
-        x: (e.clientX - rect.left) * dpr,
-        y: (e.clientY - rect.top) * dpr
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
       };
     }
   };
@@ -106,9 +99,15 @@ export default function DrawingCanvas({
 
     const pos = getEventPos(e);
 
+    // Use quadratic curves for smoother lines
     ctx.beginPath();
     ctx.moveTo(lastPos.x, lastPos.y);
-    ctx.lineTo(pos.x, pos.y);
+    
+    // Calculate midpoint for smooth curve
+    const midX = (lastPos.x + pos.x) / 2;
+    const midY = (lastPos.y + pos.y) / 2;
+    
+    ctx.quadraticCurveTo(lastPos.x, lastPos.y, midX, midY);
     ctx.stroke();
 
     setLastPos(pos);
