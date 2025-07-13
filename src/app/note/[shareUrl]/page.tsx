@@ -43,7 +43,6 @@ export default function NotePage() {
   const [canEdit, setCanEdit] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [drawingData, setDrawingData] = useState('');
-  const [authorName, setAuthorName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newShareUrl, setNewShareUrl] = useState('');
   const [nextShareUrl, setNextShareUrl] = useState('');
@@ -119,7 +118,7 @@ export default function NotePage() {
         body: JSON.stringify({
           threadId: thread.id,
           drawingData,
-          authorName: authorName || 'Anonymous'
+          authorName: 'Anonymous'
         }),
       });
       
