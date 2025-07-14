@@ -372,6 +372,7 @@ export default function NotePage() {
                 background={noteColor.bg}
                 authorName={thread.responses[0]?.authorName || ''}
                 isFlipped={allNotesFlipped}
+                showConversationButton={true}
                 frontContent={
                   <div style={{
                     width: '240px',
@@ -420,6 +421,7 @@ export default function NotePage() {
                     background={offset.color.bg}
                     authorName={response.authorName || ''}
                     isFlipped={allNotesFlipped}
+                    showConversationButton={true}
                     style={{
                       transform: `rotate(${offset.rotation}deg)`
                     }}

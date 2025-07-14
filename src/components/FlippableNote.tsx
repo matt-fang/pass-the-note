@@ -21,6 +21,8 @@ interface FlippableNoteProps {
   isTypingMode?: boolean;
   typedText?: string;
   onTextChange?: (text: string) => void;
+  // Props for conversation button
+  showConversationButton?: boolean;
 }
 
 export interface FlippableNoteRef {
@@ -41,7 +43,8 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(({
   onUndo,
   isTypingMode = false,
   typedText = '',
-  onTextChange
+  onTextChange,
+  showConversationButton = false
 }, ref) => {
   const drawingCanvasRef = useRef<SVGDrawingCanvasRef>(null);
 
@@ -51,6 +54,30 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(({
     }
     if (onUndo) {
       onUndo();
+    }
+  };
+
+  const handleStartConversation = async () => {
+    const message = "hey i saw your answer on little notes and im really interested - want to chat?";
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Little Notes',
+          text: message,
+        });
+      } catch {
+        // User cancelled, do nothing
+      }
+    } else {
+      // Fallback: copy to clipboard
+      try {
+        await navigator.clipboard.writeText(message);
+        // Could show a toast notification here
+      } catch {
+        // Fallback failed, could show an alert
+        alert(message);
+      }
     }
   };
 
@@ -198,6 +225,32 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(({
               </div>
             )}
           </div>
+
+          {/* Conversation button */}
+          {showConversationButton && (
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              paddingTop: '10px'
+            }}>
+              <button
+                onClick={handleStartConversation}
+                style={{
+                  background: '#FF5E01',
+                  border: 'none',
+                  fontFamily: 'var(--font-sans)',
+                  fontWeight: '500',
+                  fontSize: '14px',
+                  lineHeight: '18px',
+                  color: 'white',
+                  cursor: 'pointer',
+                  padding: '8px 10px'
+                }}
+              >
+                start a conversation &gt;
+              </button>
+            </div>
+          )}
         </div>
       </div>
       </div>
