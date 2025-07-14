@@ -166,9 +166,9 @@ export default function Home() {
           start a big conversation.
         </div>
 
-        {/* Note Container - with shuffle button and flip/undo buttons */}
-        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '20px' }}>
-          {/* Note */}
+        {/* Note Container - centered note with right toolbar */}
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-start', justifyContent: 'center' }}>
+          {/* Note - centered */}
           <div style={{
             opacity: noteOpacity,
             transition: 'opacity 0.2s ease-in-out',
@@ -231,13 +231,13 @@ export default function Home() {
             )}
           </div>
 
-          {/* Right side buttons - aligned with header */}
+          {/* Right side toolbar - 14px from note */}
           <div style={{
+            marginLeft: '14px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '16px',
-            alignItems: 'center',
-            paddingTop: isMobile ? '50px' : '40px' // Align with header height
+            gap: '18px',
+            alignItems: 'center'
           }}>
             {/* Flip button */}
             <button
@@ -262,30 +262,35 @@ export default function Home() {
               />
             </button>
 
-            {/* Undo button - only show when note is flipped */}
-            {isNoteFlipped && (
-              <button
-                onClick={() => flipNoteRef.current?.handleUndo()}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  padding: '8px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                <img 
-                  src="/undo.svg" 
-                  alt="undo" 
-                  style={{ 
-                    width: '14px', 
-                    height: '14px' 
-                  }} 
-                />
-              </button>
-            )}
+            {/* Undo button - always show but gray when inactive */}
+            <button
+              onClick={() => {
+                if (isNoteFlipped && flipNoteRef.current) {
+                  flipNoteRef.current.handleUndo();
+                }
+              }}
+              disabled={!isNoteFlipped}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: isNoteFlipped ? 'pointer' : 'default',
+                padding: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: isNoteFlipped ? 1 : 0.5
+              }}
+            >
+              <img 
+                src="/undo.svg" 
+                alt="undo" 
+                style={{ 
+                  width: '14px', 
+                  height: '14px',
+                  filter: isNoteFlipped ? 'none' : 'brightness(0) saturate(100%) invert(73%) sepia(0%) saturate(2%) hue-rotate(169deg) brightness(96%) contrast(86%)'
+                }} 
+              />
+            </button>
           </div>
         </div>
 
