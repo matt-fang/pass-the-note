@@ -162,8 +162,23 @@ export default function Home() {
           lineHeight: '22px',
           color: 'var(--text-dark)'
         }}>
-          pass a little note to a friend.<br />
-          start a big conversation.
+          {!authorNameDrawing ? (
+            <>
+              sign it! (legibly)<br />
+              <span style={{ 
+                color: 'var(--text-light)', 
+                fontStyle: 'italic',
+                fontWeight: '400'
+              }}>
+                this is only visible to who you send it to
+              </span>
+            </>
+          ) : (
+            <>
+              pass a little note to a friend.<br />
+              start a big conversation.
+            </>
+          )}
         </div>
 
         {/* H-Stack Layout: Left Toolbar Frame | Note | Right Toolbar Frame */}
@@ -320,17 +335,25 @@ export default function Home() {
           marginTop: '80px' // 80pt spacing between note and button
         }}>
           <button
-            onClick={shareNatively}
+            onClick={() => {
+              if (!authorNameDrawing) {
+                // If no name is drawn, flip the note to the back for signing
+                setIsNoteFlipped(true);
+              } else {
+                // If name is drawn, share normally
+                shareNatively();
+              }
+            }}
             disabled={!shareUrl}
             style={{
-              background: !shareUrl ? '#E5E1DE' : '#FF5E01',
+              background: (!shareUrl || !authorNameDrawing) ? '#E5E1DE' : '#FF5E01',
               border: 'none',
               fontFamily: 'var(--font-sans)',
               fontWeight: '500',
               fontSize: '14px',
               lineHeight: '18px',
-              color: !shareUrl ? 'black' : 'white',
-              cursor: !shareUrl ? 'default' : 'pointer',
+              color: (!shareUrl || !authorNameDrawing) ? 'black' : 'white',
+              cursor: (!shareUrl || !authorNameDrawing) ? 'default' : 'pointer',
               padding: '8px 10px'
             }}
           >
