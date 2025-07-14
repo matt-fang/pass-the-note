@@ -63,6 +63,17 @@ export default function NotePage() {
   const [typedResponse, setTypedResponse] = useState('');
   const activeNoteRef = useRef<FlippableNoteRef>(null);
 
+  // Deterministic random function based on string input
+  const seededRandom = (seed: string): number => {
+    let hash = 0;
+    for (let i = 0; i < seed.length; i++) {
+      const char = seed.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return Math.abs(hash) / 2147483647; // Normalize to 0-1
+  };
+
   useEffect(() => {
     if (params.shareUrl) {
       // Check if user has already responded to this note
@@ -74,25 +85,33 @@ export default function NotePage() {
       }
       
       loadThread();
-      // Set random note color
-      const randomColor = NOTE_COLORS[Math.floor(Math.random() * NOTE_COLORS.length)];
-      setNoteColor(randomColor);
-      
-      // Set random text offset
-      setTextOffset({
-        x: (Math.random() - 0.5) * 6, // -3px to 3px
-        y: (Math.random() - 0.5) * 4  // -2px to 2px
-      });
-      
-      // Set random response note positioning - will be calculated after thread loads
-      setResponseNoteOffset({
-        x: (Math.random() - 0.5) * 40, // -20px to 20px
-        y: 0, // Will be calculated based on existing responses
-        rotation: (Math.random() - 0.5) * 6, // -3deg to 3deg
-        color: NOTE_COLORS[(Math.floor(Math.random() * NOTE_COLORS.length) + 1) % NOTE_COLORS.length]
-      });
     }
   }, [shareUrl]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Set deterministic colors and offsets based on thread data
+  useEffect(() => {
+    if (thread) {
+      // Use thread ID for consistent color selection
+      const colorIndex = Math.floor(seededRandom(thread.id) * NOTE_COLORS.length);
+      setNoteColor(NOTE_COLORS[colorIndex]);
+      
+      // Use thread ID + "offset" for consistent text positioning
+      const offsetSeed = seededRandom(thread.id + 'offset');
+      setTextOffset({
+        x: (offsetSeed - 0.5) * 6, // -3px to 3px
+        y: (seededRandom(thread.id + 'offset2') - 0.5) * 4  // -2px to 2px
+      });
+      
+      // Use thread ID + response count for new response positioning
+      const responseSeed = seededRandom(thread.id + 'response' + thread.responses.length);
+      setResponseNoteOffset({
+        x: (responseSeed - 0.5) * 40, // -20px to 20px
+        y: 0,
+        rotation: (seededRandom(thread.id + 'rotation' + thread.responses.length) - 0.5) * 6, // -3deg to 3deg
+        color: NOTE_COLORS[(colorIndex + 1) % NOTE_COLORS.length] // Different from main note
+      });
+    }
+  }, [thread]);
 
   const loadThread = async () => {
     try {
