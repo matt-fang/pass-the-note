@@ -108,65 +108,19 @@ export default function NotePage() {
   };
   
   useEffect(() => {
-    // Use stored positioning data for existing responses
+    // Use stored positioning data for existing responses (only for horizontal offset and rotation)
     if (thread && thread.responses.length > 0) {
       const offsets = thread.responses.map((response) => ({
         x: response.positionX,
-        y: response.positionY,
+        y: response.positionY, // Still store but won't use for vertical positioning
         rotation: response.rotation,
         color: {
           bg: response.noteColor,
           secondary: response.noteColorSecondary,
-          filter: 'none' // Not needed for stored responses
+          filter: 'none'
         }
       }));
       setExistingResponseOffsets(offsets);
-      
-      // Universal note positioning: 1-6px overlap for ALL notes
-      const overlap = 1 + Math.random() * 5; // 1-6px overlap
-      
-      if (thread.responses.length > 0) {
-        // Find the note with the lowest (highest Y value) position
-        const responsesWithPosition = thread.responses.filter(r => r.positionY !== undefined);
-        
-        if (responsesWithPosition.length > 0) {
-          const lowestNote = responsesWithPosition.reduce((lowest, response) => {
-            return response.positionY > lowest.positionY ? response : lowest;
-          });
-          
-          // Position new note with 1-6px overlap below the lowest existing note
-          // Lowest note is at 314 + lowestNote.positionY, ends at 314 + lowestNote.positionY + 320
-          // New note should start at that end position minus overlap
-          const newStartY = (314 + lowestNote.positionY + 320) - overlap;
-          // Since new note is positioned at 314 + responseNoteOffset.y, solve for responseNoteOffset.y
-          const baseY = newStartY - 314;
-          
-          setResponseNoteOffset(prev => ({
-            ...prev,
-            y: baseY
-          }));
-        } else {
-          // Fallback for older responses without position data
-          // Use EXACT same calculation as first response
-          const mainNoteEffectiveY = -320;
-          const newStartY = (314 + mainNoteEffectiveY + 320) - overlap;
-          const baseY = newStartY - 314;
-          setResponseNoteOffset(prev => ({
-            ...prev,
-            y: baseY
-          }));
-        }
-      } else {
-        // First response: use EXACT same calculation as subsequent recipients
-        // Treat main note as if it were a response with small negative positionY
-        const mainNoteEffectiveY = -320;
-        const newStartY = (314 + mainNoteEffectiveY + 320) - overlap;
-        const baseY = newStartY - 314;
-        setResponseNoteOffset(prev => ({
-          ...prev,
-          y: baseY
-        }));
-      }
     }
   }, [thread]);
 
@@ -501,16 +455,11 @@ export default function NotePage() {
 
 
 
-        {/* Note Container */}
+        {/* Note Container - Simple Vertical Stack */}
         <div style={{ 
-          position: 'relative',
-          minHeight: thread.responses.length > 0 ? 
-            `${Math.max(
-              320, // Minimum height for main note
-              ...thread.responses.map(r => 314 + (r.positionY || 0) + 320), // Height needed for each stored response
-              canEdit ? 314 + responseNoteOffset.y + 320 : 0 // Height needed for active drawing note
-            )}px` :
-            '320px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '-3px', // 3px overlap between notes
           transform: notesSlideOut ? 'translateX(100vw)' : 'translateX(0)',
           transition: 'transform 0.6s ease-in-out'
         }}>
@@ -524,7 +473,8 @@ export default function NotePage() {
             alignItems: 'center',
             justifyContent: 'center',
             padding: '40px',
-            boxSizing: 'border-box'
+            boxSizing: 'border-box',
+            transform: `translate(${textOffset.x}px, ${textOffset.y}px)`
           }}>
             <div style={{
               fontFamily: 'var(--font-handwritten)',
@@ -532,33 +482,64 @@ export default function NotePage() {
               lineHeight: '1.4',
               color: 'var(--text-dark)',
               textAlign: 'center',
-              width: '100%',
-              transform: `translate(${textOffset.x}px, ${textOffset.y}px)`
+              width: '100%'
             }}>
               {thread.question}
             </div>
           </div>
 
-          {/* Response Note - positioned below with overlap and random positioning */}
+          {/* Existing Response Notes */}
+          {thread.responses.length > 0 && thread.responses.map((response, index) => {
+            if (!response.drawingData) return null;
+            
+            const offset = existingResponseOffsets[index] || { x: 0, y: 0, rotation: 0, color: NOTE_COLORS[0] };
+            
+            return (
+              <div 
+                key={response.id}
+                style={{
+                  width: '320px',
+                  height: '320px',
+                  background: offset.color.bg,
+                  boxShadow: 'var(--note-shadow)',
+                  padding: '40px',
+                  boxSizing: 'border-box',
+                  transform: `translate(${offset.x}px, 0) rotate(${offset.rotation}deg)`,
+                  zIndex: 100 + index
+                }}
+              >
+                <div style={{
+                  width: '100%',
+                  height: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <DrawingCanvas
+                    width={320}
+                    height={320}
+                    initialData={response.drawingData}
+                    disabled={true}
+                    showClearButton={false}
+                  />
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Active Response Note */}
           {canEdit && (
             <div style={{
-              position: 'absolute',
-              top: `${314 + responseNoteOffset.y}px`, // Touch or slight overlap (-6px to 0px)
-              left: `${responseNoteOffset.x}px`, // Random horizontal offset
               width: '320px',
               height: '320px',
               background: responseNoteOffset.color.bg,
               boxShadow: 'var(--note-shadow)',
               padding: '40px',
               boxSizing: 'border-box',
-              transform: `rotate(${responseNoteOffset.rotation}deg)`, // Random rotation
-              zIndex: 200 // Higher z-index so it appears above existing notes
+              transform: `translate(${responseNoteOffset.x}px, 0) rotate(${responseNoteOffset.rotation}deg)`,
+              zIndex: 200
             }}>
-              {/* Full note drawing area */}
               <div style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
                 width: '100%',
                 height: '100%',
                 display: 'flex',
@@ -586,52 +567,6 @@ export default function NotePage() {
               </div>
             </div>
           )}
-          
-          {/* Existing Response Notes - positioned exactly as stored */}
-          {thread.responses.length > 0 && thread.responses.map((response, index) => {
-            if (!response.drawingData) return null;
-            
-            const offset = existingResponseOffsets[index] || { x: 0, y: 0, rotation: 0, color: NOTE_COLORS[0] };
-            
-            return (
-              <div 
-                key={response.id}
-                style={{
-                  position: 'absolute',
-                  top: `${314 + offset.y}px`, // Use stored position directly without stack offset
-                  left: `${offset.x}px`, // Use stored horizontal position
-                  width: '320px',
-                  height: '320px',
-                  background: offset.color.bg,
-                  boxShadow: 'var(--note-shadow)',
-                  padding: '40px',
-                  boxSizing: 'border-box',
-                  transform: `rotate(${offset.rotation}deg)`, // Use stored rotation
-                  zIndex: 100 + index // Lower z-index for existing notes
-                }}
-              >
-                {/* Full note drawing area - exactly like active drawing note */}
-                <div style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <DrawingCanvas
-                    width={320}
-                    height={320}
-                    initialData={response.drawingData}
-                    disabled={true}
-                    showClearButton={false}
-                  />
-                </div>
-              </div>
-            );
-          })}
         </div>
 
         {/* Pass button - shows when user has drawn something */}
