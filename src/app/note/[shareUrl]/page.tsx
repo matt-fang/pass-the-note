@@ -122,7 +122,7 @@ export default function NotePage() {
       }));
       setExistingResponseOffsets(offsets);
       
-      // Calculate position for new response note below existing ones
+      // Universal note positioning: 1-6px overlap for ALL notes
       if (thread.responses.length > 0) {
         // Find the note with the lowest (highest Y value) position
         const responsesWithPosition = thread.responses.filter(r => r.positionY !== undefined);
@@ -132,26 +132,32 @@ export default function NotePage() {
             return response.positionY > lowest.positionY ? response : lowest;
           });
           
-          // Position new note to touch/overlap with the lowest existing note  
-          const baseY = lowestNote.positionY + 250 + (Math.random() * 20 - 10); // Natural overlap + small random variation
+          // Position new note with 1-6px overlap below the lowest existing note
+          const overlap = 1 + Math.random() * 5; // 1-6px overlap
+          // Lowest note is at 314 + lowestNote.positionY, ends at 314 + lowestNote.positionY + 320
+          // New note should start at that end position minus overlap
+          const newStartY = (314 + lowestNote.positionY + 320) - overlap;
+          // Since new note is positioned at 314 + responseNoteOffset.y, solve for responseNoteOffset.y
+          const baseY = newStartY - 314;
           
           setResponseNoteOffset(prev => ({
             ...prev,
             y: baseY
           }));
         } else {
-          // Fallback for older responses without position data
-          const baseY = (thread.responses.length * 40) + (Math.random() * 6 - 6);
+          // Fallback for older responses without position data - use simple stacking
+          const overlap = 1 + Math.random() * 5; // 1-6px overlap
           setResponseNoteOffset(prev => ({
             ...prev,
-            y: baseY
+            y: 6 - overlap // Main note ends at 320, positioned at 314 + y, so y = 320 - 314 - overlap = 6 - overlap
           }));
         }
       } else {
-        // No existing responses, position normally below main note
+        // First response: 1-6px overlap with main note (which ends at 320px)
+        const overlap = 1 + Math.random() * 5; // 1-6px overlap
         setResponseNoteOffset(prev => ({
           ...prev,
-          y: Math.random() * 6 - 6 // -6px to 0px (touching to slight overlap)
+          y: 6 - overlap // Main note ends at 320, positioned at 314 + y, so y = 320 - 314 - overlap = 6 - overlap
         }));
       }
     }
