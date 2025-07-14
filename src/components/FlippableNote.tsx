@@ -178,6 +178,7 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(({
           </div>
         </div>
       </div>
+      </div>
     </>
   );
 });
