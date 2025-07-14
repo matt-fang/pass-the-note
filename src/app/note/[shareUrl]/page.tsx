@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import DrawingCanvas from '@/components/DrawingCanvas';
+import FlippableNote from '@/components/FlippableNote';
 import Header from '@/components/Header';
 
 interface Response {
@@ -58,6 +59,7 @@ export default function NotePage() {
   const [hasPassed, setHasPassed] = useState(false);
   const [notesSlideOut, setNotesSlideOut] = useState(false);
   const [showReadView, setShowReadView] = useState(false);
+  const [authorNameDrawing, setAuthorNameDrawing] = useState('');
 
   useEffect(() => {
     if (params.shareUrl) {
@@ -137,7 +139,7 @@ export default function NotePage() {
         body: JSON.stringify({
           threadId: thread.id,
           drawingData,
-          authorName: 'Anonymous',
+          authorName: authorNameDrawing || '',
           positionX: responseNoteOffset.x,
           positionY: responseNoteOffset.y,
           rotation: responseNoteOffset.rotation,
@@ -355,40 +357,33 @@ export default function NotePage() {
               const offset = existingResponseOffsets[index] || { x: 0, y: 0, rotation: 0, color: NOTE_COLORS[0] };
               
               return (
-                <div 
+                <div
                   key={response.id}
                   style={{
                     position: 'absolute',
                     top: `${314 + offset.y}px`,
                     left: `${offset.x}px`,
-                    width: '320px',
-                    height: '320px',
-                    background: offset.color.bg,
-                    boxShadow: 'var(--note-shadow)',
-                    padding: '40px',
-                    boxSizing: 'border-box',
-                    transform: `rotate(${offset.rotation}deg)`,
                     zIndex: 100 + index
                   }}
                 >
-                  <div style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    <DrawingCanvas
-                      width={320}
-                      height={320}
-                      initialData={response.drawingData}
-                      disabled={true}
-                      showClearButton={false}
-                    />
-                  </div>
+                  <FlippableNote
+                    width={320}
+                    height={320}
+                    background={offset.color.bg}
+                    authorName={response.authorName || ''}
+                    style={{
+                      transform: `rotate(${offset.rotation}deg)`
+                    }}
+                    frontContent={
+                      <DrawingCanvas
+                        width={240}
+                        height={240}
+                        initialData={response.drawingData}
+                        disabled={true}
+                        showClearButton={false}
+                      />
+                    }
+                  />
                 </div>
               );
             })}
@@ -495,77 +490,72 @@ export default function NotePage() {
             const offset = existingResponseOffsets[index] || { x: 0, y: 0, rotation: 0, color: NOTE_COLORS[0] };
             
             return (
-              <div 
+              <FlippableNote
                 key={response.id}
+                width={320}
+                height={320}
+                background={offset.color.bg}
+                authorName={response.authorName || ''}
                 style={{
-                  width: '320px',
-                  height: '320px',
-                  background: offset.color.bg,
-                  boxShadow: 'var(--note-shadow)',
-                  padding: '40px',
-                  boxSizing: 'border-box',
                   transform: `translate(${offset.x}px, 0) rotate(${offset.rotation}deg)`,
                   zIndex: 100 + index
                 }}
-              >
-                <div style={{
-                  width: '100%',
-                  height: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
+                frontContent={
                   <DrawingCanvas
-                    width={320}
-                    height={320}
+                    width={240}
+                    height={240}
                     initialData={response.drawingData}
                     disabled={true}
                     showClearButton={false}
                   />
-                </div>
-              </div>
+                }
+              />
             );
           })}
 
           {/* Active Response Note */}
           {canEdit && (
-            <div style={{
-              width: '320px',
-              height: '320px',
-              background: responseNoteOffset.color.bg,
-              boxShadow: 'var(--note-shadow)',
-              padding: '40px',
-              boxSizing: 'border-box',
-              transform: `translate(${responseNoteOffset.x}px, 0) rotate(${responseNoteOffset.rotation}deg)`,
-              zIndex: 200
-            }}>
-              <div style={{
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                <DrawingCanvas
-                  width={320}
-                  height={320}
-                  onDrawingChange={setDrawingData}
-                  showClearButton={false}
-                />
-                {!drawingData && (
-                  <div style={{
-                    position: 'absolute',
-                    color: responseNoteOffset.color.secondary,
-                    fontSize: '18px',
-                    fontFamily: 'var(--font-handwritten)',
-                    pointerEvents: 'none',
-                    textAlign: 'center'
-                  }}>
-                    WRITE HERE!
-                  </div>
-                )}
-              </div>
-            </div>
+            <FlippableNote
+              width={320}
+              height={320}
+              background={responseNoteOffset.color.bg}
+              isEditable={true}
+              authorName={authorNameDrawing}
+              onAuthorNameChange={setAuthorNameDrawing}
+              style={{
+                transform: `translate(${responseNoteOffset.x}px, 0) rotate(${responseNoteOffset.rotation}deg)`,
+                zIndex: 200
+              }}
+              frontContent={
+                <div style={{
+                  width: '100%',
+                  height: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  position: 'relative'
+                }}>
+                  <DrawingCanvas
+                    width={240}
+                    height={240}
+                    onDrawingChange={setDrawingData}
+                    showClearButton={false}
+                  />
+                  {!drawingData && (
+                    <div style={{
+                      position: 'absolute',
+                      color: responseNoteOffset.color.secondary,
+                      fontSize: '18px',
+                      fontFamily: 'var(--font-handwritten)',
+                      pointerEvents: 'none',
+                      textAlign: 'center'
+                    }}>
+                      WRITE HERE!
+                    </div>
+                  )}
+                </div>
+              }
+            />
           )}
         </div>
 
