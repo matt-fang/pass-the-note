@@ -40,37 +40,86 @@ export default function Header({ showAbout = false, onAboutChange }: HeaderProps
         top: '0',
         left: '0',
         right: '0',
-        height: isMobile ? '90px' : '88px',
+        height: isMobile ? '90px' : '76px', // 26px + 24px logo + 26px
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: isMobile ? '30px 20px' : '32px 32px',
+        padding: isMobile ? '30px 0px' : '26px 26px',
         zIndex: 1000
       }}>
         {/* Mobile: Plus button, Desktop: Logo */}
         {isMobile ? (
-          <button
-            onClick={handleNewNote}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: '0',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
+          <div style={{
+            width: '100%',
+            maxWidth: '320px', // Match note width
+            margin: '0 auto',
+            position: 'relative'
+          }}>
+            <button
+              onClick={handleNewNote}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                position: 'absolute',
+                left: '0'
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img 
+                src="/plus.svg" 
+                alt="New Note" 
+                style={{
+                  width: '14px',
+                  height: '14px'
+                }}
+              />
+            </button>
+            
+            {/* Centered logo */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img 
-              src="/plus.svg" 
-              alt="New Note" 
+              src="/littlenoteslogo.png" 
+              alt="Little Notes" 
               style={{
-                width: '14px',
-                height: '14px'
+                height: '24px',
+                width: 'auto',
+                position: 'absolute',
+                left: '50%',
+                transform: 'translateX(-50%)'
               }}
             />
-          </button>
+            
+            {/* Info button aligned to right */}
+            <button
+              onClick={handleAbout}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                position: 'absolute',
+                right: '0'
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img 
+                src="/info.svg" 
+                alt="About" 
+                style={{
+                  height: '14px',
+                  width: 'auto' // Maintain aspect ratio
+                }}
+              />
+            </button>
+          </div>
         ) : (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img 
@@ -83,24 +132,13 @@ export default function Header({ showAbout = false, onAboutChange }: HeaderProps
           />
         )}
 
-        {/* Mobile: Logo center, Desktop: Navigation */}
-        {isMobile ? (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img 
-            src="/littlenoteslogo.png" 
-            alt="Little Notes" 
-            style={{
-              height: '24px',
-              width: 'auto',
-              position: 'absolute',
-              left: '50%',
-              transform: 'translateX(-50%)'
-            }}
-          />
-        ) : (
+        {/* Desktop: Navigation */}
+        {!isMobile && (
           <div style={{
             display: 'flex',
-            gap: '24px'
+            flexDirection: 'column',
+            alignItems: 'flex-end',
+            gap: '4px'
           }}>
             <button
               onClick={handleNewNote}
@@ -136,43 +174,16 @@ export default function Header({ showAbout = false, onAboutChange }: HeaderProps
             </button>
           </div>
         )}
-
-        {/* Mobile: Info button, Desktop: Nothing */}
-        {isMobile && (
-          <button
-            onClick={handleAbout}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: '0',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img 
-              src="/info.svg" 
-              alt="About" 
-              style={{
-                width: '14px',
-                height: '14px'
-              }}
-            />
-          </button>
-        )}
       </div>
 
       {/* Progressive blur gradient below toolbar */}
       <div style={{
         position: 'absolute',
-        top: isMobile ? '90px' : '88px',
+        top: isMobile ? '90px' : '76px',
         left: '0',
         right: '0',
         height: '40px',
         background: 'linear-gradient(to bottom, rgba(236, 232, 230, 0.8), transparent)',
-        backdropFilter: 'blur(8px)',
         zIndex: 999
       }} />
 

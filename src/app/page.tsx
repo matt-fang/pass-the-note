@@ -124,9 +124,9 @@ export default function Home() {
   };
 
 
-  const noteSize = isMobile ? 110 : 320;
-  const notePadding = isMobile ? (110 * 40) / 320 : 40; // Scale padding proportionally
-  const fontSize = isMobile ? (18 * 110) / 320 : 18; // Scale font proportionally
+  const noteSize = 320; // Keep note size consistent across mobile and desktop
+  const notePadding = 40;
+  const fontSize = 18;
 
   return (
     <div style={{
@@ -148,7 +148,7 @@ export default function Home() {
         flexDirection: 'column',
         alignItems: 'center',
         gap: isMobile ? '15px' : '50px', // 50pt spacing between text and note
-        paddingTop: isMobile ? '130px' : '130px' // Account for header + gradient
+        paddingTop: isMobile ? '130px' : '116px' // Account for header + gradient (76px header + 40px gradient)
       }}>
         {/* Text above note */}
         <div style={{
@@ -200,13 +200,13 @@ export default function Home() {
               onClick={getNewQuestion}
               style={{
                 position: 'absolute',
-                bottom: isMobile ? '4px' : '12px',
+                bottom: '12px',
                 left: '50%',
                 transform: 'translateX(-50%)',
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
-                padding: isMobile ? '4px' : '8px',
+                padding: '8px',
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
@@ -215,7 +215,7 @@ export default function Home() {
             >
               <span style={{
                 fontFamily: 'var(--font-sans)',
-                fontSize: isMobile ? '8px' : '12px',
+                fontSize: '12px',
                 fontWeight: '500',
                 color: 'var(--text-dark)',
                 opacity: noteOpacity,
@@ -229,7 +229,7 @@ export default function Home() {
 
         {/* Share button with 80pt spacing */}
         <div style={{ 
-          marginTop: isMobile ? '30px' : '80px' // 80pt spacing between note and button
+          marginTop: '80px' // 80pt spacing between note and button
         }}>
           <button
             onClick={shareNatively}
