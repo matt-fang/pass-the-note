@@ -134,7 +134,7 @@ export default function Home() {
   return (
     <div style={{
       minHeight: '100vh',
-      overflow: 'hidden',
+      overflow: 'visible', // Changed from 'hidden' to allow shadow
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
@@ -167,7 +167,13 @@ export default function Home() {
         </div>
 
         {/* Note Container - centered note with right toolbar */}
-        <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-start', justifyContent: 'center' }}>
+        <div style={{ 
+          position: 'relative', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          padding: '70px 20px' // Extra space for shadow (61px + buffer)
+        }}>
           {/* Note - centered */}
           <div style={{
             opacity: noteOpacity,
@@ -231,15 +237,18 @@ export default function Home() {
             )}
           </div>
 
-          {/* Right side toolbar - 14px from note */}
+          {/* Right side toolbar - 14px from note, vertically centered */}
           <div style={{
-            marginLeft: '14px',
+            position: 'absolute',
+            left: '334px', // 320px note width + 14px spacing
+            top: '50%',
+            transform: 'translateY(-50%)',
             display: 'flex',
             flexDirection: 'column',
             gap: '18px',
             alignItems: 'center'
           }}>
-            {/* Flip button */}
+            {/* Flip button - black */}
             <button
               onClick={() => setIsNoteFlipped(!isNoteFlipped)}
               style={{
@@ -257,7 +266,8 @@ export default function Home() {
                 alt="flip" 
                 style={{ 
                   width: '14px', 
-                  height: '14px' 
+                  height: '14px',
+                  filter: 'brightness(0)' // Makes it black
                 }} 
               />
             </button>
