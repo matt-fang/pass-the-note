@@ -166,14 +166,26 @@ export default function Home() {
           start a big conversation.
         </div>
 
-        {/* Note Container - centered note with right toolbar */}
+        {/* H-Stack Layout: Left Toolbar Frame | Note | Right Toolbar Frame */}
         <div style={{ 
-          position: 'relative', 
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'center',
-          padding: '70px 20px' // Extra space for shadow (61px + buffer)
+          padding: '70px 20px', // Extra space for shadow (61px + buffer)
+          gap: '14px' // 14px spacing between frames
         }}>
+          {/* Left Toolbar Frame - 54px wide (empty for now) */}
+          <div style={{
+            width: '54px',
+            height: `${noteSize}px`,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            {/* Empty for now */}
+          </div>
+
           {/* Note - centered */}
           <div style={{
             opacity: noteOpacity,
@@ -237,16 +249,15 @@ export default function Home() {
             )}
           </div>
 
-          {/* Right side toolbar - 14px from note, vertically centered */}
+          {/* Right Toolbar Frame - 54px wide with v-stack icons */}
           <div style={{
-            position: 'absolute',
-            left: '334px', // 320px note width + 14px spacing
-            top: '50%',
-            transform: 'translateY(-50%)',
+            width: '54px',
+            height: `${noteSize}px`,
             display: 'flex',
             flexDirection: 'column',
-            gap: '18px',
-            alignItems: 'center'
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '18px'
           }}>
             {/* Flip button - black */}
             <button
@@ -272,7 +283,7 @@ export default function Home() {
               />
             </button>
 
-            {/* Undo button - always show but gray when inactive */}
+            {/* Undo button - black when active, gray when inactive */}
             <button
               onClick={() => {
                 if (isNoteFlipped && flipNoteRef.current) {
@@ -297,7 +308,7 @@ export default function Home() {
                 style={{ 
                   width: '14px', 
                   height: '14px',
-                  filter: isNoteFlipped ? 'none' : 'brightness(0) saturate(100%) invert(73%) sepia(0%) saturate(2%) hue-rotate(169deg) brightness(96%) contrast(86%)'
+                  filter: isNoteFlipped ? 'brightness(0)' : 'brightness(0) saturate(100%) invert(73%) sepia(0%) saturate(2%) hue-rotate(169deg) brightness(96%) contrast(86%)'
                 }} 
               />
             </button>
