@@ -329,7 +329,12 @@ export default function NotePage() {
         )}
 
         {/* Note Container */}
-        <div style={{ position: 'relative' }}>
+        <div style={{ 
+          position: 'relative',
+          minHeight: thread.responses.length > 0 ? 
+            `${320 + ((thread.responses.length - 1) * 40) + 300}px` : // Main note + stack offsets + last response height
+            '320px'
+        }}>
           {/* Main Question Note */}
           <div style={{
             width: '320px',
