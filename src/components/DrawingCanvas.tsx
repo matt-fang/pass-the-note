@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useImperativeHandle, forwardRef } from 'react';
 
 interface DrawingCanvasProps {
   width?: number;
@@ -11,17 +11,23 @@ interface DrawingCanvasProps {
   showClearButton?: boolean;
 }
 
-export default function DrawingCanvas({ 
+export interface DrawingCanvasRef {
+  undo: () => void;
+}
+
+const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({ 
   width = 400, 
   height = 300, 
   onDrawingChange,
   initialData,
   disabled = false,
   showClearButton = true
-}: DrawingCanvasProps) {
+}, ref) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [lastPos, setLastPos] = useState({ x: 0, y: 0 });
+  const [history, setHistory] = useState<string[]>([]);
+  const [historyStep, setHistoryStep] = useState(-1);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -78,6 +84,57 @@ export default function DrawingCanvas({
     }
   };
 
+  const saveStateToHistory = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const dataUrl = canvas.toDataURL('image/png', 1.0);
+    setHistory(prev => {
+      const newHistory = prev.slice(0, historyStep + 1);
+      newHistory.push(dataUrl);
+      return newHistory;
+    });
+    setHistoryStep(prev => prev + 1);
+  };
+
+  const undoLastStroke = () => {
+    if (historyStep <= 0) return;
+    
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    setHistoryStep(prev => prev - 1);
+    const previousState = history[historyStep - 1];
+    
+    if (previousState) {
+      const img = new Image();
+      img.onload = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Notify parent of changes
+        if (onDrawingChange) {
+          onDrawingChange(previousState);
+        }
+      };
+      img.src = previousState;
+    } else {
+      // If no previous state, clear the canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (onDrawingChange) {
+        onDrawingChange('');
+      }
+    }
+  };
+
+  // Expose undo function to parent via ref
+  useImperativeHandle(ref, () => ({
+    undo: undoLastStroke
+  }));
+
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (disabled) return;
     
@@ -85,6 +142,9 @@ export default function DrawingCanvas({
     const pos = getEventPos(e);
     setIsDrawing(true);
     setLastPos(pos);
+    
+    // Save current state before starting new stroke
+    saveStateToHistory();
   };
 
   const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
@@ -172,4 +232,8 @@ export default function DrawingCanvas({
       )}
     </div>
   );
-}
+});
+
+DrawingCanvas.displayName = 'DrawingCanvas';
+
+export default DrawingCanvas;

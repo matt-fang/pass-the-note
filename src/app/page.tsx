@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Header from '@/components/Header';
-import FlippableNote from '@/components/FlippableNote';
+import FlippableNote, { FlippableNoteRef } from '@/components/FlippableNote';
 
 const NOTE_COLORS = [
   { 
@@ -31,6 +31,8 @@ export default function Home() {
   const [showAbout, setShowAbout] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [authorNameDrawing, setAuthorNameDrawing] = useState('');
+  const [isNoteFlipped, setIsNoteFlipped] = useState(false);
+  const flipNoteRef = useRef<FlippableNoteRef>(null);
 
   // Load question immediately when component mounts
   useEffect(() => {
@@ -127,7 +129,6 @@ export default function Home() {
 
 
   const noteSize = 320; // Keep note size consistent across mobile and desktop
-  const notePadding = 40;
   const fontSize = 18;
 
   return (
@@ -165,20 +166,23 @@ export default function Home() {
           start a big conversation.
         </div>
 
-        {/* Note Container - with shuffle button positioned on top */}
-        <div style={{ position: 'relative' }}>
+        {/* Note Container - with shuffle button and flip/undo buttons */}
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '20px' }}>
           {/* Note */}
           <div style={{
             opacity: noteOpacity,
-            transition: 'opacity 0.2s ease-in-out'
+            transition: 'opacity 0.2s ease-in-out',
+            position: 'relative'
           }}>
             <FlippableNote
+              ref={flipNoteRef}
               width={noteSize}
               height={noteSize}
               background={noteColor.bg}
               isEditable={true}
               authorName={authorNameDrawing}
               onAuthorNameChange={setAuthorNameDrawing}
+              isFlipped={isNoteFlipped}
               frontContent={
                 <div style={{
                   fontFamily: 'var(--font-handwritten)',
@@ -193,39 +197,96 @@ export default function Home() {
                 </div>
               }
             />
+            
+            {/* Shuffle button - positioned at bottom of note */}
+            {question && (
+              <button
+                onClick={getNewQuestion}
+                style={{
+                  position: 'absolute',
+                  bottom: '12px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '8px',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <span style={{
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: '12px',
+                  fontWeight: '500',
+                  color: 'var(--text-dark)',
+                  opacity: noteOpacity,
+                  transition: 'opacity 0.2s ease-in-out'
+                }}>
+                  shuffle
+                </span>
+              </button>
+            )}
           </div>
 
-          {/* Shuffle button - positioned at bottom of note */}
-          {question && (
+          {/* Right side buttons - aligned with header */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px',
+            alignItems: 'center',
+            paddingTop: isMobile ? '50px' : '40px' // Align with header height
+          }}>
+            {/* Flip button */}
             <button
-              onClick={getNewQuestion}
+              onClick={() => setIsNoteFlipped(!isNoteFlipped)}
               style={{
-                position: 'absolute',
-                bottom: '12px',
-                left: '50%',
-                transform: 'translateX(-50%)',
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
                 padding: '8px',
-                borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}
             >
-              <span style={{
-                fontFamily: 'var(--font-sans)',
-                fontSize: '12px',
-                fontWeight: '500',
-                color: 'var(--text-dark)',
-                opacity: noteOpacity,
-                transition: 'opacity 0.2s ease-in-out'
-              }}>
-                shuffle
-              </span>
+              <img 
+                src="/flip.svg" 
+                alt="flip" 
+                style={{ 
+                  width: '14px', 
+                  height: '14px' 
+                }} 
+              />
             </button>
-          )}
+
+            {/* Undo button - only show when note is flipped */}
+            {isNoteFlipped && (
+              <button
+                onClick={() => flipNoteRef.current?.handleUndo()}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <img 
+                  src="/undo.svg" 
+                  alt="undo" 
+                  style={{ 
+                    width: '14px', 
+                    height: '14px' 
+                  }} 
+                />
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Share button with 80pt spacing */}

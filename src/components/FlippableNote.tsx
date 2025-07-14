@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import DrawingCanvas from './DrawingCanvas';
+import { useState, useRef, useImperativeHandle, forwardRef } from 'react';
+import DrawingCanvas, { DrawingCanvasRef } from './DrawingCanvas';
 
 interface FlippableNoteProps {
   width?: number;
@@ -13,9 +13,15 @@ interface FlippableNoteProps {
   onAuthorNameChange?: (drawingData: string) => void;
   style?: React.CSSProperties;
   className?: string;
+  isFlipped?: boolean;
+  onUndo?: () => void;
 }
 
-export default function FlippableNote({
+export interface FlippableNoteRef {
+  handleUndo: () => void;
+}
+
+const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(({
   width = 320,
   height = 320,
   background,
@@ -24,13 +30,25 @@ export default function FlippableNote({
   authorName = '',
   onAuthorNameChange,
   style = {},
-  className = ''
-}: FlippableNoteProps) {
-  const [isFlipped, setIsFlipped] = useState(false);
+  className = '',
+  isFlipped = false,
+  onUndo
+}, ref) => {
+  const drawingCanvasRef = useRef<DrawingCanvasRef>(null);
 
-  const handleFlip = () => {
-    setIsFlipped(!isFlipped);
+  const handleUndo = () => {
+    if (drawingCanvasRef.current) {
+      drawingCanvasRef.current.undo();
+    }
+    if (onUndo) {
+      onUndo();
+    }
   };
+
+  // Expose handleUndo to parent via ref
+  useImperativeHandle(ref, () => ({
+    handleUndo
+  }));
 
   return (
     <div
@@ -41,7 +59,6 @@ export default function FlippableNote({
         perspective: '1000px',
         ...style
       }}
-      onClick={handleFlip}
     >
       <div
         className="flippable-note"
@@ -116,10 +133,10 @@ export default function FlippableNote({
               justifyContent: 'center',
               position: 'relative'
             }}
-            onClick={(e) => e.stopPropagation()} // Prevent flip when interacting with drawing
           >
             {isEditable ? (
               <DrawingCanvas
+                ref={drawingCanvasRef}
                 width={280}
                 height={240}
                 onDrawingChange={onAuthorNameChange}
@@ -156,4 +173,8 @@ export default function FlippableNote({
       </div>
     </div>
   );
-}
+});
+
+FlippableNote.displayName = 'FlippableNote';
+
+export default FlippableNote;
