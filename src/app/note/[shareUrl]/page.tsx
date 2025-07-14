@@ -461,27 +461,26 @@ export default function NotePage() {
           })}
         </div>
 
-        {/* Share/Submit button - positioned like sender screen */}
+        {/* Pass button - shows when user has drawn something */}
         {canEdit && !newShareUrl && drawingData && (
           <button
             onClick={submitResponse}
             disabled={isSubmitting}
             style={{
-              background: 'none',
+              background: '#FF6B35',
               border: 'none',
               fontFamily: 'var(--font-sans)',
               fontWeight: '500',
               fontSize: '16px',
-              color: 'var(--text-dark)',
-              textDecoration: 'underline',
-              textUnderlineOffset: '3px',
+              color: 'white',
               cursor: 'pointer',
-              padding: '12px',
-              opacity: isSubmitting ? 0.5 : 1,
-              marginTop: thread.responses.length > 0 ? '60px' : '40px'
+              padding: '12px 24px',
+              borderRadius: '4px',
+              marginTop: '40px',
+              opacity: isSubmitting ? 0.5 : 1
             }}
           >
-            {isSubmitting ? 'sending your note...' : 'share this question to a friend'}
+            {isSubmitting ? 'sending your note...' : 'pass the note on >'}
           </button>
         )}
 
