@@ -52,9 +52,12 @@ export default function Header({ showAbout = false, onAboutChange }: HeaderProps
         {isMobile ? (
           <div style={{
             width: '100%',
-            maxWidth: '320px', // Match note width
-            margin: '0 auto',
-            position: 'relative'
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            position: 'relative',
+            maxWidth: '320px',
+            margin: '0 auto'
           }}>
             <button
               onClick={handleNewNote}
@@ -88,10 +91,7 @@ export default function Header({ showAbout = false, onAboutChange }: HeaderProps
               alt="Little Notes" 
               style={{
                 height: '24px',
-                width: 'auto',
-                position: 'absolute',
-                left: '50%',
-                transform: 'translateX(-50%)'
+                width: 'auto'
               }}
             />
             
@@ -177,16 +177,6 @@ export default function Header({ showAbout = false, onAboutChange }: HeaderProps
         )}
       </div>
 
-      {/* Progressive blur gradient below toolbar */}
-      <div style={{
-        position: 'absolute',
-        top: isMobile ? '90px' : '76px',
-        left: '0',
-        right: '0',
-        height: '40px',
-        background: 'linear-gradient(to bottom, rgba(236, 232, 230, 0.8), transparent)',
-        zIndex: 999
-      }} />
 
       {/* About overlay */}
       {showAbout && onAboutChange && (

@@ -676,7 +676,7 @@ export default function NotePage() {
                 padding: '8px 10px'
               }}
             >
-              write your own note >
+              write your own note &gt;
             </button>
           </div>
         )}
