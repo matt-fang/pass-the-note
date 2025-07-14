@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import DrawingCanvas from '@/components/DrawingCanvas';
 import FlippableNote from '@/components/FlippableNote';
@@ -60,6 +60,8 @@ export default function NotePage() {
   const [notesSlideOut, setNotesSlideOut] = useState(false);
   const [showReadView, setShowReadView] = useState(false);
   const [authorNameDrawing, setAuthorNameDrawing] = useState('');
+  const [flippedNotes, setFlippedNotes] = useState<{[key: string]: boolean}>({});
+  const activeNoteRef = useRef<any>(null);
 
   useEffect(() => {
     if (params.shareUrl) {
@@ -488,74 +490,191 @@ export default function NotePage() {
             if (!response.drawingData) return null;
             
             const offset = existingResponseOffsets[index] || { x: 0, y: 0, rotation: 0, color: NOTE_COLORS[0] };
+            const noteId = `response-${response.id}`;
+            const isFlipped = flippedNotes[noteId] || false;
             
             return (
-              <FlippableNote
-                key={response.id}
-                width={320}
-                height={320}
-                background={offset.color.bg}
-                authorName={response.authorName || ''}
-                style={{
-                  transform: `translate(${offset.x}px, 0) rotate(${offset.rotation}deg)`,
-                  zIndex: 100 + index
-                }}
-                frontContent={
-                  <DrawingCanvas
-                    width={240}
-                    height={240}
-                    initialData={response.drawingData}
-                    disabled={true}
-                    showClearButton={false}
-                  />
-                }
-              />
+              <div key={response.id} style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '14px',
+                transform: `translate(${offset.x}px, 0) rotate(${offset.rotation}deg)`,
+                zIndex: 100 + index
+              }}>
+                <FlippableNote
+                  width={320}
+                  height={320}
+                  background={offset.color.bg}
+                  authorName={response.authorName || ''}
+                  isFlipped={isFlipped}
+                  frontContent={
+                    <DrawingCanvas
+                      width={240}
+                      height={240}
+                      initialData={response.drawingData}
+                      disabled={true}
+                      showClearButton={false}
+                    />
+                  }
+                />
+                
+                {/* Toolbar for existing notes */}
+                <div style={{
+                  width: '54px',
+                  height: '320px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  {/* Flip button only */}
+                  <button
+                    onClick={() => setFlippedNotes(prev => ({
+                      ...prev,
+                      [noteId]: !prev[noteId]
+                    }))}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      padding: '8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <img 
+                      src="/flip.svg" 
+                      alt="flip" 
+                      style={{ 
+                        height: '14px',
+                        width: 'auto',
+                        filter: 'brightness(0)'
+                      }} 
+                    />
+                  </button>
+                </div>
+              </div>
             );
           })}
 
           {/* Active Response Note */}
           {canEdit && (
-            <FlippableNote
-              width={320}
-              height={320}
-              background={responseNoteOffset.color.bg}
-              isEditable={true}
-              authorName={authorNameDrawing}
-              onAuthorNameChange={setAuthorNameDrawing}
-              style={{
-                transform: `translate(${responseNoteOffset.x}px, 0) rotate(${responseNoteOffset.rotation}deg)`,
-                zIndex: 200
-              }}
-              frontContent={
-                <div style={{
-                  width: '100%',
-                  height: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  position: 'relative'
-                }}>
-                  <DrawingCanvas
-                    width={240}
-                    height={240}
-                    onDrawingChange={setDrawingData}
-                    showClearButton={false}
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '14px',
+              transform: `translate(${responseNoteOffset.x}px, 0) rotate(${responseNoteOffset.rotation}deg)`,
+              zIndex: 200
+            }}>
+              <FlippableNote
+                ref={activeNoteRef}
+                width={320}
+                height={320}
+                background={responseNoteOffset.color.bg}
+                isEditable={true}
+                authorName={authorNameDrawing}
+                onAuthorNameChange={setAuthorNameDrawing}
+                isFlipped={flippedNotes['active-note'] || false}
+                frontContent={
+                  <div style={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative'
+                  }}>
+                    <DrawingCanvas
+                      width={240}
+                      height={240}
+                      onDrawingChange={setDrawingData}
+                      showClearButton={false}
+                    />
+                    {!drawingData && (
+                      <div style={{
+                        position: 'absolute',
+                        color: responseNoteOffset.color.secondary,
+                        fontSize: '18px',
+                        fontFamily: 'var(--font-handwritten)',
+                        pointerEvents: 'none',
+                        textAlign: 'center'
+                      }}>
+                        WRITE HERE!
+                      </div>
+                    )}
+                  </div>
+                }
+              />
+              
+              {/* Toolbar for active note with flip + undo */}
+              <div style={{
+                width: '54px',
+                height: '320px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '18px'
+              }}>
+                {/* Flip button */}
+                <button
+                  onClick={() => setFlippedNotes(prev => ({
+                    ...prev,
+                    'active-note': !prev['active-note']
+                  }))}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <img 
+                    src="/flip.svg" 
+                    alt="flip" 
+                    style={{ 
+                      height: '14px',
+                      width: 'auto',
+                      filter: 'brightness(0)'
+                    }} 
                   />
-                  {!drawingData && (
-                    <div style={{
-                      position: 'absolute',
-                      color: responseNoteOffset.color.secondary,
-                      fontSize: '18px',
-                      fontFamily: 'var(--font-handwritten)',
-                      pointerEvents: 'none',
-                      textAlign: 'center'
-                    }}>
-                      WRITE HERE!
-                    </div>
-                  )}
-                </div>
-              }
-            />
+                </button>
+
+                {/* Undo button - only for active note */}
+                <button
+                  onClick={() => {
+                    if (flippedNotes['active-note'] && activeNoteRef.current) {
+                      activeNoteRef.current.handleUndo();
+                    }
+                  }}
+                  disabled={!flippedNotes['active-note']}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: flippedNotes['active-note'] ? 'pointer' : 'default',
+                    padding: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    opacity: flippedNotes['active-note'] ? 1 : 0.5
+                  }}
+                >
+                  <img 
+                    src="/undo.svg" 
+                    alt="undo" 
+                    style={{ 
+                      height: '14px',
+                      width: 'auto',
+                      filter: flippedNotes['active-note'] ? 'brightness(0)' : 'brightness(0) saturate(100%) invert(73%) sepia(0%) saturate(2%) hue-rotate(169deg) brightness(96%) contrast(86%)'
+                    }} 
+                  />
+                </button>
+              </div>
+            </div>
           )}
         </div>
 
