@@ -107,7 +107,7 @@ export default function NotePage() {
       setResponseNoteOffset({
         x: (responseSeed - 0.5) * 40, // -20px to 20px
         y: 0,
-        rotation: (seededRandom(thread.id + 'rotation' + thread.responses.length) - 0.5) * 6, // -3deg to 3deg
+        rotation: (seededRandom(thread.id + 'rotation' + thread.responses.length) - 0.5) * 2, // -1deg to 1deg
         color: NOTE_COLORS[(colorIndex + 1) % NOTE_COLORS.length] // Different from main note
       });
     }
@@ -347,27 +347,75 @@ export default function NotePage() {
             )}px`
           }}>
             {/* Main Question Note */}
-            <div style={{
-              width: '320px',
-              height: '320px',
-              background: noteColor.bg,
-              boxShadow: 'var(--note-shadow)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '40px',
-              boxSizing: 'border-box'
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '14px',
+              transform: `translate(${textOffset.x}px, ${textOffset.y}px)`
             }}>
+              <FlippableNote
+                width={320}
+                height={320}
+                background={noteColor.bg}
+                authorName={thread.responses[0]?.authorName || ''}
+                isFlipped={flippedNotes['question-note-read'] || false}
+                frontContent={
+                  <div style={{
+                    width: '240px',
+                    height: '240px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontFamily: 'var(--font-handwritten)',
+                    fontSize: '18px',
+                    lineHeight: '1.4',
+                    color: 'var(--text-dark)',
+                    textAlign: 'center',
+                    padding: '20px',
+                    overflow: 'hidden',
+                    wordBreak: 'break-word'
+                  }}>
+                    {thread.question}
+                  </div>
+                }
+              />
+              
+              {/* Toolbar for question note */}
               <div style={{
-                fontFamily: 'var(--font-handwritten)',
-                fontSize: '18px',
-                lineHeight: '1.4',
-                color: 'var(--text-dark)',
-                textAlign: 'center',
-                width: '100%',
-                transform: `translate(${textOffset.x}px, ${textOffset.y}px)`
+                width: '54px',
+                height: '320px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center'
               }}>
-                {thread.question}
+                {/* Flip button only */}
+                <button
+                  onClick={() => setFlippedNotes(prev => ({
+                    ...prev,
+                    'question-note-read': !prev['question-note-read']
+                  }))}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img 
+                    src="/flip.svg" 
+                    alt="flip" 
+                    style={{ 
+                      height: '14px',
+                      width: 'auto',
+                      filter: 'brightness(0)'
+                    }} 
+                  />
+                </button>
               </div>
             </div>
 
@@ -475,7 +523,7 @@ export default function NotePage() {
         <div style={{ 
           display: 'flex',
           flexDirection: 'column',
-          gap: '-5px', // 5px overlap between notes
+          gap: '-7px', // 7px overlap between notes
           transform: notesSlideOut ? 'translateX(100vw)' : 'translateX(0)',
           transition: 'transform 0.6s ease-in-out'
         }}>
@@ -490,7 +538,7 @@ export default function NotePage() {
               width={320}
               height={320}
               background={noteColor.bg}
-              authorName={''} // TODO: Need to add authorName to Thread interface
+              authorName={thread.responses[0]?.authorName || ''}
               isFlipped={flippedNotes['question-note'] || false}
               frontContent={
                 <div style={{
