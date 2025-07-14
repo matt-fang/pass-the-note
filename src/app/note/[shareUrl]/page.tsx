@@ -147,22 +147,21 @@ export default function NotePage() {
           }));
         } else {
           // Fallback for older responses without position data
-          // Use same logic as first response for consistency
-          const mainNoteEndPosition = 180; // Adjusted for centered layout
-          const responseStartPosition = mainNoteEndPosition - overlap;
-          const baseY = responseStartPosition - 314;
+          // Use EXACT same calculation as first response
+          const mainNoteEffectiveY = -320;
+          const newStartY = (314 + mainNoteEffectiveY + 320) - overlap;
+          const baseY = newStartY - 314;
           setResponseNoteOffset(prev => ({
             ...prev,
             y: baseY
           }));
         }
       } else {
-        // First response: account for layout difference between centered and flex-start layouts
-        // In centered layout, main note is effectively 140px higher, so it ends at 320-140=180
-        // Position response to overlap with main note: start at 180 - overlap
-        const mainNoteEndPosition = 180; // Adjusted for centered layout
-        const responseStartPosition = mainNoteEndPosition - overlap;
-        const baseY = responseStartPosition - 314;
+        // First response: use EXACT same calculation as subsequent recipients
+        // Treat main note as if it were a response with small negative positionY
+        const mainNoteEffectiveY = -320;
+        const newStartY = (314 + mainNoteEffectiveY + 320) - overlap;
+        const baseY = newStartY - 314;
         setResponseNoteOffset(prev => ({
           ...prev,
           y: baseY
