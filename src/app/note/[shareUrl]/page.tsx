@@ -60,6 +60,7 @@ export default function NotePage() {
   const [showReadView, setShowReadView] = useState(false);
   const [authorNameDrawing, setAuthorNameDrawing] = useState('');
   const [flippedNotes, setFlippedNotes] = useState<{[key: string]: boolean}>({});
+  const [allNotesFlipped, setAllNotesFlipped] = useState(false);
   const [typedResponse, setTypedResponse] = useState('');
   const activeNoteRef = useRef<FlippableNoteRef>(null);
 
@@ -347,18 +348,28 @@ export default function NotePage() {
             )}px`
           }}>
             {/* Main Question Note */}
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '14px',
-              transform: `translate(${textOffset.x}px, ${textOffset.y}px)`
-            }}>
+            <div 
+              style={{ 
+                transform: `translate(${textOffset.x}px, ${textOffset.y}px)`,
+                cursor: 'pointer'
+              }}
+              onClick={() => {
+                const newFlipped = !allNotesFlipped;
+                setAllNotesFlipped(newFlipped);
+                setFlippedNotes({
+                  'question-note-read': newFlipped,
+                  ...Object.fromEntries(
+                    thread.responses.map((response, index) => [`response-read-${response.id}`, newFlipped])
+                  )
+                });
+              }}
+            >
               <FlippableNote
                 width={320}
                 height={320}
                 background={noteColor.bg}
                 authorName={thread.responses[0]?.authorName || ''}
-                isFlipped={flippedNotes['question-note-read'] || false}
+                isFlipped={allNotesFlipped}
                 frontContent={
                   <div style={{
                     width: '240px',
@@ -379,44 +390,6 @@ export default function NotePage() {
                   </div>
                 }
               />
-              
-              {/* Toolbar for question note */}
-              <div style={{
-                width: '54px',
-                height: '320px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                {/* Flip button only */}
-                <button
-                  onClick={() => setFlippedNotes(prev => ({
-                    ...prev,
-                    'question-note-read': !prev['question-note-read']
-                  }))}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    padding: '8px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img 
-                    src="/flip.svg" 
-                    alt="flip" 
-                    style={{ 
-                      height: '14px',
-                      width: 'auto',
-                      filter: 'brightness(0)'
-                    }} 
-                  />
-                </button>
-              </div>
             </div>
 
             {/* All Response Notes */}
@@ -432,7 +405,18 @@ export default function NotePage() {
                     position: 'absolute',
                     top: `${314 + offset.y}px`,
                     left: `${offset.x}px`,
-                    zIndex: 100 + index
+                    zIndex: 100 + index,
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => {
+                    const newFlipped = !allNotesFlipped;
+                    setAllNotesFlipped(newFlipped);
+                    setFlippedNotes({
+                      'question-note-read': newFlipped,
+                      ...Object.fromEntries(
+                        thread.responses.map((resp, idx) => [`response-read-${resp.id}`, newFlipped])
+                      )
+                    });
                   }}
                 >
                   <FlippableNote
@@ -440,6 +424,7 @@ export default function NotePage() {
                     height={320}
                     background={offset.color.bg}
                     authorName={response.authorName || ''}
+                    isFlipped={allNotesFlipped}
                     style={{
                       transform: `rotate(${offset.rotation}deg)`
                     }}
@@ -528,18 +513,28 @@ export default function NotePage() {
           transition: 'transform 0.6s ease-in-out'
         }}>
           {/* Main Question Note */}
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '14px',
-            transform: `translate(${textOffset.x}px, ${textOffset.y}px)`
-          }}>
+          <div 
+            style={{
+              transform: `translate(${textOffset.x}px, ${textOffset.y}px)`,
+              cursor: 'pointer'
+            }}
+            onClick={() => {
+              const newFlipped = !allNotesFlipped;
+              setAllNotesFlipped(newFlipped);
+              setFlippedNotes({
+                'question-note': newFlipped,
+                ...Object.fromEntries(
+                  thread.responses.map((response, index) => [`response-${response.id}`, newFlipped])
+                )
+              });
+            }}
+          >
             <FlippableNote
               width={320}
               height={320}
               background={noteColor.bg}
               authorName={thread.responses[0]?.authorName || ''}
-              isFlipped={flippedNotes['question-note'] || false}
+              isFlipped={allNotesFlipped}
               frontContent={
                 <div style={{
                   width: '240px',
@@ -560,44 +555,6 @@ export default function NotePage() {
                 </div>
               }
             />
-            
-            {/* Toolbar for question note */}
-            <div style={{
-              width: '54px',
-              height: '320px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              {/* Flip button only */}
-              <button
-                onClick={() => setFlippedNotes(prev => ({
-                  ...prev,
-                  'question-note': !prev['question-note']
-                }))}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  padding: '8px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img 
-                  src="/flip.svg" 
-                  alt="flip" 
-                  style={{ 
-                    height: '14px',
-                    width: 'auto',
-                    filter: 'brightness(0)'
-                  }} 
-                />
-              </button>
-            </div>
           </div>
 
           {/* Existing Response Notes */}
@@ -606,22 +563,31 @@ export default function NotePage() {
             
             const offset = existingResponseOffsets[index] || { x: 0, y: 0, rotation: 0, color: NOTE_COLORS[0] };
             const noteId = `response-${response.id}`;
-            const isFlipped = flippedNotes[noteId] || false;
-            
             return (
-              <div key={response.id} style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '14px',
-                transform: `translate(${offset.x}px, 0) rotate(${offset.rotation}deg)`,
-                zIndex: 100 + index
-              }}>
+              <div 
+                key={response.id} 
+                style={{ 
+                  transform: `translate(${offset.x}px, 0) rotate(${offset.rotation}deg)`,
+                  zIndex: 100 + index,
+                  cursor: 'pointer'
+                }}
+                onClick={() => {
+                  const newFlipped = !allNotesFlipped;
+                  setAllNotesFlipped(newFlipped);
+                  setFlippedNotes({
+                    'question-note': newFlipped,
+                    ...Object.fromEntries(
+                      thread.responses.map((resp, idx) => [`response-${resp.id}`, newFlipped])
+                    )
+                  });
+                }}
+              >
                 <FlippableNote
                   width={320}
                   height={320}
                   background={offset.color.bg}
                   authorName={response.authorName || ''}
-                  isFlipped={isFlipped}
+                  isFlipped={allNotesFlipped}
                   frontContent={
                     // Check if it's SVG, old image data, or text
                     response.drawingData.startsWith('<svg') ? (
@@ -668,43 +634,6 @@ export default function NotePage() {
                     )
                   }
                 />
-                
-                {/* Toolbar for existing notes */}
-                <div style={{
-                  width: '54px',
-                  height: '320px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  {/* Flip button only */}
-                  <button
-                    onClick={() => setFlippedNotes(prev => ({
-                      ...prev,
-                      [noteId]: !prev[noteId]
-                    }))}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      padding: '8px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                  >
-                    <img 
-                      src="/flip.svg" 
-                      alt="flip" 
-                      style={{ 
-                        height: '14px',
-                        width: 'auto',
-                        filter: 'brightness(0)'
-                      }} 
-                    />
-                  </button>
-                </div>
               </div>
             );
           })}
@@ -712,9 +641,6 @@ export default function NotePage() {
           {/* Active Response Note */}
           {canEdit && (
             <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '14px',
               transform: `translate(${responseNoteOffset.x}px, 0) rotate(${responseNoteOffset.rotation}deg)`,
               zIndex: 200
             }}>
@@ -726,79 +652,11 @@ export default function NotePage() {
                 isEditable={true}
                 authorName={authorNameDrawing}
                 onAuthorNameChange={setAuthorNameDrawing}
-                isFlipped={flippedNotes['active-note'] || false}
+                isFlipped={false}
                 isTypingMode={true}
                 typedText={typedResponse}
                 onTextChange={setTypedResponse}
               />
-              
-              {/* Toolbar for active note with flip + undo */}
-              <div style={{
-                width: '54px',
-                height: '320px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '18px'
-              }}>
-                {/* Flip button */}
-                <button
-                  onClick={() => setFlippedNotes(prev => ({
-                    ...prev,
-                    'active-note': !prev['active-note']
-                  }))}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    padding: '8px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  <img 
-                    src="/flip.svg" 
-                    alt="flip" 
-                    style={{ 
-                      height: '14px',
-                      width: 'auto',
-                      filter: 'brightness(0)'
-                    }} 
-                  />
-                </button>
-
-                {/* Undo button - only for active note */}
-                <button
-                  onClick={() => {
-                    if (flippedNotes['active-note'] && activeNoteRef.current) {
-                      activeNoteRef.current.handleUndo();
-                    }
-                  }}
-                  disabled={!flippedNotes['active-note']}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    cursor: flippedNotes['active-note'] ? 'pointer' : 'default',
-                    padding: '8px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    opacity: flippedNotes['active-note'] ? 1 : 0.5
-                  }}
-                >
-                  <img 
-                    src="/undo.svg" 
-                    alt="undo" 
-                    style={{ 
-                      height: '14px',
-                      width: 'auto',
-                      filter: flippedNotes['active-note'] ? 'brightness(0)' : 'brightness(0) saturate(100%) invert(73%) sepia(0%) saturate(2%) hue-rotate(169deg) brightness(96%) contrast(86%)'
-                    }} 
-                  />
-                </button>
-              </div>
             </div>
           )}
         </div>
