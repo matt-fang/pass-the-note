@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import DrawingCanvas from '@/components/DrawingCanvas';
-import FlippableNote from '@/components/FlippableNote';
+import FlippableNote, { FlippableNoteRef } from '@/components/FlippableNote';
 import Header from '@/components/Header';
 
 interface Response {
@@ -61,7 +61,7 @@ export default function NotePage() {
   const [showReadView, setShowReadView] = useState(false);
   const [authorNameDrawing, setAuthorNameDrawing] = useState('');
   const [flippedNotes, setFlippedNotes] = useState<{[key: string]: boolean}>({});
-  const activeNoteRef = useRef<any>(null);
+  const activeNoteRef = useRef<FlippableNoteRef>(null);
 
   useEffect(() => {
     if (params.shareUrl) {
