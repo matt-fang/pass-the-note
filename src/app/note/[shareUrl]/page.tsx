@@ -84,7 +84,7 @@ export default function NotePage() {
       setResponseNoteOffset({
         x: (Math.random() - 0.5) * 40, // -20px to 20px
         y: 0, // Will be calculated based on existing responses
-        rotation: (Math.random() - 0.5) * 8, // -4deg to 4deg
+        rotation: (Math.random() - 0.5) * 6, // -3deg to 3deg
         color: NOTE_COLORS[(Math.floor(Math.random() * NOTE_COLORS.length) + 1) % NOTE_COLORS.length]
       });
     }
@@ -459,7 +459,7 @@ export default function NotePage() {
         <div style={{ 
           display: 'flex',
           flexDirection: 'column',
-          gap: '-3px', // 3px overlap between notes
+          gap: '-5px', // 5px overlap between notes
           transform: notesSlideOut ? 'translateX(100vw)' : 'translateX(0)',
           transition: 'transform 0.6s ease-in-out'
         }}>
