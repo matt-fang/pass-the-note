@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useImperativeHandle, forwardRef } from 'react';
+import { useRef, useImperativeHandle, forwardRef } from 'react';
 import DrawingCanvas, { DrawingCanvasRef } from './DrawingCanvas';
 
 interface FlippableNoteProps {
