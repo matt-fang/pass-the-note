@@ -31,6 +31,12 @@ model Response {
   authorName    String?     // Optional name for the responder
   createdAt     DateTime    @default(now())
   shareUrl      String      @unique // Unique URL for sharing to next person
+  // Note positioning and styling data
+  positionX     Float       @default(0)
+  positionY     Float       @default(0)
+  rotation      Float       @default(0)
+  noteColor     String      @default("#B8C5A6") // Default to green
+  noteColorSecondary String  @default("#A8B896")
   
   @@map("responses")
 }

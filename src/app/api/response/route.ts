@@ -4,7 +4,16 @@ import { v4 as uuidv4 } from 'uuid';
 
 export async function POST(request: NextRequest) {
   try {
-    const { threadId, drawingData, authorName } = await request.json();
+    const { 
+      threadId, 
+      drawingData, 
+      authorName, 
+      positionX, 
+      positionY, 
+      rotation, 
+      noteColor, 
+      noteColorSecondary 
+    } = await request.json();
     
     if (!threadId || !drawingData) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -17,7 +26,12 @@ export async function POST(request: NextRequest) {
         threadId,
         drawingData,
         authorName: authorName || 'Anonymous',
-        shareUrl: newShareUrl
+        shareUrl: newShareUrl,
+        positionX: positionX || 0,
+        positionY: positionY || 0,
+        rotation: rotation || 0,
+        noteColor: noteColor || '#B8C5A6',
+        noteColorSecondary: noteColorSecondary || '#A8B896'
       }
     });
 

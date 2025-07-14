@@ -9,6 +9,11 @@ interface Response {
   drawingData: string;
   authorName: string;
   createdAt: string;
+  positionX: number;
+  positionY: number;
+  rotation: number;
+  noteColor: string;
+  noteColorSecondary: string;
 }
 
 interface Thread {
@@ -64,10 +69,10 @@ export default function NotePage() {
         y: (Math.random() - 0.5) * 4  // -2px to 2px
       });
       
-      // Set random response note positioning
+      // Set random response note positioning - will be calculated after thread loads
       setResponseNoteOffset({
         x: (Math.random() - 0.5) * 40, // -20px to 20px
-        y: Math.random() * 6 - 6, // -6px to 0px (touching to slight overlap)
+        y: 0, // Will be calculated based on existing responses
         rotation: (Math.random() - 0.5) * 8, // -4deg to 4deg
         color: NOTE_COLORS[(Math.floor(Math.random() * NOTE_COLORS.length) + 1) % NOTE_COLORS.length]
       });
@@ -93,15 +98,28 @@ export default function NotePage() {
   };
   
   useEffect(() => {
-    // Generate random offsets for existing responses when thread loads
+    // Use stored positioning data for existing responses
     if (thread && thread.responses.length > 0) {
-      const offsets = thread.responses.map((_, index) => ({
-        x: (Math.random() - 0.5) * 40, // -20px to 20px
-        y: (Math.random() - 0.5) * 20, // -10px to 10px
-        rotation: (Math.random() - 0.5) * 8, // -4deg to 4deg
-        color: NOTE_COLORS[index % NOTE_COLORS.length]
+      const offsets = thread.responses.map((response) => ({
+        x: response.positionX,
+        y: response.positionY,
+        rotation: response.rotation,
+        color: {
+          bg: response.noteColor,
+          secondary: response.noteColorSecondary,
+          filter: 'none' // Not needed for stored responses
+        }
       }));
       setExistingResponseOffsets(offsets);
+      
+      // Calculate position for new response note below existing ones
+      const lastResponseIndex = thread.responses.length - 1;
+      const baseY = 320 + (lastResponseIndex * 40); // Position below last response
+      
+      setResponseNoteOffset(prev => ({
+        ...prev,
+        y: baseY - 314 // Adjust for the base positioning offset
+      }));
     }
   }, [thread]);
 
@@ -118,7 +136,12 @@ export default function NotePage() {
         body: JSON.stringify({
           threadId: thread.id,
           drawingData,
-          authorName: 'Anonymous'
+          authorName: 'Anonymous',
+          positionX: responseNoteOffset.x,
+          positionY: responseNoteOffset.y,
+          rotation: responseNoteOffset.rotation,
+          noteColor: responseNoteOffset.color.bg,
+          noteColorSecondary: responseNoteOffset.color.secondary
         }),
       });
       
@@ -407,26 +430,26 @@ export default function NotePage() {
             </div>
           )}
           
-          {/* Existing Response Notes - stacked below */}
+          {/* Existing Response Notes - positioned exactly as stored */}
           {thread.responses.length > 0 && thread.responses.map((response, index) => {
             if (!response.drawingData) return null;
             
             const offset = existingResponseOffsets[index] || { x: 0, y: 0, rotation: 0, color: NOTE_COLORS[0] };
-            const stackOffset = index * 40; // Stack them closer vertically
+            const stackOffset = index * 40; // Stack offset for visual separation
             
             return (
               <div 
                 key={response.id}
                 style={{
                   position: 'absolute',
-                  top: `${320 + stackOffset + offset.y}px`, // Below the main note + stack offset
-                  left: `${offset.x}px`, // Random horizontal offset
+                  top: `${320 + stackOffset + offset.y}px`, // Use stored position + stack offset
+                  left: `${offset.x}px`, // Use stored horizontal position
                   width: '320px',
                   background: offset.color.bg,
                   boxShadow: 'var(--note-shadow)',
                   padding: '40px',
                   boxSizing: 'border-box',
-                  transform: `rotate(${offset.rotation}deg)`, // Random rotation
+                  transform: `rotate(${offset.rotation}deg)`, // Use stored rotation
                   display: 'flex',
                   flexDirection: 'column',
                   gap: '20px'
