@@ -45,7 +45,8 @@ export default function Header({ showAbout = false, onAboutChange }: HeaderProps
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: isMobile ? '30px 0px' : '26px 26px',
-        zIndex: 1000
+        zIndex: 1000,
+        background: 'transparent' // No background - just transparent
       }}>
         {/* Mobile: Plus button, Desktop: Logo */}
         {isMobile ? (
