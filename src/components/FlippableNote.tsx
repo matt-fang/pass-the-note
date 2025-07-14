@@ -2,13 +2,14 @@
 
 import { useRef, useImperativeHandle, forwardRef } from 'react';
 import DrawingCanvas, { DrawingCanvasRef } from './DrawingCanvas';
+import TypingCanvas from './TypingCanvas';
 import NoiseFilter from './NoiseFilter';
 
 interface FlippableNoteProps {
   width?: number;
   height?: number;
   background: string;
-  frontContent: React.ReactNode;
+  frontContent?: React.ReactNode;
   isEditable?: boolean;
   authorName?: string;
   onAuthorNameChange?: (drawingData: string) => void;
@@ -16,6 +17,10 @@ interface FlippableNoteProps {
   className?: string;
   isFlipped?: boolean;
   onUndo?: () => void;
+  // New props for typing mode
+  isTypingMode?: boolean;
+  typedText?: string;
+  onTextChange?: (text: string) => void;
 }
 
 export interface FlippableNoteRef {
@@ -33,7 +38,10 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(({
   style = {},
   className = '',
   isFlipped = false,
-  onUndo
+  onUndo,
+  isTypingMode = false,
+  typedText = '',
+  onTextChange
 }, ref) => {
   const drawingCanvasRef = useRef<DrawingCanvasRef>(null);
 
@@ -94,7 +102,18 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(({
             justifyContent: 'center'
           }}
         >
-          {frontContent}
+          {isTypingMode ? (
+            <TypingCanvas
+              width={240}
+              height={240}
+              onTextChange={onTextChange}
+              initialText={typedText}
+              disabled={!isEditable}
+              placeholder="type here"
+            />
+          ) : (
+            frontContent
+          )}
         </div>
 
         {/* Back Side */}

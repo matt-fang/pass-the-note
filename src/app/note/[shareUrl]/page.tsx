@@ -61,6 +61,7 @@ export default function NotePage() {
   const [showReadView, setShowReadView] = useState(false);
   const [authorNameDrawing, setAuthorNameDrawing] = useState('');
   const [flippedNotes, setFlippedNotes] = useState<{[key: string]: boolean}>({});
+  const [typedResponse, setTypedResponse] = useState('');
   const activeNoteRef = useRef<FlippableNoteRef>(null);
 
   useEffect(() => {
@@ -140,7 +141,7 @@ export default function NotePage() {
         },
         body: JSON.stringify({
           threadId: thread.id,
-          drawingData,
+          drawingData: typedResponse, // Use typed response instead of drawing data
           authorName: authorNameDrawing || '',
           positionX: responseNoteOffset.x,
           positionY: responseNoteOffset.y,
@@ -165,7 +166,7 @@ export default function NotePage() {
   };
 
   const passNote = async () => {
-    if (!drawingData || !thread) return;
+    if (!typedResponse || !thread) return;
     
     // 1. Submit the response and get share URL
     const shareUrl = await submitResponse();
@@ -508,13 +509,34 @@ export default function NotePage() {
                   authorName={response.authorName || ''}
                   isFlipped={isFlipped}
                   frontContent={
-                    <DrawingCanvas
-                      width={240}
-                      height={240}
-                      initialData={response.drawingData}
-                      disabled={true}
-                      showClearButton={false}
-                    />
+                    // Check if it's text (no base64 prefix) or drawing data
+                    response.drawingData.startsWith('data:image') ? (
+                      <DrawingCanvas
+                        width={240}
+                        height={240}
+                        initialData={response.drawingData}
+                        disabled={true}
+                        showClearButton={false}
+                      />
+                    ) : (
+                      <div style={{
+                        width: '240px',
+                        height: '240px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontFamily: 'var(--font-handwritten)',
+                        fontSize: '18px',
+                        lineHeight: '1.4',
+                        color: 'var(--text-dark)',
+                        textAlign: 'center',
+                        padding: '20px',
+                        overflow: 'hidden',
+                        wordBreak: 'break-word'
+                      }}>
+                        {response.drawingData}
+                      </div>
+                    )
                   }
                 />
                 
@@ -576,35 +598,9 @@ export default function NotePage() {
                 authorName={authorNameDrawing}
                 onAuthorNameChange={setAuthorNameDrawing}
                 isFlipped={flippedNotes['active-note'] || false}
-                frontContent={
-                  <div style={{
-                    width: '100%',
-                    height: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    position: 'relative'
-                  }}>
-                    <DrawingCanvas
-                      width={240}
-                      height={240}
-                      onDrawingChange={setDrawingData}
-                      showClearButton={false}
-                    />
-                    {!drawingData && (
-                      <div style={{
-                        position: 'absolute',
-                        color: responseNoteOffset.color.secondary,
-                        fontSize: '18px',
-                        fontFamily: 'var(--font-handwritten)',
-                        pointerEvents: 'none',
-                        textAlign: 'center'
-                      }}>
-                        WRITE HERE!
-                      </div>
-                    )}
-                  </div>
-                }
+                isTypingMode={true}
+                typedText={typedResponse}
+                onTextChange={setTypedResponse}
               />
               
               {/* Toolbar for active note with flip + undo */}
@@ -678,20 +674,20 @@ export default function NotePage() {
           )}
         </div>
 
-        {/* Pass button - shows when user has drawn something */}
+        {/* Pass button - shows when user has typed something */}
         {canEdit && !hasPassed && (
           <button
             onClick={passNote}
-            disabled={isSubmitting || !drawingData}
+            disabled={isSubmitting || !typedResponse.trim()}
             style={{
-              background: isSubmitting || !drawingData ? '#E5E1DE' : '#FF5E01',
+              background: isSubmitting || !typedResponse.trim() ? '#E5E1DE' : '#FF5E01',
               border: 'none',
               fontFamily: 'var(--font-sans)',
               fontWeight: '500',
               fontSize: '14px',
               lineHeight: '18px',
-              color: isSubmitting || !drawingData ? 'black' : 'white',
-              cursor: isSubmitting || !drawingData ? 'default' : 'pointer',
+              color: isSubmitting || !typedResponse.trim() ? 'black' : 'white',
+              cursor: isSubmitting || !typedResponse.trim() ? 'default' : 'pointer',
               padding: '8px 10px',
               marginTop: '40px'
             }}
