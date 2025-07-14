@@ -83,7 +83,7 @@ export default function FlippableNote({
             width: '100%',
             height: '100%',
             backfaceVisibility: 'hidden',
-            background: 'var(--light-gray)',
+            background: background,
             boxShadow: 'var(--note-shadow)',
             padding: '20px',
             boxSizing: 'border-box',
@@ -98,8 +98,10 @@ export default function FlippableNote({
               fontFamily: 'var(--font-sans)',
               fontSize: '14px',
               lineHeight: '18px',
+              fontWeight: '500',
               color: '#7A7A7A', // Darker gray for better contrast
-              marginBottom: '10px'
+              marginBottom: '10px',
+              textAlign: 'center'
             }}
           >
             from:

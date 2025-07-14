@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Header from '@/components/Header';
+import FlippableNote from '@/components/FlippableNote';
 
 const NOTE_COLORS = [
   { 
@@ -29,6 +30,7 @@ export default function Home() {
   const [noteOpacity, setNoteOpacity] = useState(1);
   const [showAbout, setShowAbout] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [authorNameDrawing, setAuthorNameDrawing] = useState('');
 
   // Load question immediately when component mounts
   useEffect(() => {
@@ -167,31 +169,30 @@ export default function Home() {
         <div style={{ position: 'relative' }}>
           {/* Note */}
           <div style={{
-            width: `${noteSize}px`,
-            height: `${noteSize}px`,
-            background: noteColor.bg,
-            boxShadow: 'var(--note-shadow)',
             opacity: noteOpacity,
-            transition: 'opacity 0.2s ease-in-out',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: `${notePadding}px`,
-            boxSizing: 'border-box'
+            transition: 'opacity 0.2s ease-in-out'
           }}>
-            <div style={{
-              fontFamily: 'var(--font-handwritten)',
-              fontSize: `${fontSize}px`,
-              lineHeight: '1.4',
-              color: 'var(--text-dark)',
-              textAlign: 'center',
-              width: '100%',
-              transform: `translate(${textOffset.x}px, ${textOffset.y}px)`,
-              opacity: noteOpacity,
-              transition: 'opacity 0.2s ease-in-out'
-            }}>
-              {question}
-            </div>
+            <FlippableNote
+              width={noteSize}
+              height={noteSize}
+              background={noteColor.bg}
+              isEditable={true}
+              authorName={authorNameDrawing}
+              onAuthorNameChange={setAuthorNameDrawing}
+              frontContent={
+                <div style={{
+                  fontFamily: 'var(--font-handwritten)',
+                  fontSize: `${fontSize}px`,
+                  lineHeight: '1.4',
+                  color: 'var(--text-dark)',
+                  textAlign: 'center',
+                  width: '100%',
+                  transform: `translate(${textOffset.x}px, ${textOffset.y}px)`
+                }}>
+                  {question}
+                </div>
+              }
+            />
           </div>
 
           {/* Shuffle button - positioned at bottom of note */}
