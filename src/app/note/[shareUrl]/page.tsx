@@ -115,13 +115,37 @@ export default function NotePage() {
       setExistingResponseOffsets(offsets);
       
       // Calculate position for new response note below existing ones
-      const lastResponseIndex = thread.responses.length - 1;
-      const baseY = 320 + (lastResponseIndex * 40); // Position below last response
-      
-      setResponseNoteOffset(prev => ({
-        ...prev,
-        y: baseY - 314 // Adjust for the base positioning offset
-      }));
+      if (thread.responses.length > 0) {
+        // Find the note with the lowest (highest Y value) position
+        const responsesWithPosition = thread.responses.filter(r => r.positionY !== undefined);
+        
+        if (responsesWithPosition.length > 0) {
+          const lowestNote = responsesWithPosition.reduce((lowest, response) => {
+            return response.positionY > lowest.positionY ? response : lowest;
+          });
+          
+          // Position new note below the lowest existing note with some random variation
+          const baseY = lowestNote.positionY + 280 + (Math.random() * 20 - 10); // 280px below + random variation
+          
+          setResponseNoteOffset(prev => ({
+            ...prev,
+            y: baseY
+          }));
+        } else {
+          // Fallback for older responses without position data
+          const baseY = (thread.responses.length * 40) + (Math.random() * 6 - 6);
+          setResponseNoteOffset(prev => ({
+            ...prev,
+            y: baseY
+          }));
+        }
+      } else {
+        // No existing responses, position normally below main note
+        setResponseNoteOffset(prev => ({
+          ...prev,
+          y: Math.random() * 6 - 6 // -6px to 0px (touching to slight overlap)
+        }));
+      }
     }
   }, [thread]);
 
@@ -325,7 +349,11 @@ export default function NotePage() {
         <div style={{ 
           position: 'relative',
           minHeight: thread.responses.length > 0 ? 
-            `${320 + ((thread.responses.length - 1) * 40) + 300}px` : // Main note + stack offsets + last response height
+            `${Math.max(
+              320, // Minimum height for main note
+              ...thread.responses.map(r => 314 + (r.positionY || 0) + 320), // Height needed for each stored response
+              canEdit ? 314 + responseNoteOffset.y + 320 : 0 // Height needed for active drawing note
+            )}px` :
             '320px'
         }}>
           {/* Main Question Note */}
@@ -365,7 +393,8 @@ export default function NotePage() {
               boxShadow: 'var(--note-shadow)',
               padding: '40px',
               boxSizing: 'border-box',
-              transform: `rotate(${responseNoteOffset.rotation}deg)` // Random rotation
+              transform: `rotate(${responseNoteOffset.rotation}deg)`, // Random rotation
+              zIndex: 200 // Higher z-index so it appears above existing notes
             }}>
               {/* Full note drawing area */}
               <div style={{
@@ -405,14 +434,13 @@ export default function NotePage() {
             if (!response.drawingData) return null;
             
             const offset = existingResponseOffsets[index] || { x: 0, y: 0, rotation: 0, color: NOTE_COLORS[0] };
-            const stackOffset = index * 40; // Stack offset for visual separation
             
             return (
               <div 
                 key={response.id}
                 style={{
                   position: 'absolute',
-                  top: `${314 + stackOffset + offset.y}px`, // Use same base position as active drawing note
+                  top: `${314 + offset.y}px`, // Use stored position directly without stack offset
                   left: `${offset.x}px`, // Use stored horizontal position
                   width: '320px',
                   height: '320px',
@@ -420,7 +448,8 @@ export default function NotePage() {
                   boxShadow: 'var(--note-shadow)',
                   padding: '40px',
                   boxSizing: 'border-box',
-                  transform: `rotate(${offset.rotation}deg)` // Use stored rotation
+                  transform: `rotate(${offset.rotation}deg)`, // Use stored rotation
+                  zIndex: 100 + index // Lower z-index for existing notes
                 }}
               >
                 {/* Full note drawing area - exactly like active drawing note */}
