@@ -146,18 +146,23 @@ export default function NotePage() {
             y: baseY
           }));
         } else {
-          // Fallback for older responses without position data - use same calculation as first response
-          const newStartY = (0 + 320) - overlap; // Main note starts at 0, ends at 320
-          const baseY = newStartY - 314;
+          // Fallback for older responses without position data
+          // Use same logic as first response for consistency
+          const mainNoteEndPosition = 180; // Adjusted for centered layout
+          const responseStartPosition = mainNoteEndPosition - overlap;
+          const baseY = responseStartPosition - 314;
           setResponseNoteOffset(prev => ({
             ...prev,
             y: baseY
           }));
         }
       } else {
-        // First response: 1-6px overlap with main note - use same calculation logic
-        const newStartY = (0 + 320) - overlap; // Main note starts at 0, ends at 320
-        const baseY = newStartY - 314; // Since new note is positioned at 314 + y
+        // First response: account for layout difference between centered and flex-start layouts
+        // In centered layout, main note is effectively 140px higher, so it ends at 320-140=180
+        // Position response to overlap with main note: start at 180 - overlap
+        const mainNoteEndPosition = 180; // Adjusted for centered layout
+        const responseStartPosition = mainNoteEndPosition - overlap;
+        const baseY = responseStartPosition - 314;
         setResponseNoteOffset(prev => ({
           ...prev,
           y: baseY
