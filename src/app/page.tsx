@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Header from '@/components/Header';
 
 const NOTE_COLORS = [
   { 
@@ -26,10 +27,23 @@ export default function Home() {
   const [noteColor, setNoteColor] = useState(NOTE_COLORS[0]);
   const [textOffset, setTextOffset] = useState({ x: 0, y: 0 });
   const [noteOpacity, setNoteOpacity] = useState(1);
+  const [showAbout, setShowAbout] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   // Load question immediately when component mounts
   useEffect(() => {
     createNewNote();
+  }, []);
+
+  // Check if mobile on mount and resize
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   const createNewNote = async () => {
@@ -109,6 +123,11 @@ export default function Home() {
     }
   };
 
+
+  const noteSize = isMobile ? 110 : 320;
+  const notePadding = isMobile ? (110 * 40) / 320 : 40; // Scale padding proportionally
+  const fontSize = isMobile ? (18 * 110) / 320 : 18; // Scale font proportionally
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -118,32 +137,18 @@ export default function Home() {
       alignItems: 'center',
       justifyContent: 'center',
       background: 'var(--cream)',
-      padding: '0 20px'
+      padding: '0 20px',
+      position: 'relative'
     }}>
-      {/* Logo */}
-      <div style={{
-        position: 'absolute',
-        top: '60px',
-        left: '50%',
-        transform: 'translateX(-50%)'
-      }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img 
-          src="/littlenoteslogo.png" 
-          alt="Little Notes" 
-          style={{
-            height: '24px',
-            width: 'auto'
-          }}
-        />
-      </div>
+      <Header showAbout={showAbout} onAboutChange={setShowAbout} />
 
       {/* Main Content */}
       <div style={{
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: '40px'
+        gap: isMobile ? '15px' : '50px', // 50pt spacing between text and note
+        paddingTop: isMobile ? '130px' : '130px' // Account for header + gradient
       }}>
         {/* Text above note */}
         <div style={{
@@ -160,10 +165,10 @@ export default function Home() {
 
         {/* Note Container - with shuffle button positioned on top */}
         <div style={{ position: 'relative' }}>
-          {/* Note - Perfect Square, slightly bigger */}
+          {/* Note */}
           <div style={{
-            width: '320px',
-            height: '320px',
+            width: `${noteSize}px`,
+            height: `${noteSize}px`,
             background: noteColor.bg,
             boxShadow: 'var(--note-shadow)',
             opacity: noteOpacity,
@@ -171,12 +176,12 @@ export default function Home() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '40px',
+            padding: `${notePadding}px`,
             boxSizing: 'border-box'
           }}>
             <div style={{
               fontFamily: 'var(--font-handwritten)',
-              fontSize: '18px',
+              fontSize: `${fontSize}px`,
               lineHeight: '1.4',
               color: 'var(--text-dark)',
               textAlign: 'center',
@@ -195,13 +200,13 @@ export default function Home() {
               onClick={getNewQuestion}
               style={{
                 position: 'absolute',
-                bottom: '12px',
+                bottom: isMobile ? '4px' : '12px',
                 left: '50%',
                 transform: 'translateX(-50%)',
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
-                padding: '8px',
+                padding: isMobile ? '4px' : '8px',
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
@@ -210,7 +215,7 @@ export default function Home() {
             >
               <span style={{
                 fontFamily: 'var(--font-sans)',
-                fontSize: '12px',
+                fontSize: isMobile ? '8px' : '12px',
                 fontWeight: '500',
                 color: 'var(--text-dark)',
                 opacity: noteOpacity,
@@ -222,27 +227,30 @@ export default function Home() {
           )}
         </div>
 
-        {/* Share button */}
-        <button
-          onClick={shareNatively}
-          disabled={!shareUrl}
-          style={{
-            background: 'none',
-            border: 'none',
-            fontFamily: 'var(--font-sans)',
-            fontWeight: '500',
-            fontSize: '16px',
-            color: 'var(--text-dark)',
-            textDecoration: 'underline',
-            textUnderlineOffset: '3px',
-            cursor: 'pointer',
-            padding: '12px',
-            opacity: !shareUrl ? 0.5 : 1
-          }}
-        >
-          share this question to a friend
-        </button>
+        {/* Share button with 80pt spacing */}
+        <div style={{ 
+          marginTop: isMobile ? '30px' : '80px' // 80pt spacing between note and button
+        }}>
+          <button
+            onClick={shareNatively}
+            disabled={!shareUrl}
+            style={{
+              background: !shareUrl ? '#E5E1DE' : '#FF5E01',
+              border: 'none',
+              fontFamily: 'var(--font-sans)',
+              fontWeight: '500',
+              fontSize: '14px',
+              lineHeight: '18px',
+              color: !shareUrl ? 'black' : 'white',
+              cursor: !shareUrl ? 'default' : 'pointer',
+              padding: '8px 10px'
+            }}
+          >
+            share this note &gt;
+          </button>
+        </div>
       </div>
+
     </div>
   );
 }

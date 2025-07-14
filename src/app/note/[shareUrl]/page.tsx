@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import DrawingCanvas from '@/components/DrawingCanvas';
+import Header from '@/components/Header';
 
 interface Response {
   id: string;
@@ -55,6 +56,7 @@ export default function NotePage() {
   const [textOffset, setTextOffset] = useState({ x: 0, y: 0 });
   const [responseNoteOffset, setResponseNoteOffset] = useState({ x: 0, y: 0, rotation: 0, color: NOTE_COLORS[0] });
   const [existingResponseOffsets, setExistingResponseOffsets] = useState<Array<{x: number, y: number, rotation: number, color: typeof NOTE_COLORS[0]}>>([]);
+  const [showAbout, setShowAbout] = useState(false);
 
   useEffect(() => {
     if (shareUrl) {
@@ -185,6 +187,7 @@ export default function NotePage() {
         background: 'var(--cream)',
         padding: '0 20px'
       }}>
+        <Header showAbout={showAbout} onAboutChange={setShowAbout} />
         <div style={{
           fontFamily: 'var(--font-sans)',
           color: 'var(--text-dark)'
@@ -207,23 +210,7 @@ export default function NotePage() {
         background: 'var(--cream)',
         padding: '0 20px'
       }}>
-        {/* Logo */}
-        <div style={{
-          position: 'absolute',
-          top: '60px',
-          left: '50%',
-          transform: 'translateX(-50%)'
-        }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img 
-            src="/littlenoteslogo.png" 
-            alt="Little Notes" 
-            style={{
-              height: '24px',
-              width: 'auto'
-            }}
-          />
-        </div>
+        <Header showAbout={showAbout} onAboutChange={setShowAbout} />
 
         {/* Main Content */}
         <div style={{
@@ -283,24 +270,7 @@ export default function NotePage() {
       paddingTop: thread.responses.length > 0 ? '140px' : '0',
       paddingBottom: thread.responses.length > 0 ? '120px' : '0'
     }}>
-      {/* Logo */}
-      <div style={{
-        position: thread.responses.length > 0 ? 'fixed' : 'absolute',
-        top: '60px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        zIndex: 1000
-      }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img 
-          src="/littlenoteslogo.png" 
-          alt="Little Notes" 
-          style={{
-            height: '24px',
-            width: 'auto'
-          }}
-        />
-      </div>
+      <Header showAbout={showAbout} onAboutChange={setShowAbout} />
 
       {/* Main Content */}
       <div style={{
