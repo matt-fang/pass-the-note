@@ -92,24 +92,8 @@ const SVGDrawingCanvas = forwardRef<SVGDrawingCanvasRef, SVGDrawingCanvasProps>(
     if (paths.length === 0) return '';
     
     const pathStrings = paths.map(path => {
-      if (path.points.length < 2) return '';
-      
-      let d = `M ${path.points[0].x} ${path.points[0].y}`;
-      
-      // Use smooth curves for better quality
-      for (let i = 1; i < path.points.length; i++) {
-        const current = path.points[i];
-        const previous = path.points[i - 1];
-        
-        if (i === 1) {
-          d += ` L ${current.x} ${current.y}`;
-        } else {
-          // Create smooth curves using quadratic bezier
-          const controlX = (previous.x + current.x) / 2;
-          const controlY = (previous.y + current.y) / 2;
-          d += ` Q ${previous.x} ${previous.y} ${controlX} ${controlY}`;
-        }
-      }
+      const d = createPathString(path.points);
+      if (!d) return '';
       
       return `<path d="${d}" stroke="#2a2a2a" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`;
     }).filter(Boolean);
@@ -204,22 +188,18 @@ const SVGDrawingCanvas = forwardRef<SVGDrawingCanvasRef, SVGDrawingCanvasProps>(
   }));
 
   const createPathString = (points: Point[]): string => {
-    if (points.length < 2) return '';
+    if (points.length === 0) return '';
+    if (points.length === 1) {
+      // Single point - create a small circle
+      const p = points[0];
+      return `M ${p.x} ${p.y} m -2,0 a 2,2 0 1,0 4,0 a 2,2 0 1,0 -4,0`;
+    }
     
     let d = `M ${points[0].x} ${points[0].y}`;
     
+    // Simple line connections for now - no complex curves that might break
     for (let i = 1; i < points.length; i++) {
-      const current = points[i];
-      const previous = points[i - 1];
-      
-      if (i === 1) {
-        d += ` L ${current.x} ${current.y}`;
-      } else {
-        // Use quadratic curves for smoothness
-        const controlX = (previous.x + current.x) / 2;
-        const controlY = (previous.y + current.y) / 2;
-        d += ` Q ${previous.x} ${previous.y} ${controlX} ${controlY}`;
-      }
+      d += ` L ${points[i].x} ${points[i].y}`;
     }
     
     return d;
