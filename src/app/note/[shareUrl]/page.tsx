@@ -123,6 +123,8 @@ export default function NotePage() {
       setExistingResponseOffsets(offsets);
       
       // Universal note positioning: 1-6px overlap for ALL notes
+      const overlap = 1 + Math.random() * 5; // 1-6px overlap
+      
       if (thread.responses.length > 0) {
         // Find the note with the lowest (highest Y value) position
         const responsesWithPosition = thread.responses.filter(r => r.positionY !== undefined);
@@ -133,7 +135,6 @@ export default function NotePage() {
           });
           
           // Position new note with 1-6px overlap below the lowest existing note
-          const overlap = 1 + Math.random() * 5; // 1-6px overlap
           // Lowest note is at 314 + lowestNote.positionY, ends at 314 + lowestNote.positionY + 320
           // New note should start at that end position minus overlap
           const newStartY = (314 + lowestNote.positionY + 320) - overlap;
@@ -145,19 +146,21 @@ export default function NotePage() {
             y: baseY
           }));
         } else {
-          // Fallback for older responses without position data - use simple stacking
-          const overlap = 1 + Math.random() * 5; // 1-6px overlap
+          // Fallback for older responses without position data - use same calculation as first response
+          const newStartY = (0 + 320) - overlap; // Main note starts at 0, ends at 320
+          const baseY = newStartY - 314;
           setResponseNoteOffset(prev => ({
             ...prev,
-            y: 6 - overlap // Main note ends at 320, positioned at 314 + y, so y = 320 - 314 - overlap = 6 - overlap
+            y: baseY
           }));
         }
       } else {
-        // First response: 1-6px overlap with main note (which ends at 320px)
-        const overlap = 1 + Math.random() * 5; // 1-6px overlap
+        // First response: 1-6px overlap with main note - use same calculation logic
+        const newStartY = (0 + 320) - overlap; // Main note starts at 0, ends at 320
+        const baseY = newStartY - 314; // Since new note is positioned at 314 + y
         setResponseNoteOffset(prev => ({
           ...prev,
-          y: 6 - overlap // Main note ends at 320, positioned at 314 + y, so y = 320 - 314 - overlap = 6 - overlap
+          y: baseY
         }));
       }
     }
