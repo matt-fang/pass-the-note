@@ -20,7 +20,6 @@ export default function TypingCanvas({
   placeholder = 'type here'
 }: TypingCanvasProps) {
   const [text, setText] = useState(initialText);
-  const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -40,11 +39,11 @@ export default function TypingCanvas({
   };
 
   const handleFocus = () => {
-    setIsFocused(true);
+    // Focus handler - could be used for future features
   };
 
   const handleBlur = () => {
-    setIsFocused(false);
+    // Blur handler - could be used for future features
   };
 
   const handleClick = () => {

@@ -49,7 +49,6 @@ export default function NotePage() {
   const [thread, setThread] = useState<Thread | null>(null);
   const [canEdit, setCanEdit] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [drawingData, setDrawingData] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [noteColor, setNoteColor] = useState(NOTE_COLORS[0]);
   const [textOffset, setTextOffset] = useState({ x: 0, y: 0 });
