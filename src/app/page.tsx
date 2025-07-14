@@ -291,8 +291,8 @@ export default function Home() {
                 src="/flip.svg" 
                 alt="flip" 
                 style={{ 
-                  width: '14px', 
                   height: '14px',
+                  width: 'auto', // Maintain aspect ratio like header icons
                   filter: 'brightness(0)' // Makes it black
                 }} 
               />
@@ -321,8 +321,8 @@ export default function Home() {
                 src="/undo.svg" 
                 alt="undo" 
                 style={{ 
-                  width: '14px', 
                   height: '14px',
+                  width: 'auto', // Maintain aspect ratio like header icons
                   filter: isNoteFlipped ? 'brightness(0)' : 'brightness(0) saturate(100%) invert(73%) sepia(0%) saturate(2%) hue-rotate(169deg) brightness(96%) contrast(86%)'
                 }} 
               />

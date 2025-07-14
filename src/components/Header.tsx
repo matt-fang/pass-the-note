@@ -57,7 +57,8 @@ export default function Header({ showAbout = false, onAboutChange }: HeaderProps
             justifyContent: 'center',
             position: 'relative',
             maxWidth: '320px',
-            margin: '0 auto'
+            margin: '0 auto',
+            padding: '0 138px' // Added padding to align with note toolbar
           }}>
             <button
               onClick={handleNewNote}
