@@ -36,8 +36,10 @@
   --note-beige-secondary: #EAA95D;
   
   /* Shadow */
-  --note-shadow: -6px 61px 17px 0px rgba(4, 2, 1, 0.00), -4px 39px 16px 0px rgba(4, 2, 1, 0.01), -2px 22px 13px 0px rgba(4, 2, 1, 0.03), -1px 10px 10px 0px rgba(4, 2, 1, 0.04), 0px 2px 5px 0px rgba(4, 2, 1, 0.05);
+  --note-shadow: 1px -2px 4px 0px rgba(255, 255, 255, 0.25), -6px 61px 17px 0px rgba(4, 2, 1, 0.00), -4px 39px 16px 0px rgba(4, 2, 1, 0.01), -2px 22px 13px 0px rgba(4, 2, 1, 0.03), -1px 10px 10px 0px rgba(4, 2, 1, 0.04), 0px 2px 5px 0px rgba(4, 2, 1, 0.05);
   --note-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --note-border: 1px solid rgba(255, 255, 255, 0.31);
+  --note-noise-filter: url(#note-noise);
   
   /* Fonts */
   --font-handwritten: 'Lore', cursive;
@@ -64,6 +66,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
 }
+
 
 /* Typography */
 .font-handwritten {

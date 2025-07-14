@@ -2,6 +2,7 @@
 
 import { useRef, useImperativeHandle, forwardRef } from 'react';
 import DrawingCanvas, { DrawingCanvasRef } from './DrawingCanvas';
+import NoiseFilter from './NoiseFilter';
 
 interface FlippableNoteProps {
   width?: number;
@@ -51,15 +52,17 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(({
   }));
 
   return (
-    <div
-      className={`flippable-note-container ${className}`}
-      style={{
-        width: `${width}px`,
-        height: `${height}px`,
-        perspective: '1000px',
-        ...style
-      }}
-    >
+    <>
+      <NoiseFilter />
+      <div
+        className={`flippable-note-container ${className}`}
+        style={{
+          width: `${width}px`,
+          height: `${height}px`,
+          perspective: '1000px',
+          ...style
+        }}
+      >
       <div
         className="flippable-note"
         style={{
@@ -82,6 +85,8 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(({
             backfaceVisibility: 'hidden',
             background,
             boxShadow: 'var(--note-shadow)',
+            border: 'var(--note-border)',
+            filter: 'var(--note-noise-filter)',
             padding: '40px',
             boxSizing: 'border-box',
             display: 'flex',
@@ -102,6 +107,8 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(({
             backfaceVisibility: 'hidden',
             background: background,
             boxShadow: 'var(--note-shadow)',
+            border: 'var(--note-border)',
+            filter: 'var(--note-noise-filter)',
             padding: '20px',
             boxSizing: 'border-box',
             transform: 'rotateY(180deg)',
@@ -171,7 +178,7 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(({
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 });
 
