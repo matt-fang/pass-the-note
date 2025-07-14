@@ -462,22 +462,21 @@ export default function NotePage() {
         </div>
 
         {/* Pass button - shows when user has drawn something */}
-        {canEdit && !newShareUrl && drawingData && (
+        {canEdit && !newShareUrl && (
           <button
             onClick={submitResponse}
-            disabled={isSubmitting}
+            disabled={isSubmitting || !drawingData}
             style={{
-              background: '#FF6B35',
+              background: isSubmitting || !drawingData ? '#E5E1DE' : '#FF5E01',
               border: 'none',
               fontFamily: 'var(--font-sans)',
               fontWeight: '500',
-              fontSize: '16px',
-              color: 'white',
-              cursor: 'pointer',
-              padding: '12px 24px',
-              borderRadius: '4px',
-              marginTop: '40px',
-              opacity: isSubmitting ? 0.5 : 1
+              fontSize: '14px',
+              lineHeight: '18px',
+              color: isSubmitting || !drawingData ? 'black' : 'white',
+              cursor: isSubmitting || !drawingData ? 'default' : 'pointer',
+              padding: '8px 10px',
+              marginTop: '40px'
             }}
           >
             {isSubmitting ? 'sending your note...' : 'pass the note on >'}
