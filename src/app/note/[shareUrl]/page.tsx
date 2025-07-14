@@ -59,7 +59,6 @@ export default function NotePage() {
   const [notesSlideOut, setNotesSlideOut] = useState(false);
   const [showReadView, setShowReadView] = useState(false);
   const [authorNameDrawing, setAuthorNameDrawing] = useState('');
-  const [flippedNotes, setFlippedNotes] = useState<{[key: string]: boolean}>({});
   const [allNotesFlipped, setAllNotesFlipped] = useState(false);
   const [typedResponse, setTypedResponse] = useState('');
   const activeNoteRef = useRef<FlippableNoteRef>(null);
@@ -89,12 +88,21 @@ export default function NotePage() {
     }
   }, [shareUrl]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Set deterministic colors and offsets based on thread data
+  // Set colors and offsets based on thread data
   useEffect(() => {
     if (thread) {
-      // Use thread ID for consistent color selection
-      const colorIndex = Math.floor(seededRandom(thread.id) * NOTE_COLORS.length);
-      setNoteColor(NOTE_COLORS[colorIndex]);
+      // Use stored color from first response (question author) if available
+      if (thread.responses.length > 0 && thread.responses[0].noteColor) {
+        setNoteColor({
+          bg: thread.responses[0].noteColor,
+          secondary: thread.responses[0].noteColorSecondary,
+          filter: 'none'
+        });
+      } else {
+        // Fallback to deterministic color if no stored color
+        const colorIndex = Math.floor(seededRandom(thread.id) * NOTE_COLORS.length);
+        setNoteColor(NOTE_COLORS[colorIndex]);
+      }
       
       // Use thread ID + "offset" for consistent text positioning
       const offsetSeed = seededRandom(thread.id + 'offset');
@@ -105,11 +113,12 @@ export default function NotePage() {
       
       // Use thread ID + response count for new response positioning
       const responseSeed = seededRandom(thread.id + 'response' + thread.responses.length);
+      const fallbackColorIndex = Math.floor(seededRandom(thread.id) * NOTE_COLORS.length);
       setResponseNoteOffset({
         x: (responseSeed - 0.5) * 40, // -20px to 20px
         y: 0,
         rotation: (seededRandom(thread.id + 'rotation' + thread.responses.length) - 0.5) * 2, // -1deg to 1deg
-        color: NOTE_COLORS[(colorIndex + 1) % NOTE_COLORS.length] // Different from main note
+        color: NOTE_COLORS[(fallbackColorIndex + 1) % NOTE_COLORS.length] // Different from main note
       });
     }
   }, [thread]);
@@ -354,14 +363,7 @@ export default function NotePage() {
                 cursor: 'pointer'
               }}
               onClick={() => {
-                const newFlipped = !allNotesFlipped;
-                setAllNotesFlipped(newFlipped);
-                setFlippedNotes({
-                  'question-note-read': newFlipped,
-                  ...Object.fromEntries(
-                    thread.responses.map((response, index) => [`response-read-${response.id}`, newFlipped])
-                  )
-                });
+                setAllNotesFlipped(!allNotesFlipped);
               }}
             >
               <FlippableNote
@@ -393,7 +395,7 @@ export default function NotePage() {
             </div>
 
             {/* All Response Notes */}
-            {thread.responses.length > 0 && thread.responses.map((response, index) => {
+            {thread.responses.length > 0 && thread.responses.map((response) => {
               if (!response.drawingData) return null;
               
               const offset = existingResponseOffsets[index] || { x: 0, y: 0, rotation: 0, color: NOTE_COLORS[0] };
@@ -409,14 +411,7 @@ export default function NotePage() {
                     cursor: 'pointer'
                   }}
                   onClick={() => {
-                    const newFlipped = !allNotesFlipped;
-                    setAllNotesFlipped(newFlipped);
-                    setFlippedNotes({
-                      'question-note-read': newFlipped,
-                      ...Object.fromEntries(
-                        thread.responses.map((resp, idx) => [`response-read-${resp.id}`, newFlipped])
-                      )
-                    });
+                    setAllNotesFlipped(!allNotesFlipped);
                   }}
                 >
                   <FlippableNote
@@ -508,7 +503,7 @@ export default function NotePage() {
         <div style={{ 
           display: 'flex',
           flexDirection: 'column',
-          gap: '-7px', // 7px overlap between notes
+          gap: '-27px', // ~1/12 of note height (320px/12 ≈ 27px) overlap
           transform: notesSlideOut ? 'translateX(100vw)' : 'translateX(0)',
           transition: 'transform 0.6s ease-in-out'
         }}>
@@ -519,14 +514,7 @@ export default function NotePage() {
               cursor: 'pointer'
             }}
             onClick={() => {
-              const newFlipped = !allNotesFlipped;
-              setAllNotesFlipped(newFlipped);
-              setFlippedNotes({
-                'question-note': newFlipped,
-                ...Object.fromEntries(
-                  thread.responses.map((response, index) => [`response-${response.id}`, newFlipped])
-                )
-              });
+              setAllNotesFlipped(!allNotesFlipped);
             }}
           >
             <FlippableNote
@@ -562,7 +550,6 @@ export default function NotePage() {
             if (!response.drawingData) return null;
             
             const offset = existingResponseOffsets[index] || { x: 0, y: 0, rotation: 0, color: NOTE_COLORS[0] };
-            const noteId = `response-${response.id}`;
             return (
               <div 
                 key={response.id} 
@@ -572,14 +559,7 @@ export default function NotePage() {
                   cursor: 'pointer'
                 }}
                 onClick={() => {
-                  const newFlipped = !allNotesFlipped;
-                  setAllNotesFlipped(newFlipped);
-                  setFlippedNotes({
-                    'question-note': newFlipped,
-                    ...Object.fromEntries(
-                      thread.responses.map((resp, idx) => [`response-${resp.id}`, newFlipped])
-                    )
-                  });
+                  setAllNotesFlipped(!allNotesFlipped);
                 }}
               >
                 <FlippableNote
