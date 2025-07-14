@@ -395,7 +395,7 @@ export default function NotePage() {
             </div>
 
             {/* All Response Notes */}
-            {thread.responses.length > 0 && thread.responses.map((response) => {
+            {thread.responses.length > 0 && thread.responses.map((response, index) => {
               if (!response.drawingData) return null;
               
               const offset = existingResponseOffsets[index] || { x: 0, y: 0, rotation: 0, color: NOTE_COLORS[0] };
