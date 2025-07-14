@@ -258,7 +258,7 @@ export default function NotePage() {
       background: 'var(--cream)',
       padding: '0 20px',
       paddingTop: thread.responses.length > 0 ? '140px' : '0',
-      paddingBottom: thread.responses.length > 0 ? '60px' : '0'
+      paddingBottom: thread.responses.length > 0 ? '120px' : '0'
     }}>
       {/* Logo */}
       <div style={{
@@ -484,19 +484,19 @@ export default function NotePage() {
           <button
             onClick={() => shareNatively(newShareUrl)}
             style={{
-              background: 'none',
+              background: '#FF6B35',
               border: 'none',
               fontFamily: 'var(--font-sans)',
               fontWeight: '500',
               fontSize: '16px',
-              color: 'var(--text-dark)',
-              textDecoration: 'underline',
-              textUnderlineOffset: '3px',
+              color: 'white',
               cursor: 'pointer',
-              padding: '12px'
+              padding: '12px 24px',
+              borderRadius: '4px',
+              marginTop: '40px'
             }}
           >
-            share this question to a friend
+            pass the note on &gt;
           </button>
         )}
 
@@ -504,19 +504,19 @@ export default function NotePage() {
           <button
             onClick={() => shareNatively(`${window.location.origin}/note/${nextShareUrl}`)}
             style={{
-              background: 'none',
+              background: '#FF6B35',
               border: 'none',
               fontFamily: 'var(--font-sans)',
               fontWeight: '500',
               fontSize: '16px',
-              color: 'var(--text-dark)',
-              textDecoration: 'underline',
-              textUnderlineOffset: '3px',
+              color: 'white',
               cursor: 'pointer',
-              padding: '12px'
+              padding: '12px 24px',
+              borderRadius: '4px',
+              marginTop: '40px'
             }}
           >
-            share this question to a friend
+            pass the note on &gt;
           </button>
         )}
       </div>
