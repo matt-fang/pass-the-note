@@ -472,7 +472,7 @@ export default function NotePage() {
         gap: '40px'
       }}>
         {/* Text above note */}
-        {canEdit && !newShareUrl && (
+        {canEdit && (
           <div style={{
             textAlign: 'center',
             fontFamily: 'var(--font-sans)',
@@ -527,7 +527,7 @@ export default function NotePage() {
           </div>
 
           {/* Response Note - positioned below with overlap and random positioning */}
-          {canEdit && !newShareUrl && (
+          {canEdit && (
             <div style={{
               position: 'absolute',
               top: `${314 + responseNoteOffset.y}px`, // Touch or slight overlap (-6px to 0px)
