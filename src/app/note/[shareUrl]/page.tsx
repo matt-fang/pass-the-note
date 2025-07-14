@@ -50,8 +50,6 @@ export default function NotePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [drawingData, setDrawingData] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [newShareUrl, setNewShareUrl] = useState('');
-  const [nextShareUrl, setNextShareUrl] = useState('');
   const [noteColor, setNoteColor] = useState(NOTE_COLORS[0]);
   const [textOffset, setTextOffset] = useState({ x: 0, y: 0 });
   const [responseNoteOffset, setResponseNoteOffset] = useState({ x: 0, y: 0, rotation: 0, color: NOTE_COLORS[0] });
@@ -99,7 +97,6 @@ export default function NotePage() {
         const data = await response.json();
         setThread(data.thread);
         setCanEdit(data.canEdit);
-        setNextShareUrl(data.nextShareUrl || '');
       } else {
         console.error('Thread not found');
       }
@@ -135,8 +132,8 @@ export default function NotePage() {
             return response.positionY > lowest.positionY ? response : lowest;
           });
           
-          // Position new note below the lowest existing note with some random variation
-          const baseY = lowestNote.positionY + 280 + (Math.random() * 20 - 10); // 280px below + random variation
+          // Position new note to touch/overlap with the lowest existing note  
+          const baseY = lowestNote.positionY + 250 + (Math.random() * 20 - 10); // Natural overlap + small random variation
           
           setResponseNoteOffset(prev => ({
             ...prev,
@@ -347,8 +344,8 @@ export default function NotePage() {
             lineHeight: '22px',
             color: 'var(--text-dark)'
           }}>
-            you've already responded to this note.<br />
-            here's the conversation so far.
+            you&apos;ve already responded to this note.<br />
+            here&apos;s the conversation so far.
           </div>
 
           {/* Note Container - Read Only */}
@@ -625,7 +622,7 @@ export default function NotePage() {
         </div>
 
         {/* Pass button - shows when user has drawn something */}
-        {canEdit && !newShareUrl && !hasPassed && (
+        {canEdit && !hasPassed && (
           <button
             onClick={passNote}
             disabled={isSubmitting || !drawingData}
