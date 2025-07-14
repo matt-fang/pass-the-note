@@ -471,7 +471,7 @@ export default function NotePage() {
               width={320}
               height={320}
               background={noteColor.bg}
-              authorName={thread.authorName || ''} // Add the sender's signature
+              authorName={''} // TODO: Need to add authorName to Thread interface
               isFlipped={flippedNotes['question-note'] || false}
               frontContent={
                 <div style={{
@@ -556,15 +556,30 @@ export default function NotePage() {
                   authorName={response.authorName || ''}
                   isFlipped={isFlipped}
                   frontContent={
-                    // Check if it's text (no base64 prefix) or drawing data
-                    response.drawingData.startsWith('data:image') ? (
-                      <DrawingCanvas
-                        width={240}
-                        height={240}
-                        initialData={response.drawingData}
-                        disabled={true}
-                        showClearButton={false}
+                    // Check if it's SVG, old image data, or text
+                    response.drawingData.startsWith('<svg') ? (
+                      <div 
+                        style={{
+                          width: '240px',
+                          height: '240px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                        dangerouslySetInnerHTML={{ __html: response.drawingData }}
                       />
+                    ) : response.drawingData.startsWith('data:image') ? (
+                      <div style={{
+                        width: '240px',
+                        height: '240px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundImage: `url(${response.drawingData})`,
+                        backgroundSize: 'contain',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundPosition: 'center'
+                      }} />
                     ) : (
                       <div style={{
                         width: '240px',

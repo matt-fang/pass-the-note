@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useImperativeHandle, forwardRef } from 'react';
-import DrawingCanvas, { DrawingCanvasRef } from './DrawingCanvas';
+import SVGDrawingCanvas, { SVGDrawingCanvasRef } from './SVGDrawingCanvas';
 import TypingCanvas from './TypingCanvas';
 import NoiseFilter from './NoiseFilter';
 
@@ -43,7 +43,7 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(({
   typedText = '',
   onTextChange
 }, ref) => {
-  const drawingCanvasRef = useRef<DrawingCanvasRef>(null);
+  const drawingCanvasRef = useRef<SVGDrawingCanvasRef>(null);
 
   const handleUndo = () => {
     if (drawingCanvasRef.current) {
@@ -161,7 +161,7 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(({
             }}
           >
             {isEditable ? (
-              <DrawingCanvas
+              <SVGDrawingCanvas
                 ref={drawingCanvasRef}
                 width={280}
                 height={240}
@@ -171,12 +171,15 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(({
               />
             ) : (
               authorName && (
-                <DrawingCanvas
-                  width={280}
-                  height={240}
-                  initialData={authorName}
-                  disabled={true}
-                  showClearButton={false}
+                <div 
+                  style={{
+                    width: '280px',
+                    height: '240px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                  dangerouslySetInnerHTML={{ __html: authorName }}
                 />
               )
             )}
