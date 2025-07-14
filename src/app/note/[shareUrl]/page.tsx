@@ -412,38 +412,31 @@ export default function NotePage() {
                 key={response.id}
                 style={{
                   position: 'absolute',
-                  top: `${320 + stackOffset + offset.y}px`, // Use stored position + stack offset
+                  top: `${314 + stackOffset + offset.y}px`, // Use same base position as active drawing note
                   left: `${offset.x}px`, // Use stored horizontal position
                   width: '320px',
+                  height: '320px',
                   background: offset.color.bg,
                   boxShadow: 'var(--note-shadow)',
                   padding: '40px',
                   boxSizing: 'border-box',
-                  transform: `rotate(${offset.rotation}deg)`, // Use stored rotation
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '20px'
+                  transform: `rotate(${offset.rotation}deg)` // Use stored rotation
                 }}
               >
+                {/* Full note drawing area - exactly like active drawing note */}
                 <div style={{
-                  fontFamily: 'var(--font-handwritten)',
-                  fontSize: '16px',
-                  color: 'var(--text-dark)',
-                  textAlign: 'center'
-                }}>
-                  {response.authorName || 'Anonymous'}
-                </div>
-                
-                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
                   display: 'flex',
-                  justifyContent: 'center',
-                  background: 'rgba(255,255,255,0.3)',
-                  borderRadius: '8px',
-                  padding: '20px'
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}>
                   <DrawingCanvas
-                    width={240}
-                    height={140}
+                    width={320}
+                    height={320}
                     initialData={response.drawingData}
                     disabled={true}
                     showClearButton={false}
