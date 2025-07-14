@@ -57,9 +57,20 @@ export default function NotePage() {
   const [responseNoteOffset, setResponseNoteOffset] = useState({ x: 0, y: 0, rotation: 0, color: NOTE_COLORS[0] });
   const [existingResponseOffsets, setExistingResponseOffsets] = useState<Array<{x: number, y: number, rotation: number, color: typeof NOTE_COLORS[0]}>>([]);
   const [showAbout, setShowAbout] = useState(false);
+  const [hasPassed, setHasPassed] = useState(false);
+  const [notesSlideOut, setNotesSlideOut] = useState(false);
+  const [showReadView, setShowReadView] = useState(false);
 
   useEffect(() => {
-    if (shareUrl) {
+    if (params.shareUrl) {
+      // Check if user has already responded to this note
+      const hasRespondedKey = `responded_${params.shareUrl}`;
+      const hasResponded = localStorage.getItem(hasRespondedKey) === 'true';
+      
+      if (hasResponded) {
+        setShowReadView(true);
+      }
+      
       loadThread();
       // Set random note color
       const randomColor = NOTE_COLORS[Math.floor(Math.random() * NOTE_COLORS.length)];
@@ -174,14 +185,37 @@ export default function NotePage() {
       if (response.ok) {
         const data = await response.json();
         const fullUrl = `${window.location.origin}/note/${data.shareUrl}`;
-        setNewShareUrl(fullUrl);
-        setCanEdit(false);
-        await loadThread();
+        return fullUrl;
       }
     } catch (error) {
       console.error('Error submitting response:', error);
+      return null;
     } finally {
       setIsSubmitting(false);
+    }
+    return null;
+  };
+
+  const passNote = async () => {
+    if (!drawingData || !thread) return;
+    
+    // 1. Submit the response and get share URL
+    const shareUrl = await submitResponse();
+    
+    if (shareUrl) {
+      // 2. Store that user has responded to THIS note
+      const hasRespondedKey = `responded_${params.shareUrl}`;
+      localStorage.setItem(hasRespondedKey, 'true');
+      
+      // 3. Open native sharing interface immediately
+      await shareNatively(shareUrl);
+      
+      // 4. Trigger animation and passed state
+      setNotesSlideOut(true);
+      setTimeout(() => {
+        setHasPassed(true);
+        setCanEdit(false);
+      }, 600); // Wait for slide animation to complete
     }
   };
 
@@ -281,6 +315,143 @@ export default function NotePage() {
     );
   }
 
+  // If user has already responded, show read view
+  if (showReadView && thread) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        overflow: 'auto',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        background: 'var(--cream)',
+        padding: '0 20px',
+        paddingTop: '140px',
+        paddingBottom: '120px'
+      }}>
+        <Header showAbout={showAbout} onAboutChange={setShowAbout} />
+
+        {/* Read View Content */}
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '40px'
+        }}>
+          <div style={{
+            textAlign: 'center',
+            fontFamily: 'var(--font-sans)',
+            fontWeight: '500',
+            fontSize: '16px',
+            lineHeight: '22px',
+            color: 'var(--text-dark)'
+          }}>
+            you've already responded to this note.<br />
+            here's the conversation so far.
+          </div>
+
+          {/* Note Container - Read Only */}
+          <div style={{ 
+            position: 'relative',
+            minHeight: `${Math.max(
+              320,
+              ...thread.responses.map(r => 314 + (r.positionY || 0) + 320)
+            )}px`
+          }}>
+            {/* Main Question Note */}
+            <div style={{
+              width: '320px',
+              height: '320px',
+              background: noteColor.bg,
+              boxShadow: 'var(--note-shadow)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '40px',
+              boxSizing: 'border-box'
+            }}>
+              <div style={{
+                fontFamily: 'var(--font-handwritten)',
+                fontSize: '18px',
+                lineHeight: '1.4',
+                color: 'var(--text-dark)',
+                textAlign: 'center',
+                width: '100%',
+                transform: `translate(${textOffset.x}px, ${textOffset.y}px)`
+              }}>
+                {thread.question}
+              </div>
+            </div>
+
+            {/* All Response Notes */}
+            {thread.responses.length > 0 && thread.responses.map((response, index) => {
+              if (!response.drawingData) return null;
+              
+              const offset = existingResponseOffsets[index] || { x: 0, y: 0, rotation: 0, color: NOTE_COLORS[0] };
+              
+              return (
+                <div 
+                  key={response.id}
+                  style={{
+                    position: 'absolute',
+                    top: `${314 + offset.y}px`,
+                    left: `${offset.x}px`,
+                    width: '320px',
+                    height: '320px',
+                    background: offset.color.bg,
+                    boxShadow: 'var(--note-shadow)',
+                    padding: '40px',
+                    boxSizing: 'border-box',
+                    transform: `rotate(${offset.rotation}deg)`,
+                    zIndex: 100 + index
+                  }}
+                >
+                  <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <DrawingCanvas
+                      width={320}
+                      height={320}
+                      initialData={response.drawingData}
+                      disabled={true}
+                      showClearButton={false}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <button
+            onClick={() => window.location.href = '/'}
+            style={{
+              background: '#FF5E01',
+              border: 'none',
+              fontFamily: 'var(--font-sans)',
+              fontWeight: '500',
+              fontSize: '14px',
+              lineHeight: '18px',
+              color: 'white',
+              cursor: 'pointer',
+              padding: '8px 10px',
+              marginTop: '40px'
+            }}
+          >
+            write your own note &gt;
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -318,32 +489,7 @@ export default function NotePage() {
           </div>
         )}
 
-        {newShareUrl && (
-          <div style={{
-            textAlign: 'center',
-            fontFamily: 'var(--font-sans)',
-            fontWeight: '500',
-            fontSize: '16px',
-            lineHeight: '22px',
-            color: 'var(--text-dark)'
-          }}>
-            your note has been added to the chain!
-          </div>
-        )}
 
-        {nextShareUrl && !canEdit && !newShareUrl && (
-          <div style={{
-            textAlign: 'center',
-            fontFamily: 'var(--font-sans)',
-            fontWeight: '500',
-            fontSize: '16px',
-            lineHeight: '22px',
-            color: 'var(--text-dark)'
-          }}>
-            this note has been responded to!<br />
-            but you can still continue the chain.
-          </div>
-        )}
 
         {/* Note Container */}
         <div style={{ 
@@ -354,7 +500,9 @@ export default function NotePage() {
               ...thread.responses.map(r => 314 + (r.positionY || 0) + 320), // Height needed for each stored response
               canEdit ? 314 + responseNoteOffset.y + 320 : 0 // Height needed for active drawing note
             )}px` :
-            '320px'
+            '320px',
+          transform: notesSlideOut ? 'translateX(100vw)' : 'translateX(0)',
+          transition: 'transform 0.6s ease-in-out'
         }}>
           {/* Main Question Note */}
           <div style={{
@@ -477,9 +625,9 @@ export default function NotePage() {
         </div>
 
         {/* Pass button - shows when user has drawn something */}
-        {canEdit && !newShareUrl && (
+        {canEdit && !newShareUrl && !hasPassed && (
           <button
-            onClick={submitResponse}
+            onClick={passNote}
             disabled={isSubmitting || !drawingData}
             style={{
               background: isSubmitting || !drawingData ? '#E5E1DE' : '#FF5E01',
@@ -498,45 +646,41 @@ export default function NotePage() {
           </button>
         )}
 
-        {newShareUrl && (
-          <button
-            onClick={() => shareNatively(newShareUrl)}
-            style={{
-              background: '#FF6B35',
-              border: 'none',
+        {/* Passed state - shows after note is passed */}
+        {hasPassed && (
+          <div style={{
+            textAlign: 'center',
+            marginTop: '40px'
+          }}>
+            <div style={{
               fontFamily: 'var(--font-sans)',
               fontWeight: '500',
-              fontSize: '16px',
-              color: 'white',
-              cursor: 'pointer',
-              padding: '12px 24px',
-              borderRadius: '4px',
-              marginTop: '40px'
-            }}
-          >
-            pass the note on &gt;
-          </button>
+              fontSize: '24px',
+              lineHeight: '30px',
+              color: 'var(--text-dark)',
+              marginBottom: '20px'
+            }}>
+              passed!
+            </div>
+            <button
+              onClick={() => window.location.href = '/'}
+              style={{
+                background: '#FF5E01',
+                border: 'none',
+                fontFamily: 'var(--font-sans)',
+                fontWeight: '500',
+                fontSize: '14px',
+                lineHeight: '18px',
+                color: 'white',
+                cursor: 'pointer',
+                padding: '8px 10px'
+              }}
+            >
+              write your own note >
+            </button>
+          </div>
         )}
 
-        {nextShareUrl && !canEdit && !newShareUrl && (
-          <button
-            onClick={() => shareNatively(`${window.location.origin}/note/${nextShareUrl}`)}
-            style={{
-              background: '#FF6B35',
-              border: 'none',
-              fontFamily: 'var(--font-sans)',
-              fontWeight: '500',
-              fontSize: '16px',
-              color: 'white',
-              cursor: 'pointer',
-              padding: '12px 24px',
-              borderRadius: '4px',
-              marginTop: '40px'
-            }}
-          >
-            pass the note on &gt;
-          </button>
-        )}
       </div>
     </div>
   );
