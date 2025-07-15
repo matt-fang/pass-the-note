@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import DrawingCanvas from "@/components/DrawingCanvas";
 import FlippableNote, { FlippableNoteRef } from "@/components/FlippableNote";
 import Header from "@/components/Header";
+import { useImagePreloader } from "@/hooks/useImagePreloader";
 
 interface Response {
   id: string;
@@ -43,12 +44,6 @@ const NOTE_COLORS = [
     filter:
       "brightness(0) saturate(100%) invert(71%) sepia(12%) saturate(361%) hue-rotate(351deg) brightness(97%) contrast(91%)",
   },
-  {
-    bg: "/orangenote.jpg",
-    secondary: "var(--note-beige-secondary)",
-    filter:
-      "brightness(0) saturate(100%) invert(71%) sepia(12%) saturate(361%) hue-rotate(351deg) brightness(97%) contrast(91%)",
-  },
 ];
 
 export default function NotePage() {
@@ -60,6 +55,10 @@ export default function NotePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [noteColor, setNoteColor] = useState(NOTE_COLORS[0]);
+  
+  // Preload note images
+  const noteImages = NOTE_COLORS.map(color => color.bg);
+  const imagesLoaded = useImagePreloader(noteImages);
   const [textOffset, setTextOffset] = useState({ x: 0, y: 0 });
   const [responseNoteOffset, setResponseNoteOffset] = useState({
     x: 0,
@@ -250,7 +249,7 @@ export default function NotePage() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || !imagesLoaded) {
     return (
       <div
         style={{

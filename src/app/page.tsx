@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Header from "@/components/Header";
 import FlippableNote, { FlippableNoteRef } from "@/components/FlippableNote";
+import { useImagePreloader } from "@/hooks/useImagePreloader";
 
 const NOTE_COLORS = [
   {
@@ -23,12 +24,6 @@ const NOTE_COLORS = [
     filter:
       "brightness(0) saturate(100%) invert(71%) sepia(12%) saturate(361%) hue-rotate(351deg) brightness(97%) contrast(91%)",
   },
-  {
-    bg: "/orangenote.jpg",
-    secondary: "var(--note-beige-secondary)",
-    filter:
-      "brightness(0) saturate(100%) invert(71%) sepia(12%) saturate(361%) hue-rotate(351deg) brightness(97%) contrast(91%)",
-  },
 ];
 
 export default function Home() {
@@ -42,6 +37,10 @@ export default function Home() {
   const [authorNameDrawing, setAuthorNameDrawing] = useState("");
   const [isNoteFlipped, setIsNoteFlipped] = useState(false);
   const flipNoteRef = useRef<FlippableNoteRef>(null);
+  
+  // Preload note images
+  const noteImages = NOTE_COLORS.map(color => color.bg);
+  const imagesLoaded = useImagePreloader(noteImages);
 
   // Load question immediately when component mounts
   useEffect(() => {
@@ -170,6 +169,26 @@ export default function Home() {
 
   const noteSize = 320; // Keep note size consistent across mobile and desktop
   const fontSize = 18;
+
+  // Show loading until images are preloaded
+  if (!imagesLoaded) {
+    return (
+      <div style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "var(--cream)",
+      }}>
+        <div style={{
+          fontFamily: "var(--font-sans)",
+          color: "var(--text-light)",
+        }}>
+          Loading...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
