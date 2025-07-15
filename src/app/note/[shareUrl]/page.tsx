@@ -44,7 +44,16 @@ const NOTE_COLORS = [
     filter:
       "brightness(0) saturate(100%) invert(71%) sepia(12%) saturate(361%) hue-rotate(351deg) brightness(97%) contrast(91%)",
   },
+  {
+    bg: "/orangenote.jpg",
+    secondary: "var(--note-orange-secondary)",
+    filter:
+      "brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%)",
+  },
 ];
+
+// Orange note color for the original question
+const ORANGE_NOTE_COLOR = NOTE_COLORS[3]; // Orange is at index 3
 
 export default function NotePage() {
   const params = useParams();
@@ -109,17 +118,22 @@ export default function NotePage() {
   };
 
   // Generate random color ensuring no adjacent duplicates
-  const getRandomColor = useCallback((
-    seed: string,
-    prevColor?: (typeof NOTE_COLORS)[0]
-  ): (typeof NOTE_COLORS)[0] => {
-    const availableColors = prevColor
-      ? NOTE_COLORS.filter((color) => color.bg !== prevColor.bg)
-      : NOTE_COLORS;
+  const getRandomColor = useCallback(
+    (
+      seed: string,
+      prevColor?: (typeof NOTE_COLORS)[0]
+    ): (typeof NOTE_COLORS)[0] => {
+      const availableColors = prevColor
+        ? NOTE_COLORS.filter((color) => color.bg !== prevColor.bg)
+        : NOTE_COLORS;
 
-    const randomIndex = Math.floor(seededRandom(seed) * availableColors.length);
-    return availableColors[randomIndex];
-  }, []);
+      const randomIndex = Math.floor(
+        seededRandom(seed) * availableColors.length
+      );
+      return availableColors[randomIndex];
+    },
+    []
+  );
 
   // Generate random x-offset
   const getRandomXOffset = useCallback((seed: string): number => {
@@ -192,23 +206,29 @@ export default function NotePage() {
     if (thread && thread.responses.length > 0) {
       const offsets = thread.responses.map((response, index) => {
         // Get previous color for adjacent check (skip first response which is the original question)
-        const prevColor = index > 1 ? {
-          bg: thread.responses[index - 1].noteColor,
-          secondary: thread.responses[index - 1].noteColorSecondary,
-          filter: "none"
-        } : undefined;
-        
+        const prevColor =
+          index > 1
+            ? {
+                bg: thread.responses[index - 1].noteColor,
+                secondary: thread.responses[index - 1].noteColorSecondary,
+                filter: "none",
+              }
+            : undefined;
+
         // Use stored data if available, otherwise generate random data
-        const color = response.noteColor ? {
-          bg: response.noteColor,
-          secondary: response.noteColorSecondary,
-          filter: "none",
-        } : getRandomColor(response.id + "color", prevColor);
-        
-        const xOffset = response.positionX !== null && response.positionX !== undefined 
-          ? response.positionX 
-          : getRandomXOffset(response.id + "xoffset");
-        
+        const color = response.noteColor
+          ? {
+              bg: response.noteColor,
+              secondary: response.noteColorSecondary,
+              filter: "none",
+            }
+          : getRandomColor(response.id + "color", prevColor);
+
+        const xOffset =
+          response.positionX !== null && response.positionX !== undefined
+            ? response.positionX
+            : getRandomXOffset(response.id + "xoffset");
+
         return {
           x: xOffset,
           y: response.positionY, // Still store but won't use for vertical positioning
@@ -479,16 +499,21 @@ export default function NotePage() {
                 if (!response.drawingData || response.drawingData.trim() === "")
                   return null;
 
-                const offset = existingResponseOffsets[index + 1] || (() => {
-                  // Get previous color for adjacent check
-                  const prevColor = index > 0 ? existingResponseOffsets[index]?.color : undefined;
-                  return {
-                    x: getRandomXOffset(response.id + "xoffset"),
-                    y: 0,
-                    rotation: 0,
-                    color: getRandomColor(response.id + "color", prevColor),
-                  };
-                })();
+                const offset =
+                  existingResponseOffsets[index + 1] ||
+                  (() => {
+                    // Get previous color for adjacent check
+                    const prevColor =
+                      index > 0
+                        ? existingResponseOffsets[index]?.color
+                        : undefined;
+                    return {
+                      x: getRandomXOffset(response.id + "xoffset"),
+                      y: 0,
+                      rotation: 0,
+                      color: getRandomColor(response.id + "color", prevColor),
+                    };
+                  })();
 
                 return (
                   <div
@@ -789,16 +814,21 @@ export default function NotePage() {
               if (!response.drawingData || response.drawingData.trim() === "")
                 return null;
 
-              const offset = existingResponseOffsets[index + 1] || (() => {
-                // Get previous color for adjacent check
-                const prevColor = index > 0 ? existingResponseOffsets[index]?.color : undefined;
-                return {
-                  x: getRandomXOffset(response.id + "xoffset"),
-                  y: 0,
-                  rotation: 0,
-                  color: getRandomColor(response.id + "color", prevColor),
-                };
-              })();
+              const offset =
+                existingResponseOffsets[index + 1] ||
+                (() => {
+                  // Get previous color for adjacent check
+                  const prevColor =
+                    index > 0
+                      ? existingResponseOffsets[index]?.color
+                      : undefined;
+                  return {
+                    x: getRandomXOffset(response.id + "xoffset"),
+                    y: 0,
+                    rotation: 0,
+                    color: getRandomColor(response.id + "color", prevColor),
+                  };
+                })();
               const noteId = `response-${response.id}`;
               const isFlipped = flippedNotes[noteId] || false;
 
@@ -904,7 +934,7 @@ export default function NotePage() {
                                 transformOrigin: "center",
                               }}
                             >
-                              {index === 0 ? (
+                              {index !== 0 ? (
                                 // First connection - show actual signature
                                 <div
                                   dangerouslySetInnerHTML={{
@@ -916,8 +946,8 @@ export default function NotePage() {
                                 <Image
                                   src={getCrossoutStroke(response.id)}
                                   alt="crossed out signature"
-                                  width={64}
-                                  height={16}
+                                  width={128}
+                                  height={32}
                                 />
                               )}
                             </div>

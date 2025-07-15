@@ -158,7 +158,7 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
                   >
                     <TypingCanvas
                       width={242} // 280 - 38 (19px padding on each side)
-                      height={149} // 187 - 38 (19px padding on top and bottom)
+                      height={224} // 187 - 38 (19px padding on top and bottom)
                       onTextChange={onTextChange}
                       initialText={typedText}
                       disabled={!isEditable}
@@ -174,7 +174,7 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      paddingBottom: "20px",
+                      paddingBottom: "10px",
                     }}
                   >
                     {/* Signature will be added when note is flipped and signed */}

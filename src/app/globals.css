@@ -27,6 +27,7 @@
   --note-green-secondary: #3EB2D1;
   --note-blue-secondary: #6CBDDC;
   --note-beige-secondary: #EAA95D;
+  --note-orange-secondary: #FFFFFF;
   
   /* Shadow */
   --note-shadow: 1px -2px 4px 0px rgba(255, 255, 255, 0.25), -6px 61px 17px 0px rgba(4, 2, 1, 0.00), -4px 39px 16px 0px rgba(4, 2, 1, 0.01), -2px 22px 13px 0px rgba(4, 2, 1, 0.03), -1px 10px 10px 0px rgba(4, 2, 1, 0.04), 0px 2px 5px 0px rgba(4, 2, 1, 0.05);
