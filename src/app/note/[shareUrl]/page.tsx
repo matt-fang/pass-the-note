@@ -1058,7 +1058,7 @@ export default function NotePage() {
                                 const myResponseIndex =
                                   thread.responses.length - 1;
                                 const senderIndex = thread.responses.length - 2;
-                                const actualIndex = index + 1; // Because we're using slice(1)
+                                const actualIndex = index + 2; // Because we're using slice(1)
 
                                 // Show signature for: sender to me, me, person I send to
                                 const isDirectConnection =
