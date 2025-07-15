@@ -108,7 +108,6 @@ export default function NotePage() {
   // Set deterministic colors and offsets based on thread data
   useEffect(() => {
     if (thread) {
-      console.log("Setting up thread with responses:", thread.responses.length);
       // Use thread ID for consistent color selection
       const colorIndex = Math.floor(
         seededRandom(thread.id) * NOTE_COLORS.length
@@ -143,7 +142,6 @@ export default function NotePage() {
       const response = await fetch(`/api/share/${shareUrl}`);
       if (response.ok) {
         const data = await response.json();
-        console.log("Loaded thread data:", data);
         setThread(data.thread);
         setCanEdit(data.canEdit);
       } else {
@@ -274,7 +272,6 @@ export default function NotePage() {
   }
 
   if (!thread) {
-    console.log("Thread is null, showing not found");
     return (
       <div
         style={{
@@ -492,9 +489,6 @@ export default function NotePage() {
     );
   }
 
-  console.log("Rendering main component with thread:", thread);
-  console.log("Thread responses length:", thread?.responses?.length || 0);
-  console.log("Can edit:", canEdit);
   
   return (
     <div
@@ -540,14 +534,6 @@ export default function NotePage() {
           </div>
         )}
         
-        {/* Debug info */}
-        <div style={{ fontFamily: "monospace", fontSize: "12px", color: "red", marginBottom: "10px" }}>
-          Thread ID: {thread.id}<br/>
-          Question: {thread.question}<br/>
-          Responses: {thread.responses.length}<br/>
-          Can Edit: {canEdit ? "yes" : "no"}<br/>
-          First Response Author: {thread.responses[0]?.authorName || "none"}
-        </div>
 
         {/* Note Container - Simple Vertical Stack */}
         <div
