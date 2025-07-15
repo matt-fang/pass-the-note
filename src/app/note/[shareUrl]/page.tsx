@@ -870,7 +870,9 @@ export default function NotePage() {
               }
             }}
             disabled={
-              isSubmitting || !typedResponse.trim() || !authorNameDrawing.trim()
+              isSubmitting ||
+              !typedResponse.trim() ||
+              !!authorNameDrawing.trim()
             }
             style={{
               background:
