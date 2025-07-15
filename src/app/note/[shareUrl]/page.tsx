@@ -98,7 +98,7 @@ export default function NotePage() {
 
   // Get random crossout stroke SVG path
   const getCrossoutStroke = (seed: string): string => {
-    const crossoutFiles = ['crossout1.svg', 'crossout3.svg', 'crossout4.svg', 'crossout5.svg'];
+    const crossoutFiles = ['crossout1.png', 'crossout2.png', 'crossout3.png', 'crossout4.png', 'crossout5.png'];
     const randomIndex = Math.floor(seededRandom(seed) * crossoutFiles.length);
     return `/${crossoutFiles[randomIndex]}`;
   };
@@ -851,7 +851,7 @@ export default function NotePage() {
                                 transformOrigin: "center",
                               }}
                             >
-                              {index > 0 ? (
+                              {index === 0 ? (
                                 // First connection - show actual signature
                                 <div
                                   dangerouslySetInnerHTML={{
@@ -859,12 +859,12 @@ export default function NotePage() {
                                   }}
                                 />
                               ) : (
-                                // Direct first connection - show crossout stroke
+                                // Farther connections - show crossout stroke
                                 <Image
                                   src={getCrossoutStroke(response.id)}
                                   alt="crossed out signature"
-                                  width={80}
-                                  height={24}
+                                  width={64}
+                                  height={16}
                                   style={{
                                     filter: (() => {
                                       // Find the matching note color for proper filter
@@ -924,6 +924,7 @@ export default function NotePage() {
                   typedText={typedResponse}
                   onTextChange={setTypedResponse}
                   noteColor={responseNoteOffset.color}
+                  onUndo={() => activeNoteRef.current?.handleUndo()}
                 />
               </div>
             );
