@@ -452,51 +452,99 @@ export default function NotePage() {
             here&apos;s the conversation so far.
           </div>
 
-          {/* Note Container - Read Only */}
+          {/* Note Container - Read Only - Using same layout as active editing */}
           <div
             style={{
               position: "relative",
-              minHeight: `${Math.max(
-                320,
-                ...thread.responses
-                  .slice(1)
-                  .map((r) => 314 + (r.positionY || 0) + 320)
-              )}px`,
+              width: "100%",
+              height: (() => {
+                // Calculate total height based on actual overlap amounts
+                let totalHeight = 320; // Base question note height
+
+                // Add height for existing responses
+                for (let i = 0; i < thread.responses.length - 1; i++) {
+                  const overlapSeed = seededRandom(
+                    (thread.responses[i + 1]?.id || "default") + "overlap"
+                  );
+                  const overlap = 13 + overlapSeed * 13; // 13-26px overlap
+                  totalHeight += 320 - overlap;
+                }
+
+                return `${totalHeight}px`;
+              })(),
             }}
           >
             {/* Main Question Note */}
             <div
               style={{
-                width: "320px",
-                height: "320px",
-                backgroundImage: `url(${ORANGE_NOTE_COLOR.bg})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                backgroundRepeat: "no-repeat",
-                boxShadow: "var(--note-shadow)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "40px",
-                boxSizing: "border-box",
+                position: "absolute",
+                top: "0px",
+                left: "50%",
+                transform: `translateX(-50%) translate(${textOffset.x}px, ${textOffset.y}px)`,
+                zIndex: 100,
               }}
             >
-              <div
-                style={{
-                  fontFamily: "var(--font-handwritten)",
-                  fontSize: "18px",
-                  lineHeight: "1.4",
-                  color: ORANGE_NOTE_COLOR.secondary,
-                  textAlign: "center",
-                  width: "100%",
-                  transform: `translate(${textOffset.x}px, ${textOffset.y}px)`,
-                }}
-              >
-                {thread.question}
-              </div>
+              <FlippableNote
+                width={320}
+                height={320}
+                background={ORANGE_NOTE_COLOR.bg}
+                noteColor={ORANGE_NOTE_COLOR}
+                authorName={thread.responses[0]?.authorName || ""}
+                frontContent={
+                  <div
+                    style={{
+                      width: "280px",
+                      height: "240px",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "space-between",
+                      padding: "19px",
+                      boxSizing: "border-box",
+                    }}
+                  >
+                    {/* Question text */}
+                    <div
+                      style={{
+                        fontFamily: "var(--font-handwritten)",
+                        fontSize: "18px",
+                        lineHeight: "1.4",
+                        color: ORANGE_NOTE_COLOR.secondary,
+                        textAlign: "center",
+                        overflow: "hidden",
+                        wordBreak: "break-word",
+                        flex: 1,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginBottom: "19px",
+                      }}
+                    >
+                      {thread.question}
+                    </div>
+
+                    {/* Signature at bottom */}
+                    {thread.responses[0]?.authorName && (
+                      <div
+                        style={{
+                          height: "34px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          transform: "scale(0.33)",
+                          transformOrigin: "center",
+                          filter: ORANGE_NOTE_COLOR.filter,
+                        }}
+                        dangerouslySetInnerHTML={{
+                          __html: thread.responses[0].authorName,
+                        }}
+                      />
+                    )}
+                  </div>
+                }
+              />
             </div>
 
-            {/* All Response Notes */}
+            {/* Existing Response Notes */}
             {thread.responses.length > 1 &&
               thread.responses.slice(1).map((response, index) => {
                 if (!response.drawingData || response.drawingData.trim() === "")
@@ -518,13 +566,29 @@ export default function NotePage() {
                     };
                   })();
 
+                // Calculate overlap for this note (-13 to -26px)
+                const overlapSeed = seededRandom(response.id + "overlap");
+                const overlap = 13 + overlapSeed * 13; // 13-26px overlap
+
+                // Calculate cumulative top position
+                let cumulativeTop = 320; // Start after the question note
+                for (let i = 0; i < index; i++) {
+                  const prevSeed = seededRandom(
+                    (thread.responses[i + 1]?.id || "default") + "overlap"
+                  );
+                  const prevOverlap = 13 + prevSeed * 13;
+                  cumulativeTop += 320 - prevOverlap;
+                }
+                cumulativeTop -= overlap;
+
                 return (
                   <div
                     key={response.id}
                     style={{
                       position: "absolute",
-                      top: `${314 + offset.y}px`,
-                      left: `${offset.x}px`,
+                      top: `${cumulativeTop}px`,
+                      left: "50%",
+                      transform: `translateX(-50%) translate(${offset.x}px, 0)`,
                       zIndex: 100 + index + 1,
                     }}
                   >
@@ -533,9 +597,6 @@ export default function NotePage() {
                       height={320}
                       background={offset.color.bg}
                       authorName={response.authorName || ""}
-                      style={{
-                        transform: `rotate(0deg)`,
-                      }}
                       frontContent={
                         // Check if it's SVG, old image data, or text
                         response.drawingData.startsWith("<svg") ? (
@@ -581,8 +642,8 @@ export default function NotePage() {
                             <div
                               style={{
                                 fontFamily: "var(--font-sans)",
-                                fontSize: "16px", // Updated to match new font size
-                                lineHeight: "22px", // Updated to match new line height
+                                fontSize: "16px",
+                                lineHeight: "22px",
                                 fontWeight: "500",
                                 color: offset.color.secondary,
                                 textAlign: "left",
@@ -603,13 +664,30 @@ export default function NotePage() {
                                   display: "flex",
                                   alignItems: "center",
                                   justifyContent: "center",
-                                  transform: "scale(0.33)",
                                   transformOrigin: "center",
                                 }}
-                                dangerouslySetInnerHTML={{
-                                  __html: response.authorName,
-                                }}
-                              />
+                              >
+                                {index === 0 ? (
+                                  // First connection - show actual signature
+                                  <div
+                                    style={{
+                                      transform: "scale(0.33)",
+                                      transformOrigin: "center",
+                                    }}
+                                    dangerouslySetInnerHTML={{
+                                      __html: response.authorName,
+                                    }}
+                                  />
+                                ) : (
+                                  // Farther connections - show crossout stroke
+                                  <Image
+                                    src={getCrossoutStroke(response.id)}
+                                    alt="crossed out signature"
+                                    width={128}
+                                    height={32}
+                                  />
+                                )}
+                              </div>
                             )}
                           </div>
                         )
@@ -623,7 +701,7 @@ export default function NotePage() {
           <button
             onClick={() => (window.location.href = "/")}
             style={{
-              background: "#FF5E01",
+              background: "#FF6B35",
               border: "none",
               fontFamily: "var(--font-sans)",
               fontWeight: "500",
