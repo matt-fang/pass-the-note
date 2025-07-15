@@ -172,7 +172,7 @@ export default function Home() {
             color: "var(--text-dark)",
           }}
         >
-          {authorNameDrawing ? (
+          {!isNoteFlipped ? (
             <>
               sign it! (legibly)
               <br />
@@ -361,7 +361,7 @@ export default function Home() {
         {/* Share button with 80pt spacing */}
         <div
           style={{
-            marginTop: "80px", // 80pt spacing between note and button
+            marginTop: "10px", // 80pt spacing between note and button
           }}
         >
           <button
