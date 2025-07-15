@@ -96,6 +96,13 @@ export default function NotePage() {
     return Math.abs(hash) / 2147483647; // Normalize to 0-1
   };
 
+  // Get random crossout stroke SVG path
+  const getCrossoutStroke = (seed: string): string => {
+    const crossoutFiles = ['crossout1.svg', 'crossout3.svg', 'crossout4.svg', 'crossout5.svg'];
+    const randomIndex = Math.floor(seededRandom(seed) * crossoutFiles.length);
+    return `/${crossoutFiles[randomIndex]}`;
+  };
+
   useEffect(() => {
     if (params.shareUrl) {
       // Check if user has already responded to this note
@@ -763,7 +770,7 @@ export default function NotePage() {
                             {response.drawingData}
                           </div>
                           
-                          {/* Signature at bottom */}
+                          {/* Signature at bottom - crossout for non-first connections */}
                           {response.authorName && (
                             <div
                               style={{
@@ -774,10 +781,32 @@ export default function NotePage() {
                                 transform: "scale(0.33)",
                                 transformOrigin: "center",
                               }}
-                              dangerouslySetInnerHTML={{
-                                __html: response.authorName,
-                              }}
-                            />
+                            >
+                              {index === 0 ? (
+                                // First connection - show actual signature
+                                <div
+                                  dangerouslySetInnerHTML={{
+                                    __html: response.authorName,
+                                  }}
+                                />
+                              ) : (
+                                // Non-first connection - show crossout stroke
+                                <img
+                                  src={getCrossoutStroke(response.id)}
+                                  alt="crossed out signature"
+                                  style={{
+                                    width: "60px",
+                                    height: "20px",
+                                    filter: (() => {
+                                      // Find the matching note color for proper filter
+                                      const noteColor = NOTE_COLORS.find(c => c.secondary === offset.color.secondary);
+                                      return noteColor ? `${noteColor.filter} opacity(0.8)` : 'opacity(0.8)';
+                                    })(),
+                                    objectFit: "contain",
+                                  }}
+                                />
+                              )}
+                            </div>
                           )}
                         </div>
                       )
