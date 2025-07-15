@@ -150,10 +150,17 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
                   }}
                 >
                   {/* Text input area - height adjusted to leave space for signature */}
-                  <div style={{ flex: 1, marginBottom: "19px" }}>
+                  <div 
+                    style={{ 
+                      flex: 1, 
+                      marginBottom: "19px",
+                      padding: "19px", // Add uniform padding around text area
+                      boxSizing: "border-box"
+                    }}
+                  >
                     <TypingCanvas
-                      width={280}
-                      height={187} // 240 - 34 (signature) - 19 (margin) = 187
+                      width={242} // 280 - 38 (19px padding on each side)
+                      height={149} // 187 - 38 (19px padding on top and bottom)
                       onTextChange={onTextChange}
                       initialText={typedText}
                       disabled={!isEditable}

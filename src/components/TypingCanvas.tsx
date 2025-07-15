@@ -31,12 +31,21 @@ export default function TypingCanvas({
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newText = e.target.value;
     
-    // Limit text length to prevent overflow
-    if (newText.length <= 150) { // Adjust this limit as needed
-      setText(newText);
-      if (onTextChange) {
-        onTextChange(newText);
-      }
+    // Check if adding this text would overflow the visible area
+    const textarea = e.target;
+    const originalText = textarea.value;
+    textarea.value = newText;
+    
+    // If text overflows (scrollHeight > clientHeight), revert to previous text
+    if (textarea.scrollHeight > textarea.clientHeight) {
+      textarea.value = originalText;
+      return; // Don't update state if it would overflow
+    }
+    
+    // Otherwise, update the text
+    setText(newText);
+    if (onTextChange) {
+      onTextChange(newText);
     }
   };
 
@@ -85,12 +94,12 @@ export default function TypingCanvas({
           textAlign: 'left',
           verticalAlign: 'top',
           fontFamily: 'var(--font-sans)',
-          fontSize: '13px',
-          lineHeight: '18px',
+          fontSize: '16px', // Body font size (same as "passed this note to you")
+          lineHeight: '22px', // Body line height
           fontWeight: '500',
           color: textColor,
-          padding: '19px',
-          overflow: 'hidden',
+          padding: '0', // Remove all padding
+          overflow: 'hidden', // No scrolling
           // Make placeholder lighter
           '::placeholder': {
             color: 'var(--text-light)',
@@ -98,20 +107,6 @@ export default function TypingCanvas({
           }
         } as React.CSSProperties}
       />
-      
-      {/* Character count indicator when getting close to limit */}
-      {text.length > 120 && (
-        <div style={{
-          position: 'absolute',
-          bottom: '5px',
-          right: '5px',
-          fontSize: '10px',
-          color: text.length > 140 ? '#ff0000' : 'var(--text-light)',
-          fontFamily: 'var(--font-sans)'
-        }}>
-          {text.length}/150
-        </div>
-      )}
     </div>
   );
 }
