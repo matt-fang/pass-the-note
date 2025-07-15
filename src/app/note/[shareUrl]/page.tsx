@@ -409,7 +409,7 @@ export default function NotePage() {
               style={{
                 width: "320px",
                 height: "320px",
-                background: noteColor.bg,
+                background: "url(/orangenote.jpg)",
                 boxShadow: "var(--note-shadow)",
                 display: "flex",
                 alignItems: "center",
@@ -423,7 +423,7 @@ export default function NotePage() {
                   fontFamily: "var(--font-handwritten)",
                   fontSize: "18px",
                   lineHeight: "1.4",
-                  color: "var(--text-dark)",
+                  color: "white",
                   textAlign: "center",
                   width: "100%",
                   transform: `translate(${textOffset.x}px, ${textOffset.y}px)`,
@@ -679,7 +679,7 @@ export default function NotePage() {
             <FlippableNote
               width={320}
               height={320}
-              background={existingResponseOffsets[0]?.color.bg || noteColor.bg}
+              background="url(/orangenote.jpg)"
               authorName={thread.responses[0]?.authorName || ""}
               isFlipped={flippedNotes["question-note"] || false}
               frontContent={
@@ -700,7 +700,7 @@ export default function NotePage() {
                       fontFamily: "var(--font-handwritten)",
                       fontSize: "18px",
                       lineHeight: "1.4",
-                      color: "var(--text-dark)",
+                      color: "white",
                       textAlign: "center",
                       overflow: "hidden",
                       wordBreak: "break-word",
@@ -724,6 +724,7 @@ export default function NotePage() {
                         justifyContent: "center",
                         transform: "scale(0.33)",
                         transformOrigin: "center",
+                        filter: "invert(1) brightness(1)",
                       }}
                       dangerouslySetInnerHTML={{
                         __html: thread.responses[0].authorName,
