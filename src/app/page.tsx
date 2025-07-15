@@ -279,6 +279,7 @@ export default function Home() {
               authorName={authorNameDrawing}
               onAuthorNameChange={setAuthorNameDrawing}
               isFlipped={isNoteFlipped}
+              noteColor={noteColor}
               onUndo={() => {
                 if (flipNoteRef.current) {
                   flipNoteRef.current.handleUndo();

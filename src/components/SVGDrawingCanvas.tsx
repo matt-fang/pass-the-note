@@ -9,6 +9,7 @@ interface SVGDrawingCanvasProps {
   initialData?: string;
   disabled?: boolean;
   showClearButton?: boolean;
+  strokeColor?: string;
 }
 
 export interface SVGDrawingCanvasRef {
@@ -31,7 +32,8 @@ const SVGDrawingCanvas = forwardRef<SVGDrawingCanvasRef, SVGDrawingCanvasProps>(
   onDrawingChange,
   initialData = '',
   disabled = false,
-  showClearButton = true
+  showClearButton = true,
+  strokeColor = '#2a2a2a'
 }, ref) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [paths, setPaths] = useState<Path[]>([]);
@@ -95,7 +97,7 @@ const SVGDrawingCanvas = forwardRef<SVGDrawingCanvasRef, SVGDrawingCanvasProps>(
       const d = createPathString(path.points);
       if (!d) return '';
       
-      return `<path d="${d}" stroke="#2a2a2a" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`;
+      return `<path d="${d}" stroke="${strokeColor}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.95"/>`;
     }).filter(Boolean);
 
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${pathStrings.join('')}</svg>`;
@@ -232,8 +234,8 @@ const SVGDrawingCanvas = forwardRef<SVGDrawingCanvasRef, SVGDrawingCanvasProps>(
           <path
             key={path.id}
             d={createPathString(path.points)}
-            stroke="#2a2a2a"
-            strokeWidth="4"
+            stroke={strokeColor}
+            strokeWidth="3"
             strokeLinecap="round"
             strokeLinejoin="round"
             fill="none"
@@ -244,8 +246,8 @@ const SVGDrawingCanvas = forwardRef<SVGDrawingCanvasRef, SVGDrawingCanvasProps>(
         {isDrawing && currentPath.length > 1 && (
           <path
             d={createPathString(currentPath)}
-            stroke="#2a2a2a"
-            strokeWidth="4"
+            stroke={strokeColor}
+            strokeWidth="3"
             strokeLinecap="round"
             strokeLinejoin="round"
             fill="none"

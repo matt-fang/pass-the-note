@@ -22,6 +22,8 @@ interface FlippableNoteProps {
   onTextChange?: (text: string) => void;
   // Props for conversation button
   showConversationButton?: boolean;
+  // Note color for secondary color
+  noteColor?: { bg: string; secondary: string; filter: string };
 }
 
 export interface FlippableNoteRef {
@@ -46,6 +48,7 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
       typedText = "",
       onTextChange,
       showConversationButton = false,
+      noteColor,
     },
     ref
   ) => {
@@ -175,7 +178,7 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
                   fontSize: "14px",
                   lineHeight: "18px",
                   fontWeight: "500",
-                  color: "#7A7A7A", // Darker gray for better contrast
+                  color: "#BBC2BB",
                   marginBottom: "10px",
                   textAlign: "center",
                 }}
@@ -202,6 +205,7 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
                     onDrawingChange={onAuthorNameChange}
                     initialData={authorName}
                     showClearButton={false}
+                    strokeColor={noteColor?.secondary || "#2a2a2a"}
                   />
                 ) : (
                   authorName && (
@@ -221,7 +225,7 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
                   <div
                     style={{
                       position: "absolute",
-                      color: "#7A7A7A",
+                      color: "#BBC2BB",
                       fontSize: "16px",
                       fontFamily: "var(--font-handwritten)",
                       pointerEvents: "none",
