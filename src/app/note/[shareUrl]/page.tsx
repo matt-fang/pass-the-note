@@ -216,8 +216,7 @@ export default function NotePage() {
             : undefined;
 
         // Use stored data if available, otherwise generate random data
-        const hasStoredColor = response.noteColor && response.noteColor.trim() !== "" && response.noteColorSecondary && response.noteColorSecondary.trim() !== "";
-        const color = hasStoredColor
+        const color = response.noteColor
           ? {
               bg: response.noteColor,
               secondary: response.noteColorSecondary,
@@ -711,7 +710,6 @@ export default function NotePage() {
             </div>
           </div>
         )}
-
         {/* Note Container - Absolute Positioned for Overlap */}
         <div
           style={{
@@ -940,53 +938,22 @@ export default function NotePage() {
                                 transformOrigin: "center",
                               }}
                             >
-                              {(() => {
-                                // Calculate if this is a direct connection
-                                // If canEdit is true, I'm the current recipient
-                                const myResponseIndex = thread.responses.length - 1;
-                                const senderIndex = thread.responses.length - 2;
-                                const actualIndex = index + 1; // Because we're using slice(1)
-                                
-                                // Show signature for: sender to me, me, person I send to
-                                const isDirectConnection = canEdit && (
-                                  actualIndex === senderIndex || // Person who sent to me
-                                  actualIndex === myResponseIndex || // My response  
-                                  actualIndex === myResponseIndex + 1 // Person I send to
-                                );
-                                
-                                return isDirectConnection ? (
-                                  // Direct connection - show actual signature
-                                  <div
-                                    style={{
-                                      transform: "scale(0.33)",
-                                      transformOrigin: "center",
-                                    }}
-                                    dangerouslySetInnerHTML={{
-                                      __html: response.authorName,
-                                    }}
-                                  />
-                                ) : (
-                                  // Farther connections - show crossout stroke
-                                  <Image
-                                    src={getCrossoutStroke(response.id)}
-                                    alt="crossed out signature"
-                                    width={64}
-                                    height={16}
-                                    style={{
-                                      filter: (() => {
-                                        // Find the matching note color for proper filter
-                                        const noteColor = NOTE_COLORS.find(
-                                          (c) => c.secondary === offset.color.secondary
-                                        );
-                                        return noteColor
-                                          ? `${noteColor.filter} opacity(0.8)`
-                                          : "opacity(0.8)";
-                                      })(),
-                                      objectFit: "contain",
-                                    }}
-                                  />
-                                );
-                              })()}
+                              {index === 0 ? (
+                                // First connection - show actual signature
+                                <div
+                                  dangerouslySetInnerHTML={{
+                                    __html: response.authorName,
+                                  }}
+                                />
+                              ) : (
+                                // Farther connections - show crossout stroke
+                                <Image
+                                  src={getCrossoutStroke(response.id)}
+                                  alt="crossed out signature"
+                                  width={128}
+                                  height={32}
+                                />
+                              )}
                             </div>
                           )}
                         </div>
@@ -1044,7 +1011,6 @@ export default function NotePage() {
               );
             })()}
         </div>
-
         {/* Bottom buttons - always show when editing */}
         {canEdit && !hasPassed && (
           <div
@@ -1134,76 +1100,90 @@ export default function NotePage() {
             </button>
           </div>
         )}
-
         {/* Passed state - shows after note is passed */}
         {hasPassed && (
           <div
             style={{
               display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              textAlign: "center",
-              gap: "40px",
+              alignItems: "center", // vertical centering
+              justifyContent: "center", // horizontal centering
+              height: "100vh", // full viewport height
               width: "100%",
-              maxWidth: "300px",
             }}
           >
-            <div
-              style={{
-                fontFamily: "var(--font-sans)",
-                fontWeight: "500",
-                fontSize: "18px",
-                lineHeight: "24px",
-                color: "var(--text-dark)",
-              }}
-            >
-              sent! check this link again when<br />
-              your friend fills out their note.
-            </div>
-            
             <div
               style={{
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                gap: "16px",
+                justifyContent: "center",
+                textAlign: "center",
+                gap: "40px",
+                padding: "0 20px",
                 width: "100%",
+                maxWidth: "400px",
               }}
             >
-              <button
-                onClick={async () => {
-                  // Reinvoke share menu
-                  const shareUrl = window.location.href;
-                  await shareNatively(shareUrl);
-                }}
-                className="btn-link"
+              <div
                 style={{
+                  fontFamily: "var(--font-sans)",
+                  fontWeight: 500,
                   fontSize: "18px",
                   lineHeight: "24px",
+                  color: "var(--text-dark)",
                 }}
               >
-                pass this note again &gt;
-              </button>
-              
-              <button
-                onClick={() => (window.location.href = "/")}
+                sent! check this link again when
+                <br />
+                your friend fills out their note.
+              </div>
+
+              <div
                 style={{
-                  background: "#FF6B35",
-                  border: "none",
-                  fontFamily: "var(--font-sans)",
-                  fontWeight: "500",
-                  fontSize: "18px",
-                  lineHeight: "24px",
-                  color: "white",
-                  cursor: "pointer",
-                  padding: "16px 24px",
-                  borderRadius: "0px",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "16px",
                   width: "100%",
                 }}
               >
-                or, write your own note &gt;
-              </button>
+                <button
+                  onClick={async () => {
+                    const shareUrl = window.location.href;
+                    await shareNatively(shareUrl);
+                  }}
+                  style={{
+                    background: "#E5E1DE",
+                    border: "none",
+                    fontFamily: "var(--font-sans)",
+                    fontWeight: 500,
+                    fontSize: "14px",
+                    lineHeight: "18px",
+                    color: "black",
+                    cursor: "pointer",
+                    padding: "8px 10px",
+                  }}
+                >
+                  pass this note again &gt;
+                </button>
+
+                <button
+                  onClick={() => (window.location.href = "/")}
+                  style={{
+                    background: "#FF5E01",
+                    border: "none",
+                    fontFamily: "var(--font-sans)",
+                    fontWeight: 500,
+                    fontSize: "14px",
+                    lineHeight: "18px",
+                    color: "white",
+                    cursor: "pointer",
+                    padding: "8px 10px",
+                  }}
+                >
+                  or, write your own note &gt;
+                </button>
+              </div>
             </div>
           </div>
         )}
