@@ -239,7 +239,7 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
                   onClick={onUndo}
                   style={{
                     position: "absolute",
-                    bottom: "20px",
+                    bottom: "12px",
                     left: "50%",
                     transform: "translateX(-50%)",
                     background: "none",
@@ -250,6 +250,7 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
+                    zIndex: 1000,
                   }}
                 >
                   <span
