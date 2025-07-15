@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
-import DrawingCanvas from "@/components/DrawingCanvas";
+import Image from "next/image";
 import FlippableNote, { FlippableNoteRef } from "@/components/FlippableNote";
 import Header from "@/components/Header";
 import { useImagePreloader } from "@/hooks/useImagePreloader";
@@ -860,12 +860,12 @@ export default function NotePage() {
                                 />
                               ) : (
                                 // Direct first connection - show crossout stroke
-                                <img
+                                <Image
                                   src={getCrossoutStroke(response.id)}
                                   alt="crossed out signature"
+                                  width={80}
+                                  height={24}
                                   style={{
-                                    width: "80px", // Much bigger
-                                    height: "24px", // Much bigger (16px minimum)
                                     filter: (() => {
                                       // Find the matching note color for proper filter
                                       const noteColor = NOTE_COLORS.find(c => c.secondary === offset.color.secondary);

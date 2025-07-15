@@ -106,14 +106,6 @@ const SVGDrawingCanvas = forwardRef<SVGDrawingCanvasRef, SVGDrawingCanvasProps>(
     }
   }, [initialData]);
 
-  useEffect(() => {
-    // Generate SVG string and notify parent
-    if (onDrawingChange) {
-      const svgString = generateSVGString();
-      onDrawingChange(svgString);
-    }
-  }, [paths, onDrawingChange]);
-
   const generateSVGString = (): string => {
     if (paths.length === 0) return '';
     
@@ -165,6 +157,14 @@ const SVGDrawingCanvas = forwardRef<SVGDrawingCanvasRef, SVGDrawingCanvasProps>(
 
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${boundingWidth}" height="${boundingHeight}" viewBox="${minX} ${minY} ${boundingWidth} ${boundingHeight}">${pathStrings.join('')}</svg>`;
   };
+
+  useEffect(() => {
+    // Generate SVG string and notify parent
+    if (onDrawingChange) {
+      const svgString = generateSVGString();
+      onDrawingChange(svgString);
+    }
+  }, [paths, onDrawingChange, generateSVGString]);
 
   const getEventPos = (e: React.MouseEvent<SVGSVGElement> | React.TouchEvent<SVGSVGElement>): Point => {
     const svg = svgRef.current;
