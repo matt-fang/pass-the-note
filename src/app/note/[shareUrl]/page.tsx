@@ -216,7 +216,8 @@ export default function NotePage() {
             : undefined;
 
         // Use stored data if available, otherwise generate random data
-        const color = response.noteColor
+        const hasStoredColor = response.noteColor && response.noteColor.trim() !== "" && response.noteColorSecondary && response.noteColorSecondary.trim() !== "";
+        const color = hasStoredColor
           ? {
               bg: response.noteColor,
               secondary: response.noteColorSecondary,
@@ -939,22 +940,49 @@ export default function NotePage() {
                                 transformOrigin: "center",
                               }}
                             >
-                              {index !== 0 ? (
-                                // First connection - show actual signature
-                                <div
-                                  dangerouslySetInnerHTML={{
-                                    __html: response.authorName,
-                                  }}
-                                />
-                              ) : (
-                                // Farther connections - show crossout stroke
-                                <Image
-                                  src={getCrossoutStroke(response.id)}
-                                  alt="crossed out signature"
-                                  width={128}
-                                  height={32}
-                                />
-                              )}
+                              {(() => {
+                                // Calculate if this is a direct connection
+                                // If canEdit is true, I'm the current recipient
+                                const myResponseIndex = thread.responses.length - 1;
+                                const senderIndex = thread.responses.length - 2;
+                                const actualIndex = index + 1; // Because we're using slice(1)
+                                
+                                // Show signature for: sender to me, me, person I send to
+                                const isDirectConnection = canEdit && (
+                                  actualIndex === senderIndex || // Person who sent to me
+                                  actualIndex === myResponseIndex || // My response  
+                                  actualIndex === myResponseIndex + 1 // Person I send to
+                                );
+                                
+                                return isDirectConnection ? (
+                                  // Direct connection - show actual signature
+                                  <div
+                                    dangerouslySetInnerHTML={{
+                                      __html: response.authorName,
+                                    }}
+                                  />
+                                ) : (
+                                  // Farther connections - show crossout stroke
+                                  <Image
+                                    src={getCrossoutStroke(response.id)}
+                                    alt="crossed out signature"
+                                    width={64}
+                                    height={16}
+                                    style={{
+                                      filter: (() => {
+                                        // Find the matching note color for proper filter
+                                        const noteColor = NOTE_COLORS.find(
+                                          (c) => c.secondary === offset.color.secondary
+                                        );
+                                        return noteColor
+                                          ? `${noteColor.filter} opacity(0.8)`
+                                          : "opacity(0.8)";
+                                      })(),
+                                      objectFit: "contain",
+                                    }}
+                                  />
+                                );
+                              })()}
                             </div>
                           )}
                         </div>
