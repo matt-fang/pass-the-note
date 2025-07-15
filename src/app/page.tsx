@@ -294,7 +294,6 @@ export default function Home() {
                       color: "var(--text-dark)",
                       textAlign: "center",
                       width: "100%",
-                      transform: `translate(${textOffset.x}px, ${textOffset.y}px)`,
                       position: "absolute",
                       top: "50%",
                       left: "50%",
