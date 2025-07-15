@@ -504,11 +504,11 @@ export default function NotePage() {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: thread.responses.length > 1 ? "flex-start" : "center",
+        justifyContent: (thread.responses.length > 1) ? "flex-start" : "center",
         background: "var(--cream)",
         padding: "0 20px",
-        paddingTop: thread.responses.length > 1 ? "140px" : "0",
-        paddingBottom: thread.responses.length > 1 ? "120px" : "0",
+        paddingTop: (thread.responses.length > 1) ? "140px" : "0",
+        paddingBottom: (thread.responses.length > 1) ? "120px" : "0",
       }}
     >
       <Header showAbout={showAbout} onAboutChange={setShowAbout} />
@@ -539,6 +539,15 @@ export default function NotePage() {
             write your answer below.
           </div>
         )}
+        
+        {/* Debug info */}
+        <div style={{ fontFamily: "monospace", fontSize: "12px", color: "red", marginBottom: "10px" }}>
+          Thread ID: {thread.id}<br/>
+          Question: {thread.question}<br/>
+          Responses: {thread.responses.length}<br/>
+          Can Edit: {canEdit ? "yes" : "no"}<br/>
+          First Response Author: {thread.responses[0]?.authorName || "none"}
+        </div>
 
         {/* Note Container - Simple Vertical Stack */}
         <div
@@ -551,7 +560,6 @@ export default function NotePage() {
           }}
         >
           {/* Main Question Note */}
-          {console.log("Rendering main question note, question:", thread.question, "author:", thread.responses[0]?.authorName)}
           <div
             style={{
               display: "flex",

@@ -41,7 +41,7 @@ export async function PUT(request: Request) {
   try {
     const { shareUrl, authorName } = await request.json();
     
-    const response = await prisma.response.update({
+    await prisma.response.update({
       where: { shareUrl },
       data: {
         authorName: authorName || 'Anonymous'
