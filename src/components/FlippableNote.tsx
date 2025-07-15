@@ -93,7 +93,6 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
       handleUndo,
     }));
 
-
     return (
       <>
         <div
@@ -126,9 +125,9 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
                 height: "100%",
                 backfaceVisibility: "hidden",
                 backgroundImage: `url(${background})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
                 boxShadow: "var(--note-shadow)",
                 padding: "19px",
                 boxSizing: "border-box",
@@ -150,12 +149,11 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
                   }}
                 >
                   {/* Text input area - height adjusted to leave space for signature */}
-                  <div 
-                    style={{ 
-                      flex: 1, 
+                  <div
+                    style={{
+                      flex: 1,
                       marginBottom: "19px",
-                      padding: "19px", // Add uniform padding around text area
-                      boxSizing: "border-box"
+                      boxSizing: "border-box",
                     }}
                   >
                     <TypingCanvas
@@ -168,7 +166,7 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
                       textColor={noteColor?.secondary || "var(--text-dark)"}
                     />
                   </div>
-                  
+
                   {/* Signature space at bottom */}
                   <div
                     style={{
@@ -196,9 +194,9 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
                 height: "100%",
                 backfaceVisibility: "hidden",
                 backgroundImage: `url(${background})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
                 boxShadow: "var(--note-shadow)",
                 padding: "20px",
                 boxSizing: "border-box",

@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, useState, useImperativeHandle, forwardRef } from 'react';
+import { useRef, useEffect, useState, useImperativeHandle, forwardRef, useCallback } from 'react';
 
 interface SVGDrawingCanvasProps {
   width?: number;
@@ -106,7 +106,7 @@ const SVGDrawingCanvas = forwardRef<SVGDrawingCanvasRef, SVGDrawingCanvasProps>(
     }
   }, [initialData]);
 
-  const generateSVGString = (): string => {
+  const generateSVGString = useCallback((): string => {
     if (paths.length === 0) return '';
     
     // Calculate exact bounding box considering actual path geometry
@@ -156,7 +156,7 @@ const SVGDrawingCanvas = forwardRef<SVGDrawingCanvasRef, SVGDrawingCanvasProps>(
     }).filter(Boolean);
 
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${boundingWidth}" height="${boundingHeight}" viewBox="${minX} ${minY} ${boundingWidth} ${boundingHeight}">${pathStrings.join('')}</svg>`;
-  };
+  }, [paths, strokeColor]);
 
   useEffect(() => {
     // Generate SVG string and notify parent

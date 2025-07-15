@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import FlippableNote, { FlippableNoteRef } from "@/components/FlippableNote";
@@ -54,10 +54,9 @@ export default function NotePage() {
   const [canEdit, setCanEdit] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [noteColor, setNoteColor] = useState(NOTE_COLORS[0]);
-  
+
   // Preload note images
-  const noteImages = NOTE_COLORS.map(color => color.bg);
+  const noteImages = NOTE_COLORS.map((color) => color.bg);
   const imagesLoaded = useImagePreloader(noteImages);
   const [textOffset, setTextOffset] = useState({ x: 0, y: 0 });
   const [responseNoteOffset, setResponseNoteOffset] = useState({
@@ -98,10 +97,34 @@ export default function NotePage() {
 
   // Get random crossout stroke SVG path
   const getCrossoutStroke = (seed: string): string => {
-    const crossoutFiles = ['crossout1.png', 'crossout2.png', 'crossout3.png', 'crossout4.png', 'crossout5.png'];
+    const crossoutFiles = [
+      "crossout1.png",
+      "crossout2.png",
+      "crossout3.png",
+      "crossout4.png",
+      "crossout5.png",
+    ];
     const randomIndex = Math.floor(seededRandom(seed) * crossoutFiles.length);
     return `/${crossoutFiles[randomIndex]}`;
   };
+
+  // Generate random color ensuring no adjacent duplicates
+  const getRandomColor = useCallback((
+    seed: string,
+    prevColor?: (typeof NOTE_COLORS)[0]
+  ): (typeof NOTE_COLORS)[0] => {
+    const availableColors = prevColor
+      ? NOTE_COLORS.filter((color) => color.bg !== prevColor.bg)
+      : NOTE_COLORS;
+
+    const randomIndex = Math.floor(seededRandom(seed) * availableColors.length);
+    return availableColors[randomIndex];
+  }, []);
+
+  // Generate random x-offset
+  const getRandomXOffset = useCallback((seed: string): number => {
+    return (seededRandom(seed) - 0.5) * 16; // -8px to +8px
+  }, []);
 
   useEffect(() => {
     if (params.shareUrl) {
@@ -124,7 +147,6 @@ export default function NotePage() {
       const colorIndex = Math.floor(
         seededRandom(thread.id) * NOTE_COLORS.length
       );
-      setNoteColor(NOTE_COLORS[colorIndex]);
 
       // Use thread ID + "offset" for consistent text positioning
       const offsetSeed = seededRandom(thread.id + "offset");
@@ -168,19 +190,35 @@ export default function NotePage() {
   useEffect(() => {
     // Use stored positioning data for existing responses (only for horizontal offset and rotation)
     if (thread && thread.responses.length > 0) {
-      const offsets = thread.responses.map((response) => ({
-        x: response.positionX,
-        y: response.positionY, // Still store but won't use for vertical positioning
-        rotation: response.rotation,
-        color: {
+      const offsets = thread.responses.map((response, index) => {
+        // Get previous color for adjacent check (skip first response which is the original question)
+        const prevColor = index > 1 ? {
+          bg: thread.responses[index - 1].noteColor,
+          secondary: thread.responses[index - 1].noteColorSecondary,
+          filter: "none"
+        } : undefined;
+        
+        // Use stored data if available, otherwise generate random data
+        const color = response.noteColor ? {
           bg: response.noteColor,
           secondary: response.noteColorSecondary,
           filter: "none",
-        },
-      }));
+        } : getRandomColor(response.id + "color", prevColor);
+        
+        const xOffset = response.positionX !== null && response.positionX !== undefined 
+          ? response.positionX 
+          : getRandomXOffset(response.id + "xoffset");
+        
+        return {
+          x: xOffset,
+          y: response.positionY, // Still store but won't use for vertical positioning
+          rotation: response.rotation || 0,
+          color: color,
+        };
+      });
       setExistingResponseOffsets(offsets);
     }
-  }, [thread]);
+  }, [thread, getRandomColor, getRandomXOffset]);
 
   const submitResponse = async () => {
     if (!typedResponse || !thread) return;
@@ -400,7 +438,9 @@ export default function NotePage() {
               position: "relative",
               minHeight: `${Math.max(
                 320,
-                ...thread.responses.slice(1).map((r) => 314 + (r.positionY || 0) + 320)
+                ...thread.responses
+                  .slice(1)
+                  .map((r) => 314 + (r.positionY || 0) + 320)
               )}px`,
             }}
           >
@@ -436,14 +476,19 @@ export default function NotePage() {
             {/* All Response Notes */}
             {thread.responses.length > 1 &&
               thread.responses.slice(1).map((response, index) => {
-                if (!response.drawingData || response.drawingData.trim() === '') return null;
+                if (!response.drawingData || response.drawingData.trim() === "")
+                  return null;
 
-                const offset = existingResponseOffsets[index + 1] || {
-                  x: 0,
-                  y: 0,
-                  rotation: 0,
-                  color: NOTE_COLORS[0],
-                };
+                const offset = existingResponseOffsets[index + 1] || (() => {
+                  // Get previous color for adjacent check
+                  const prevColor = index > 0 ? existingResponseOffsets[index]?.color : undefined;
+                  return {
+                    x: getRandomXOffset(response.id + "xoffset"),
+                    y: 0,
+                    rotation: 0,
+                    color: getRandomColor(response.id + "color", prevColor),
+                  };
+                })();
 
                 return (
                   <div
@@ -521,7 +566,7 @@ export default function NotePage() {
                             >
                               {response.drawingData}
                             </div>
-                            
+
                             {/* Signature at bottom */}
                             {response.authorName && (
                               <div
@@ -569,7 +614,6 @@ export default function NotePage() {
     );
   }
 
-  
   return (
     <div
       style={{
@@ -608,19 +652,21 @@ export default function NotePage() {
             }}
           >
             {/* Previous person's signature */}
-            {thread.responses.length > 0 && thread.responses[thread.responses.length - 1]?.authorName && (
-              <div
-                style={{
-                  transform: "scale(0.75)",
-                  transformOrigin: "center",
-                  filter: "brightness(0) saturate(100%) invert(0%)", // Make it black
-                }}
-                dangerouslySetInnerHTML={{
-                  __html: thread.responses[thread.responses.length - 1].authorName,
-                }}
-              />
-            )}
-            
+            {thread.responses.length > 0 &&
+              thread.responses[thread.responses.length - 1]?.authorName && (
+                <div
+                  style={{
+                    transform: "scale(0.75)",
+                    transformOrigin: "center",
+                    filter: "brightness(0) saturate(100%) invert(0%)", // Make it black
+                  }}
+                  dangerouslySetInnerHTML={{
+                    __html:
+                      thread.responses[thread.responses.length - 1].authorName,
+                  }}
+                />
+              )}
+
             {/* Text below signature */}
             <div
               style={{
@@ -635,7 +681,6 @@ export default function NotePage() {
             </div>
           </div>
         )}
-        
 
         {/* Note Container - Absolute Positioned for Overlap */}
         <div
@@ -645,21 +690,23 @@ export default function NotePage() {
             height: (() => {
               // Calculate total height based on actual overlap amounts
               let totalHeight = 320; // Base question note height
-              
+
               // Add height for existing responses
               for (let i = 0; i < thread.responses.length - 1; i++) {
-                const overlapSeed = seededRandom((thread.responses[i + 1]?.id || "default") + "overlap");
-                const overlap = 13 + (overlapSeed * 13); // 13-26px overlap
-                totalHeight += (320 - overlap);
+                const overlapSeed = seededRandom(
+                  (thread.responses[i + 1]?.id || "default") + "overlap"
+                );
+                const overlap = 13 + overlapSeed * 13; // 13-26px overlap
+                totalHeight += 320 - overlap;
               }
-              
+
               // Add height for active response note if editing
               if (canEdit) {
                 const activeSeed = seededRandom(thread.id + "active-response");
-                const activeOverlap = 13 + (activeSeed * 13);
-                totalHeight += (320 - activeOverlap);
+                const activeOverlap = 13 + activeSeed * 13;
+                totalHeight += 320 - activeOverlap;
               }
-              
+
               return `${totalHeight}px`;
             })(),
             transform: notesSlideOut ? "translateX(100vw)" : "translateX(0)",
@@ -713,7 +760,7 @@ export default function NotePage() {
                   >
                     {thread.question}
                   </div>
-                  
+
                   {/* Signature at bottom */}
                   {thread.responses[0]?.authorName && (
                     <div
@@ -734,33 +781,39 @@ export default function NotePage() {
                 </div>
               }
             />
-
           </div>
 
           {/* Existing Response Notes */}
           {thread.responses.length > 1 &&
             thread.responses.slice(1).map((response, index) => {
-              if (!response.drawingData || response.drawingData.trim() === '') return null;
+              if (!response.drawingData || response.drawingData.trim() === "")
+                return null;
 
-              const offset = existingResponseOffsets[index + 1] || {
-                x: 0,
-                y: 0,
-                rotation: 0,
-                color: NOTE_COLORS[0],
-              };
+              const offset = existingResponseOffsets[index + 1] || (() => {
+                // Get previous color for adjacent check
+                const prevColor = index > 0 ? existingResponseOffsets[index]?.color : undefined;
+                return {
+                  x: getRandomXOffset(response.id + "xoffset"),
+                  y: 0,
+                  rotation: 0,
+                  color: getRandomColor(response.id + "color", prevColor),
+                };
+              })();
               const noteId = `response-${response.id}`;
               const isFlipped = flippedNotes[noteId] || false;
 
               // Calculate overlap for this note (-13 to -26px)
               const overlapSeed = seededRandom(response.id + "overlap");
-              const overlap = 13 + (overlapSeed * 13); // 13-26px overlap
-              
+              const overlap = 13 + overlapSeed * 13; // 13-26px overlap
+
               // Calculate cumulative top position
               let cumulativeTop = 320; // Start after the question note
               for (let i = 0; i < index; i++) {
-                const prevSeed = seededRandom((thread.responses[i + 1]?.id || "default") + "overlap");
-                const prevOverlap = 13 + (prevSeed * 13);
-                cumulativeTop += (320 - prevOverlap);
+                const prevSeed = seededRandom(
+                  (thread.responses[i + 1]?.id || "default") + "overlap"
+                );
+                const prevOverlap = 13 + prevSeed * 13;
+                cumulativeTop += 320 - prevOverlap;
               }
               cumulativeTop -= overlap; // Apply current note's overlap
 
@@ -827,7 +880,7 @@ export default function NotePage() {
                             style={{
                               fontFamily: "var(--font-sans)",
                               fontSize: "16px", // Updated to match new font size
-                              lineHeight: "22px", // Updated to match new line height  
+                              lineHeight: "22px", // Updated to match new line height
                               fontWeight: "500",
                               color: offset.color.secondary,
                               textAlign: "left",
@@ -839,7 +892,7 @@ export default function NotePage() {
                           >
                             {response.drawingData}
                           </div>
-                          
+
                           {/* Signature at bottom - crossout for non-first connections */}
                           {response.authorName && (
                             <div
@@ -848,7 +901,6 @@ export default function NotePage() {
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "center",
-                                transform: "scale(0.33)",
                                 transformOrigin: "center",
                               }}
                             >
@@ -866,14 +918,6 @@ export default function NotePage() {
                                   alt="crossed out signature"
                                   width={64}
                                   height={16}
-                                  style={{
-                                    filter: (() => {
-                                      // Find the matching note color for proper filter
-                                      const noteColor = NOTE_COLORS.find(c => c.secondary === offset.color.secondary);
-                                      return noteColor ? `${noteColor.filter} opacity(0.8)` : 'opacity(0.8)';
-                                    })(),
-                                    objectFit: "contain",
-                                  }}
                                 />
                               )}
                             </div>
@@ -882,54 +926,56 @@ export default function NotePage() {
                       )
                     }
                   />
-
                 </div>
               );
             })}
 
           {/* Active Response Note */}
-          {canEdit && (() => {
-            // Calculate position for active response note
-            const activeSeed = seededRandom(thread.id + "active-response");
-            const activeOverlap = 13 + (activeSeed * 13); // 13-26px overlap
-            
-            // Calculate cumulative top position for active note
-            let activeTop = 320; // Start after the question note
-            for (let i = 0; i < thread.responses.length - 1; i++) {
-              const prevSeed = seededRandom((thread.responses[i + 1]?.id || "default") + "overlap");
-              const prevOverlap = 13 + (prevSeed * 13);
-              activeTop += (320 - prevOverlap);
-            }
-            activeTop -= activeOverlap; // Apply current note's overlap
-            
-            return (
-              <div
-                style={{
-                  position: "absolute",
-                  top: `${activeTop}px`,
-                  left: "50%",
-                  transform: `translateX(-50%) translate(${responseNoteOffset.x}px, 0)`,
-                  zIndex: 200,
-                }}
-              >
-                <FlippableNote
-                  ref={activeNoteRef}
-                  width={320}
-                  height={320}
-                  background={responseNoteOffset.color.bg}
-                  isEditable={true}
-                  authorName={authorNameDrawing}
-                  onAuthorNameChange={setAuthorNameDrawing}
-                  isFlipped={flippedNotes["active-note"] || false}
-                  isTypingMode={true}
-                  typedText={typedResponse}
-                  onTextChange={setTypedResponse}
-                  noteColor={responseNoteOffset.color}
-                  onUndo={() => activeNoteRef.current?.handleUndo()}
-                />
-              </div>
-            );
-          })()}
+          {canEdit &&
+            (() => {
+              // Calculate position for active response note
+              const activeSeed = seededRandom(thread.id + "active-response");
+              const activeOverlap = 13 + activeSeed * 13; // 13-26px overlap
+
+              // Calculate cumulative top position for active note
+              let activeTop = 320; // Start after the question note
+              for (let i = 0; i < thread.responses.length - 1; i++) {
+                const prevSeed = seededRandom(
+                  (thread.responses[i + 1]?.id || "default") + "overlap"
+                );
+                const prevOverlap = 13 + prevSeed * 13;
+                activeTop += 320 - prevOverlap;
+              }
+              activeTop -= activeOverlap; // Apply current note's overlap
+
+              return (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: `${activeTop}px`,
+                    left: "50%",
+                    transform: `translateX(-50%) translate(${responseNoteOffset.x}px, 0)`,
+                    zIndex: 200,
+                  }}
+                >
+                  <FlippableNote
+                    ref={activeNoteRef}
+                    width={320}
+                    height={320}
+                    background={responseNoteOffset.color.bg}
+                    isEditable={true}
+                    authorName={authorNameDrawing}
+                    onAuthorNameChange={setAuthorNameDrawing}
+                    isFlipped={flippedNotes["active-note"] || false}
+                    isTypingMode={true}
+                    typedText={typedResponse}
+                    onTextChange={setTypedResponse}
+                    noteColor={responseNoteOffset.color}
+                    onUndo={() => activeNoteRef.current?.handleUndo()}
+                  />
+                </div>
+              );
+            })()}
         </div>
 
         {/* Bottom buttons - always show when editing */}
@@ -945,10 +991,12 @@ export default function NotePage() {
             {/* Back button - only show when flipped */}
             {flippedNotes["active-note"] && (
               <button
-                onClick={() => setFlippedNotes((prev) => ({
-                  ...prev,
-                  "active-note": false,
-                }))}
+                onClick={() =>
+                  setFlippedNotes((prev) => ({
+                    ...prev,
+                    "active-note": false,
+                  }))
+                }
                 style={{
                   background: "#E5E1DE",
                   border: "none",
@@ -964,7 +1012,7 @@ export default function NotePage() {
                 &lt;
               </button>
             )}
-            
+
             {/* Main action button */}
             <button
               onClick={async () => {
@@ -1015,8 +1063,7 @@ export default function NotePage() {
                 ? "sending your note..."
                 : !flippedNotes["active-note"]
                 ? "1. sign this note >"
-                : "2. pass this note >"
-              }
+                : "2. pass this note >"}
             </button>
           </div>
         )}
