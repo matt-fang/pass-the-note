@@ -957,6 +957,10 @@ export default function NotePage() {
                                 return isDirectConnection ? (
                                   // Direct connection - show actual signature
                                   <div
+                                    style={{
+                                      transform: "scale(0.33)",
+                                      transformOrigin: "center",
+                                    }}
                                     dangerouslySetInnerHTML={{
                                       __html: response.authorName,
                                     }}
