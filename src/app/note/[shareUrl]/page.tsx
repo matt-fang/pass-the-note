@@ -568,67 +568,53 @@ export default function NotePage() {
               frontContent={
                 <div
                   style={{
-                    width: "240px",
+                    width: "280px",
                     height: "240px",
                     display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontFamily: "var(--font-handwritten)",
-                    fontSize: "18px",
-                    lineHeight: "1.4",
-                    color: "var(--text-dark)",
-                    textAlign: "center",
-                    padding: "20px",
-                    overflow: "hidden",
-                    wordBreak: "break-word",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    padding: "19px",
+                    boxSizing: "border-box",
                   }}
                 >
-                  {thread.question}
+                  {/* Question text */}
+                  <div
+                    style={{
+                      fontFamily: "var(--font-handwritten)",
+                      fontSize: "18px",
+                      lineHeight: "1.4",
+                      color: "var(--text-dark)",
+                      textAlign: "center",
+                      overflow: "hidden",
+                      wordBreak: "break-word",
+                      flex: 1,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginBottom: "19px",
+                    }}
+                  >
+                    {thread.question}
+                  </div>
+                  
+                  {/* Signature at bottom */}
+                  {thread.responses[0]?.authorName && (
+                    <div
+                      style={{
+                        height: "34px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                      dangerouslySetInnerHTML={{
+                        __html: thread.responses[0].authorName,
+                      }}
+                    />
+                  )}
                 </div>
               }
             />
 
-            {/* Toolbar for question note */}
-            <div
-              style={{
-                width: "54px",
-                height: "320px",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              {/* Flip button only */}
-              <button
-                onClick={() =>
-                  setFlippedNotes((prev) => ({
-                    ...prev,
-                    "question-note": !prev["question-note"],
-                  }))
-                }
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  padding: "8px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/flip.svg"
-                  alt="flip"
-                  style={{
-                    height: "14px",
-                    width: "auto",
-                    filter: "brightness(0)",
-                  }}
-                />
-              </button>
-            </div>
           </div>
 
           {/* Existing Response Notes */}
@@ -694,67 +680,52 @@ export default function NotePage() {
                       ) : (
                         <div
                           style={{
-                            width: "240px",
+                            width: "280px",
                             height: "240px",
                             display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontFamily: "var(--font-handwritten)",
-                            fontSize: "18px",
-                            lineHeight: "1.4",
-                            color: "var(--text-dark)",
-                            textAlign: "center",
-                            padding: "20px",
-                            overflow: "hidden",
-                            wordBreak: "break-word",
+                            flexDirection: "column",
+                            justifyContent: "space-between",
+                            padding: "19px",
+                            boxSizing: "border-box",
                           }}
                         >
-                          {response.drawingData}
+                          {/* Answer text */}
+                          <div
+                            style={{
+                              fontFamily: "var(--font-sans)",
+                              fontSize: "13px",
+                              lineHeight: "18px",
+                              fontWeight: "500",
+                              color: offset.color.secondary,
+                              textAlign: "left",
+                              overflow: "hidden",
+                              wordBreak: "break-word",
+                              flex: 1,
+                              marginBottom: "19px",
+                            }}
+                          >
+                            {response.drawingData}
+                          </div>
+                          
+                          {/* Signature at bottom */}
+                          {response.authorName && (
+                            <div
+                              style={{
+                                height: "34px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
+                              dangerouslySetInnerHTML={{
+                                __html: response.authorName,
+                              }}
+                            />
+                          )}
                         </div>
                       )
                     }
                   />
 
-                  {/* Toolbar for existing notes */}
-                  <div
-                    style={{
-                      width: "54px",
-                      height: "320px",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    {/* Flip button only */}
-                    <button
-                      onClick={() =>
-                        setFlippedNotes((prev) => ({
-                          ...prev,
-                          [noteId]: !prev[noteId],
-                        }))
-                      }
-                      style={{
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        padding: "8px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <img
-                        src="/flip.svg"
-                        alt="flip"
-                        style={{
-                          height: "14px",
-                          width: "auto",
-                          filter: "brightness(0)",
-                        }}
-                      />
-                    </button>
-                  </div>
                 </div>
               );
             })}
@@ -782,81 +753,9 @@ export default function NotePage() {
                 isTypingMode={true}
                 typedText={typedResponse}
                 onTextChange={setTypedResponse}
+                noteColor={responseNoteOffset.color}
               />
 
-              {/* Toolbar for active note with flip + undo */}
-              <div
-                style={{
-                  width: "54px",
-                  height: "320px",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "18px",
-                }}
-              >
-                {/* Flip button */}
-                <button
-                  onClick={() =>
-                    setFlippedNotes((prev) => ({
-                      ...prev,
-                      "active-note": !prev["active-note"],
-                    }))
-                  }
-                  style={{
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    padding: "8px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <img
-                    src="/flip.svg"
-                    alt="flip"
-                    style={{
-                      height: "14px",
-                      width: "auto",
-                      filter: "brightness(0)",
-                    }}
-                  />
-                </button>
-
-                {/* Undo button - only for active note */}
-                <button
-                  onClick={() => {
-                    if (flippedNotes["active-note"] && activeNoteRef.current) {
-                      activeNoteRef.current.handleUndo();
-                    }
-                  }}
-                  disabled={!flippedNotes["active-note"]}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    cursor: flippedNotes["active-note"] ? "pointer" : "default",
-                    padding: "8px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    opacity: flippedNotes["active-note"] ? 1 : 0.5,
-                  }}
-                >
-                  <img
-                    src="/undo.svg"
-                    alt="undo"
-                    style={{
-                      height: "14px",
-                      width: "auto",
-                      filter: flippedNotes["active-note"]
-                        ? "brightness(0)"
-                        : "brightness(0) saturate(100%) invert(73%) sepia(0%) saturate(2%) hue-rotate(169deg) brightness(96%) contrast(86%)",
-                    }}
-                  />
-                </button>
-              </div>
             </div>
           )}
         </div>

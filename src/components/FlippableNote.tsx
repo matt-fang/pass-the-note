@@ -138,14 +138,42 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
               }}
             >
               {isTypingMode ? (
-                <TypingCanvas
-                  width={240}
-                  height={240}
-                  onTextChange={onTextChange}
-                  initialText={typedText}
-                  disabled={!isEditable}
-                  placeholder="type here"
-                />
+                <div
+                  style={{
+                    width: "280px",
+                    height: "240px",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    padding: "0",
+                    boxSizing: "border-box",
+                  }}
+                >
+                  {/* Text input area - height adjusted to leave space for signature */}
+                  <div style={{ flex: 1, marginBottom: "19px" }}>
+                    <TypingCanvas
+                      width={280}
+                      height={187} // 240 - 34 (signature) - 19 (margin) = 187
+                      onTextChange={onTextChange}
+                      initialText={typedText}
+                      disabled={!isEditable}
+                      placeholder="type here"
+                      textColor={noteColor?.secondary || "var(--text-dark)"}
+                    />
+                  </div>
+                  
+                  {/* Signature space at bottom */}
+                  <div
+                    style={{
+                      height: "34px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {/* Signature will be added when note is flipped and signed */}
+                  </div>
+                </div>
               ) : (
                 frontContent
               )}

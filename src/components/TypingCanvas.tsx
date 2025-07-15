@@ -9,6 +9,7 @@ interface TypingCanvasProps {
   initialText?: string;
   disabled?: boolean;
   placeholder?: string;
+  textColor?: string;
 }
 
 export default function TypingCanvas({ 
@@ -17,7 +18,8 @@ export default function TypingCanvas({
   onTextChange,
   initialText = '',
   disabled = false,
-  placeholder = 'type here'
+  placeholder = 'type here',
+  textColor = 'var(--text-dark)'
 }: TypingCanvasProps) {
   const [text, setText] = useState(initialText);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -80,14 +82,15 @@ export default function TypingCanvas({
           background: 'transparent',
           resize: 'none',
           outline: 'none',
-          textAlign: 'center',
-          fontFamily: 'var(--font-handwritten)',
-          fontSize: '18px',
-          lineHeight: '1.4',
-          color: 'var(--text-dark)',
-          padding: '20px',
+          textAlign: 'left',
+          verticalAlign: 'top',
+          fontFamily: 'var(--font-sans)',
+          fontSize: '13px',
+          lineHeight: '18px',
+          fontWeight: '500',
+          color: textColor,
+          padding: '19px',
           overflow: 'hidden',
-          verticalAlign: 'middle',
           // Make placeholder lighter
           '::placeholder': {
             color: 'var(--text-light)',
