@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useImperativeHandle, forwardRef } from "react";
+import { useRef, useImperativeHandle, forwardRef, useEffect, useState } from "react";
 import SVGDrawingCanvas, { SVGDrawingCanvasRef } from "./SVGDrawingCanvas";
 import TypingCanvas from "./TypingCanvas";
+import NoiseFilter from "./NoiseFilter";
 
 interface FlippableNoteProps {
   width?: number;
@@ -50,6 +51,41 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
     ref
   ) => {
     const drawingCanvasRef = useRef<SVGDrawingCanvasRef>(null);
+    const [supportsSvgFilters, setSupportsSvgFilters] = useState(true);
+
+    useEffect(() => {
+      // Simple mobile detection - if mobile, use CSS texture
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      if (isMobile) {
+        setSupportsSvgFilters(false);
+      } else {
+        // Test if SVG filters are supported on desktop
+        const testSvgFilters = () => {
+          try {
+            const testElement = document.createElement('div');
+            testElement.style.filter = 'url(#note-noise)';
+            testElement.style.position = 'absolute';
+            testElement.style.top = '-9999px';
+            testElement.style.width = '1px';
+            testElement.style.height = '1px';
+            document.body.appendChild(testElement);
+            
+            // Small delay to ensure styles are applied
+            setTimeout(() => {
+              const computedStyle = window.getComputedStyle(testElement);
+              const supportsFilters = computedStyle.filter !== 'none';
+              document.body.removeChild(testElement);
+              setSupportsSvgFilters(supportsFilters);
+            }, 100);
+          } catch {
+            setSupportsSvgFilters(false);
+          }
+        };
+        
+        testSvgFilters();
+      }
+    }, []);
 
     const handleUndo = () => {
       if (drawingCanvasRef.current) {
@@ -90,8 +126,39 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
       handleUndo,
     }));
 
+    // CSS-based paper texture for mobile
+    const createPaperTextureOverlay = () => {
+      if (supportsSvgFilters) return null;
+      
+      return (
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: `
+              radial-gradient(circle at 20% 30%, rgba(0,0,0,0.03) 1px, transparent 1px),
+              radial-gradient(circle at 80% 70%, rgba(0,0,0,0.02) 1px, transparent 1px),
+              radial-gradient(circle at 40% 80%, rgba(0,0,0,0.025) 1px, transparent 1px),
+              radial-gradient(circle at 60% 20%, rgba(0,0,0,0.015) 1px, transparent 1px),
+              radial-gradient(circle at 30% 60%, rgba(0,0,0,0.02) 1px, transparent 1px),
+              radial-gradient(circle at 90% 40%, rgba(0,0,0,0.01) 1px, transparent 1px)
+            `,
+            backgroundSize: '15px 15px, 25px 25px, 20px 20px, 30px 30px, 18px 18px, 12px 12px',
+            backgroundPosition: '0 0, 8px 8px, 4px 12px, 16px 4px, 12px 16px, 6px 10px',
+            pointerEvents: 'none',
+            borderRadius: 'inherit',
+            mixBlendMode: 'multiply',
+          }}
+        />
+      );
+    };
+
     return (
       <>
+        {supportsSvgFilters && <NoiseFilter />}
         <div
           className={`flippable-note-container ${className}`}
           style={{
@@ -124,6 +191,7 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
                 background,
                 boxShadow: "var(--note-shadow)",
                 border: "var(--note-border)",
+                filter: supportsSvgFilters ? "var(--note-noise-filter)" : "none",
                 padding: "40px",
                 boxSizing: "border-box",
                 display: "flex",
@@ -131,6 +199,7 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
                 justifyContent: "center",
               }}
             >
+              {createPaperTextureOverlay()}
               {isTypingMode ? (
                 <TypingCanvas
                   width={240}
@@ -156,6 +225,7 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
                 background: background,
                 boxShadow: "var(--note-shadow)",
                 border: "var(--note-border)",
+                filter: supportsSvgFilters ? "var(--note-noise-filter)" : "none",
                 padding: "20px",
                 boxSizing: "border-box",
                 transform: "rotateY(180deg)",
@@ -163,6 +233,7 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
                 flexDirection: "column",
               }}
             >
+              {createPaperTextureOverlay()}
               {/* From label */}
               <div
                 style={{
