@@ -6,19 +6,25 @@ import FlippableNote, { FlippableNoteRef } from "@/components/FlippableNote";
 
 const NOTE_COLORS = [
   {
-    bg: "var(--note-green)",
+    bg: "/greennote.jpg",
     secondary: "var(--note-green-secondary)",
     filter:
       "brightness(0) saturate(100%) invert(49%) sepia(8%) saturate(1128%) hue-rotate(75deg) brightness(95%) contrast(87%)",
   },
   {
-    bg: "var(--note-blue)",
+    bg: "/bluenote.jpg",
     secondary: "var(--note-blue-secondary)",
     filter:
       "brightness(0) saturate(100%) invert(55%) sepia(18%) saturate(1045%) hue-rotate(166deg) brightness(95%) contrast(92%)",
   },
   {
-    bg: "var(--note-beige)",
+    bg: "/beigenote.jpg",
+    secondary: "var(--note-beige-secondary)",
+    filter:
+      "brightness(0) saturate(100%) invert(71%) sepia(12%) saturate(361%) hue-rotate(351deg) brightness(97%) contrast(91%)",
+  },
+  {
+    bg: "/orangenote.jpg",
     secondary: "var(--note-beige-secondary)",
     filter:
       "brightness(0) saturate(100%) invert(71%) sepia(12%) saturate(361%) hue-rotate(351deg) brightness(97%) contrast(91%)",

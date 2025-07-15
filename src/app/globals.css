@@ -23,13 +23,6 @@
   --text-dark: #2a2a2a;
   --text-light: #666;
   
-  /* Note Colors */
-  --note-green: #E3E5E3;
-  --note-blue: #D3E3E9;
-  --note-beige: #F5E9DB;
-  --note-white: #ffffff;
-  --light-gray: #B8B9B9;
-  
   /* Note Secondary Colors */
   --note-green-secondary: #3EB2D1;
   --note-blue-secondary: #2FC6CB;
@@ -39,7 +32,6 @@
   --note-shadow: 1px -2px 4px 0px rgba(255, 255, 255, 0.25), -6px 61px 17px 0px rgba(4, 2, 1, 0.00), -4px 39px 16px 0px rgba(4, 2, 1, 0.01), -2px 22px 13px 0px rgba(4, 2, 1, 0.03), -1px 10px 10px 0px rgba(4, 2, 1, 0.04), 0px 2px 5px 0px rgba(4, 2, 1, 0.05);
   --note-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.15);
   --note-border: 1px solid rgba(255, 255, 255, 0.31);
-  --note-noise-filter: url(#note-noise);
   
   /* Fonts */
   --font-handwritten: 'Lore', cursive;
