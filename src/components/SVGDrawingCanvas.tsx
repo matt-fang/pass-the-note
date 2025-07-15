@@ -93,6 +93,29 @@ const SVGDrawingCanvas = forwardRef<SVGDrawingCanvasRef, SVGDrawingCanvasProps>(
   const generateSVGString = (): string => {
     if (paths.length === 0) return '';
     
+    // Calculate bounding box of all paths
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    
+    paths.forEach(path => {
+      path.points.forEach(point => {
+        minX = Math.min(minX, point.x);
+        minY = Math.min(minY, point.y);
+        maxX = Math.max(maxX, point.x);
+        maxY = Math.max(maxY, point.y);
+      });
+    });
+    
+    // Add padding around the content (stroke width / 2 + small buffer)
+    const padding = 10;
+    minX -= padding;
+    minY -= padding;
+    maxX += padding;
+    maxY += padding;
+    
+    // Ensure minimum size
+    const boundingWidth = Math.max(maxX - minX, 20);
+    const boundingHeight = Math.max(maxY - minY, 20);
+    
     const pathStrings = paths.map(path => {
       const d = createPathString(path.points);
       if (!d) return '';
@@ -100,7 +123,7 @@ const SVGDrawingCanvas = forwardRef<SVGDrawingCanvasRef, SVGDrawingCanvasProps>(
       return `<path d="${d}" stroke="${strokeColor}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.95"/>`;
     }).filter(Boolean);
 
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${pathStrings.join('')}</svg>`;
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${boundingWidth}" height="${boundingHeight}" viewBox="${minX} ${minY} ${boundingWidth} ${boundingHeight}">${pathStrings.join('')}</svg>`;
   };
 
   const getEventPos = (e: React.MouseEvent<SVGSVGElement> | React.TouchEvent<SVGSVGElement>): Point => {

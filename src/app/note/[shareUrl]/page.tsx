@@ -502,11 +502,11 @@ export default function NotePage() {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: (thread.responses.length > 1) ? "flex-start" : "center",
+        justifyContent: "flex-start",
         background: "var(--cream)",
         padding: "0 20px",
-        paddingTop: (thread.responses.length > 1) ? "140px" : "0",
-        paddingBottom: (thread.responses.length > 1) ? "120px" : "0",
+        paddingTop: "140px",
+        paddingBottom: "120px",
       }}
     >
       <Header showAbout={showAbout} onAboutChange={setShowAbout} />
@@ -528,7 +528,7 @@ export default function NotePage() {
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
-              gap: "22px", // Same as line height for consistent spacing
+              gap: "0px", // Zero spacing between signature and text
             }}
           >
             {/* Previous person's signature */}
