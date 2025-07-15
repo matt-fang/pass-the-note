@@ -464,13 +464,82 @@ export default function NotePage() {
                         transform: `rotate(0deg)`,
                       }}
                       frontContent={
-                        <DrawingCanvas
-                          width={240}
-                          height={240}
-                          initialData={response.drawingData}
-                          disabled={true}
-                          showClearButton={false}
-                        />
+                        // Check if it's SVG, old image data, or text
+                        response.drawingData.startsWith("<svg") ? (
+                          <div
+                            style={{
+                              width: "240px",
+                              height: "240px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                            dangerouslySetInnerHTML={{
+                              __html: response.drawingData,
+                            }}
+                          />
+                        ) : response.drawingData.startsWith("data:image") ? (
+                          <div
+                            style={{
+                              width: "240px",
+                              height: "240px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              backgroundImage: `url(${response.drawingData})`,
+                              backgroundSize: "contain",
+                              backgroundRepeat: "no-repeat",
+                              backgroundPosition: "center",
+                            }}
+                          />
+                        ) : (
+                          <div
+                            style={{
+                              width: "280px",
+                              height: "240px",
+                              display: "flex",
+                              flexDirection: "column",
+                              justifyContent: "space-between",
+                              padding: "19px",
+                              boxSizing: "border-box",
+                            }}
+                          >
+                            {/* Answer text */}
+                            <div
+                              style={{
+                                fontFamily: "var(--font-sans)",
+                                fontSize: "16px", // Updated to match new font size
+                                lineHeight: "22px", // Updated to match new line height
+                                fontWeight: "500",
+                                color: offset.color.secondary,
+                                textAlign: "left",
+                                overflow: "hidden",
+                                wordBreak: "break-word",
+                                flex: 1,
+                                marginBottom: "19px",
+                              }}
+                            >
+                              {response.drawingData}
+                            </div>
+                            
+                            {/* Signature at bottom */}
+                            {response.authorName && (
+                              <div
+                                style={{
+                                  height: "34px",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  transform: "scale(0.33)",
+                                  transformOrigin: "center",
+                                }}
+                                dangerouslySetInnerHTML={{
+                                  __html: response.authorName,
+                                }}
+                              />
+                            )}
+                          </div>
+                        )
                       }
                     />
                   </div>
@@ -756,8 +825,8 @@ export default function NotePage() {
                           <div
                             style={{
                               fontFamily: "var(--font-sans)",
-                              fontSize: "13px",
-                              lineHeight: "18px",
+                              fontSize: "16px", // Updated to match new font size
+                              lineHeight: "22px", // Updated to match new line height  
                               fontWeight: "500",
                               color: offset.color.secondary,
                               textAlign: "left",
