@@ -130,13 +130,12 @@ export default function NotePage() {
       const responseSeed = seededRandom(
         thread.id + "response" + (thread.responses.length - 1)
       );
+      // Calculate overlap: -13px to -26px (scaled from -12pt to -24pt)
+      const overlapAmount = -13 - (responseSeed * 13); // Random between -13 and -26
       setResponseNoteOffset({
-        x: (responseSeed - 0.5) * 40, // -20px to 20px
+        x: overlapAmount,
         y: 0,
-        rotation:
-          (seededRandom(thread.id + "rotation" + (thread.responses.length - 1)) -
-            0.5) *
-          6, // -3deg to 3deg
+        rotation: 0, // No rotation
         color: NOTE_COLORS[(colorIndex + 1) % NOTE_COLORS.length], // Different from main note
       });
     }
@@ -192,7 +191,7 @@ export default function NotePage() {
           authorName: authorNameDrawing || "",
           positionX: responseNoteOffset.x,
           positionY: responseNoteOffset.y,
-          rotation: responseNoteOffset.rotation,
+          rotation: 0, // Always 0 rotation
           noteColor: responseNoteOffset.color.bg,
           noteColorSecondary: responseNoteOffset.color.secondary,
         }),
@@ -455,7 +454,7 @@ export default function NotePage() {
                       background={offset.color.bg}
                       authorName={response.authorName || ""}
                       style={{
-                        transform: `rotate(${offset.rotation}deg)`,
+                        transform: `rotate(0deg)`,
                       }}
                       frontContent={
                         <DrawingCanvas
@@ -638,7 +637,7 @@ export default function NotePage() {
                     display: "flex",
                     alignItems: "center",
                     gap: "14px",
-                    transform: `translate(${offset.x}px, 0) rotate(${offset.rotation}deg)`,
+                    transform: `translate(${offset.x}px, 0) rotate(0deg)`,
                     zIndex: 100 + index + 1,
                   }}
                 >
@@ -737,7 +736,7 @@ export default function NotePage() {
                 display: "flex",
                 alignItems: "center",
                 gap: "14px",
-                transform: `translate(${responseNoteOffset.x}px, 0) rotate(${responseNoteOffset.rotation}deg)`,
+                transform: `translate(${responseNoteOffset.x}px, 0) rotate(0deg)`,
                 zIndex: 200,
               }}
             >

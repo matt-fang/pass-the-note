@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
         shareUrl: newShareUrl,
         positionX: positionX || 0,
         positionY: positionY || 0,
-        rotation: rotation || 0,
+        rotation: 0, // Always 0 rotation for new responses
         noteColor: noteColor || '#B8C5A6',
         noteColorSecondary: noteColorSecondary || '#A8B896'
       }
