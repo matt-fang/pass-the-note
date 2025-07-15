@@ -646,15 +646,16 @@ export default function NotePage() {
     <div
       style={{
         minHeight: "100vh",
-        overflow: "auto",
+        height: hasPassed ? "100vh" : "auto",
+        overflow: hasPassed ? "hidden" : "auto",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "flex-start",
+        justifyContent: hasPassed ? "center" : "flex-start",
         background: "var(--cream)",
-        padding: "0 20px",
-        paddingTop: "140px",
-        paddingBottom: "120px",
+        padding: hasPassed ? "0" : "0 20px",
+        paddingTop: hasPassed ? "0" : "140px",
+        paddingBottom: hasPassed ? "0" : "120px",
       }}
     >
       <Header showAbout={showAbout} onAboutChange={setShowAbout} />
@@ -737,7 +738,7 @@ export default function NotePage() {
 
               return `${totalHeight}px`;
             })(),
-            transform: notesSlideOut ? "translateX(100vw)" : "translateX(0)",
+            transform: notesSlideOut ? "translateY(-100vh)" : "translateY(0)",
             transition: "transform 0.6s ease-in-out",
           }}
         >
@@ -1106,38 +1107,81 @@ export default function NotePage() {
         {hasPassed && (
           <div
             style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
               textAlign: "center",
-              marginTop: "40px",
+              gap: "40px",
+              padding: "0 20px",
+              width: "100%",
+              maxWidth: "400px",
             }}
           >
             <div
               style={{
                 fontFamily: "var(--font-sans)",
                 fontWeight: "500",
-                fontSize: "24px",
-                lineHeight: "30px",
+                fontSize: "18px",
+                lineHeight: "24px",
                 color: "var(--text-dark)",
-                marginBottom: "20px",
               }}
             >
-              passed!
+              sent! check this link again when<br />
+              your friend fills out their note.
             </div>
-            <button
-              onClick={() => (window.location.href = "/")}
+            
+            <div
               style={{
-                background: "#FF5E01",
-                border: "none",
-                fontFamily: "var(--font-sans)",
-                fontWeight: "500",
-                fontSize: "14px",
-                lineHeight: "18px",
-                color: "white",
-                cursor: "pointer",
-                padding: "8px 10px",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "16px",
+                width: "100%",
               }}
             >
-              write your own note &gt;
-            </button>
+              <button
+                onClick={async () => {
+                  // Reinvoke share menu
+                  const shareUrl = window.location.href;
+                  await shareNatively(shareUrl);
+                }}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  fontFamily: "var(--font-sans)",
+                  fontWeight: "500",
+                  fontSize: "18px",
+                  lineHeight: "24px",
+                  color: "var(--text-dark)",
+                  cursor: "pointer",
+                  padding: "12px 0",
+                  textDecoration: "none",
+                }}
+              >
+                pass this note again &gt;
+              </button>
+              
+              <button
+                onClick={() => (window.location.href = "/")}
+                style={{
+                  background: "#FF5E01",
+                  border: "none",
+                  fontFamily: "var(--font-sans)",
+                  fontWeight: "500",
+                  fontSize: "18px",
+                  lineHeight: "24px",
+                  color: "white",
+                  cursor: "pointer",
+                  padding: "16px 24px",
+                  borderRadius: "0px",
+                  width: "100%",
+                  maxWidth: "300px",
+                }}
+              >
+                or, write your own note &gt;
+              </button>
+            </div>
           </div>
         )}
       </div>
