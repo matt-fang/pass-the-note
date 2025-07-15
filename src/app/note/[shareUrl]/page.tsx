@@ -425,7 +425,7 @@ export default function NotePage() {
             {/* All Response Notes */}
             {thread.responses.length > 1 &&
               thread.responses.slice(1).map((response, index) => {
-                if (!response.drawingData) return null;
+                if (!response.drawingData || response.drawingData.trim() === '') return null;
 
                 const offset = existingResponseOffsets[index + 1] || {
                   x: 0,
@@ -627,7 +627,7 @@ export default function NotePage() {
           {/* Existing Response Notes */}
           {thread.responses.length > 1 &&
             thread.responses.slice(1).map((response, index) => {
-              if (!response.drawingData) return null;
+              if (!response.drawingData || response.drawingData.trim() === '') return null;
 
               const offset = existingResponseOffsets[index + 1] || {
                 x: 0,
@@ -872,19 +872,19 @@ export default function NotePage() {
             disabled={
               isSubmitting ||
               !typedResponse.trim() ||
-              !!authorNameDrawing.trim()
+              !authorNameDrawing.trim()
             }
             style={{
               background:
-                isSubmitting || !typedResponse.trim() ? "#E5E1DE" : "#FF5E01",
+                isSubmitting || !typedResponse.trim() || !authorNameDrawing.trim() ? "#E5E1DE" : "#FF5E01",
               border: "none",
               fontFamily: "var(--font-sans)",
               fontWeight: "500",
               fontSize: "14px",
               lineHeight: "18px",
-              color: isSubmitting || !typedResponse.trim() ? "black" : "white",
+              color: isSubmitting || !typedResponse.trim() || !authorNameDrawing.trim() ? "black" : "white",
               cursor:
-                isSubmitting || !typedResponse.trim() ? "default" : "pointer",
+                isSubmitting || !typedResponse.trim() || !authorNameDrawing.trim() ? "default" : "pointer",
               padding: "8px 10px",
               marginTop: "40px",
             }}
