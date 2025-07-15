@@ -297,7 +297,7 @@ export default function Home() {
                       position: "absolute",
                       top: "50%",
                       left: "50%",
-                      transform: `translate(-50%, -50%) translate(${textOffset.x}px, ${textOffset.y}px)`,
+                      transform: `translate(calc(-50% + ${textOffset.x}px), calc(-50% + ${textOffset.y}px))`,
                     }}
                   >
                     {question}
@@ -366,7 +366,7 @@ export default function Home() {
                 padding: "8px 10px",
               }}
             >
-              <
+              &lt;
             </button>
           )}
           
