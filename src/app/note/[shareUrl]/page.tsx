@@ -525,26 +525,67 @@ export default function NotePage() {
           <div
             style={{
               textAlign: "center",
-              fontFamily: "var(--font-sans)",
-              fontWeight: "500",
-              fontSize: "16px",
-              lineHeight: "22px",
-              color: "var(--text-dark)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "22px", // Same as line height for consistent spacing
             }}
           >
-            your friend passed you this note.
-            <br />
-            write your answer below.
+            {/* Previous person's signature */}
+            {thread.responses.length > 0 && thread.responses[thread.responses.length - 1]?.authorName && (
+              <div
+                style={{
+                  transform: "scale(0.75)",
+                  transformOrigin: "center",
+                  filter: "brightness(0) saturate(100%) invert(0%)", // Make it black
+                }}
+                dangerouslySetInnerHTML={{
+                  __html: thread.responses[thread.responses.length - 1].authorName,
+                }}
+              />
+            )}
+            
+            {/* Text below signature */}
+            <div
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontWeight: "500",
+                fontSize: "16px",
+                lineHeight: "22px",
+                color: "var(--text-dark)",
+              }}
+            >
+              passed this note chain to you
+            </div>
           </div>
         )}
         
 
-        {/* Note Container - Simple Vertical Stack */}
+        {/* Note Container - Absolute Positioned for Overlap */}
         <div
           style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "-5px", // 5px overlap between notes
+            position: "relative",
+            width: "100%",
+            height: (() => {
+              // Calculate total height based on actual overlap amounts
+              let totalHeight = 320; // Base question note height
+              
+              // Add height for existing responses
+              for (let i = 0; i < thread.responses.length - 1; i++) {
+                const overlapSeed = seededRandom((thread.responses[i + 1]?.id || "default") + "overlap");
+                const overlap = 13 + (overlapSeed * 13); // 13-26px overlap
+                totalHeight += (320 - overlap);
+              }
+              
+              // Add height for active response note if editing
+              if (canEdit) {
+                const activeSeed = seededRandom(thread.id + "active-response");
+                const activeOverlap = 13 + (activeSeed * 13);
+                totalHeight += (320 - activeOverlap);
+              }
+              
+              return `${totalHeight}px`;
+            })(),
             transform: notesSlideOut ? "translateX(100vw)" : "translateX(0)",
             transition: "transform 0.6s ease-in-out",
           }}
@@ -552,10 +593,11 @@ export default function NotePage() {
           {/* Main Question Note */}
           <div
             style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "14px",
-              transform: `translate(${textOffset.x}px, ${textOffset.y}px)`,
+              position: "absolute",
+              top: "0px",
+              left: "50%",
+              transform: `translateX(-50%) translate(${textOffset.x}px, ${textOffset.y}px)`,
+              zIndex: 100,
             }}
           >
             <FlippableNote
@@ -632,14 +674,27 @@ export default function NotePage() {
               const noteId = `response-${response.id}`;
               const isFlipped = flippedNotes[noteId] || false;
 
+              // Calculate overlap for this note (-13 to -26px)
+              const overlapSeed = seededRandom(response.id + "overlap");
+              const overlap = 13 + (overlapSeed * 13); // 13-26px overlap
+              
+              // Calculate cumulative top position
+              let cumulativeTop = 320; // Start after the question note
+              for (let i = 0; i < index; i++) {
+                const prevSeed = seededRandom((thread.responses[i + 1]?.id || "default") + "overlap");
+                const prevOverlap = 13 + (prevSeed * 13);
+                cumulativeTop += (320 - prevOverlap);
+              }
+              cumulativeTop -= overlap; // Apply current note's overlap
+
               return (
                 <div
                   key={response.id}
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "14px",
-                    transform: `translate(${offset.x}px, 0) rotate(0deg)`,
+                    position: "absolute",
+                    top: `${cumulativeTop}px`,
+                    left: "50%",
+                    transform: `translateX(-50%) translate(${offset.x}px, 0)`,
                     zIndex: 100 + index + 1,
                   }}
                 >
@@ -734,72 +789,136 @@ export default function NotePage() {
             })}
 
           {/* Active Response Note */}
-          {canEdit && (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "14px",
-                transform: `translate(${responseNoteOffset.x}px, 0) rotate(0deg)`,
-                zIndex: 200,
-              }}
-            >
-              <FlippableNote
-                ref={activeNoteRef}
-                width={320}
-                height={320}
-                background={responseNoteOffset.color.bg}
-                isEditable={true}
-                authorName={authorNameDrawing}
-                onAuthorNameChange={setAuthorNameDrawing}
-                isFlipped={flippedNotes["active-note"] || false}
-                isTypingMode={true}
-                typedText={typedResponse}
-                onTextChange={setTypedResponse}
-                noteColor={responseNoteOffset.color}
-              />
-
-            </div>
-          )}
+          {canEdit && (() => {
+            // Calculate position for active response note
+            const activeSeed = seededRandom(thread.id + "active-response");
+            const activeOverlap = 13 + (activeSeed * 13); // 13-26px overlap
+            
+            // Calculate cumulative top position for active note
+            let activeTop = 320; // Start after the question note
+            for (let i = 0; i < thread.responses.length - 1; i++) {
+              const prevSeed = seededRandom((thread.responses[i + 1]?.id || "default") + "overlap");
+              const prevOverlap = 13 + (prevSeed * 13);
+              activeTop += (320 - prevOverlap);
+            }
+            activeTop -= activeOverlap; // Apply current note's overlap
+            
+            return (
+              <div
+                style={{
+                  position: "absolute",
+                  top: `${activeTop}px`,
+                  left: "50%",
+                  transform: `translateX(-50%) translate(${responseNoteOffset.x}px, 0)`,
+                  zIndex: 200,
+                }}
+              >
+                <FlippableNote
+                  ref={activeNoteRef}
+                  width={320}
+                  height={320}
+                  background={responseNoteOffset.color.bg}
+                  isEditable={true}
+                  authorName={authorNameDrawing}
+                  onAuthorNameChange={setAuthorNameDrawing}
+                  isFlipped={flippedNotes["active-note"] || false}
+                  isTypingMode={true}
+                  typedText={typedResponse}
+                  onTextChange={setTypedResponse}
+                  noteColor={responseNoteOffset.color}
+                />
+              </div>
+            );
+          })()}
         </div>
 
-        {/* Pass button - shows when user has typed something */}
-        {canEdit && !hasPassed && (
-          <button
-            onClick={() => {
-              if (!authorNameDrawing.trim()) {
-                // No signature yet → flip to the back so they can sign
-                setFlippedNotes((prev) => ({
-                  ...prev,
-                  "active-note": !prev["active-note"],
-                }));
-              } else {
-                // Name is present → go ahead and pass the note
-                passNote();
-              }
-            }}
-            disabled={
-              isSubmitting ||
-              !typedResponse.trim() ||
-              !authorNameDrawing.trim()
-            }
+        {/* Bottom buttons - shows when user has typed something */}
+        {canEdit && !hasPassed && typedResponse.trim() && (
+          <div
             style={{
-              background:
-                isSubmitting || !typedResponse.trim() || !authorNameDrawing.trim() ? "#E5E1DE" : "#FF5E01",
-              border: "none",
-              fontFamily: "var(--font-sans)",
-              fontWeight: "500",
-              fontSize: "14px",
-              lineHeight: "18px",
-              color: isSubmitting || !typedResponse.trim() || !authorNameDrawing.trim() ? "black" : "white",
-              cursor:
-                isSubmitting || !typedResponse.trim() || !authorNameDrawing.trim() ? "default" : "pointer",
-              padding: "8px 10px",
               marginTop: "40px",
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
             }}
           >
-            {isSubmitting ? "sending your note..." : "pass the note on >"}
-          </button>
+            {/* Back button - only show when flipped */}
+            {flippedNotes["active-note"] && (
+              <button
+                onClick={() => setFlippedNotes((prev) => ({
+                  ...prev,
+                  "active-note": false,
+                }))}
+                style={{
+                  background: "#E5E1DE",
+                  border: "none",
+                  fontFamily: "var(--font-sans)",
+                  fontWeight: "500",
+                  fontSize: "14px",
+                  lineHeight: "18px",
+                  color: "black",
+                  cursor: "pointer",
+                  padding: "8px 10px",
+                }}
+              >
+                &lt;
+              </button>
+            )}
+            
+            {/* Main action button */}
+            <button
+              onClick={async () => {
+                if (!flippedNotes["active-note"]) {
+                  // If not flipped, flip to signing screen
+                  setFlippedNotes((prev) => ({
+                    ...prev,
+                    "active-note": true,
+                  }));
+                } else {
+                  // If flipped and signed, pass the note
+                  await passNote();
+                }
+              }}
+              disabled={
+                isSubmitting ||
+                !typedResponse.trim() ||
+                (flippedNotes["active-note"] && !authorNameDrawing.trim())
+              }
+              style={{
+                background:
+                  isSubmitting ||
+                  !typedResponse.trim() ||
+                  (flippedNotes["active-note"] && !authorNameDrawing.trim())
+                    ? "#E5E1DE"
+                    : "#FF5E01",
+                border: "none",
+                fontFamily: "var(--font-sans)",
+                fontWeight: "500",
+                fontSize: "14px",
+                lineHeight: "18px",
+                color:
+                  isSubmitting ||
+                  !typedResponse.trim() ||
+                  (flippedNotes["active-note"] && !authorNameDrawing.trim())
+                    ? "black"
+                    : "white",
+                cursor:
+                  isSubmitting ||
+                  !typedResponse.trim() ||
+                  (flippedNotes["active-note"] && !authorNameDrawing.trim())
+                    ? "default"
+                    : "pointer",
+                padding: "8px 10px",
+              }}
+            >
+              {isSubmitting
+                ? "sending your note..."
+                : !flippedNotes["active-note"]
+                ? "1. sign this note >"
+                : "2. pass this note >"
+              }
+            </button>
+          </div>
         )}
 
         {/* Passed state - shows after note is passed */}
