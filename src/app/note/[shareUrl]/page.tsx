@@ -216,12 +216,7 @@ export default function NotePage() {
             : undefined;
 
         // Use stored data if available, otherwise generate random data
-        const hasStoredColor =
-          response.noteColor &&
-          response.noteColor.trim() !== "" &&
-          response.noteColorSecondary &&
-          response.noteColorSecondary.trim() !== "";
-        const color = hasStoredColor
+        const color = response.noteColor
           ? {
               bg: response.noteColor,
               secondary: response.noteColorSecondary,
@@ -457,51 +452,99 @@ export default function NotePage() {
             here&apos;s the conversation so far.
           </div>
 
-          {/* Note Container - Read Only */}
+          {/* Note Container - Read Only - Using same layout as active editing */}
           <div
             style={{
               position: "relative",
-              minHeight: `${Math.max(
-                320,
-                ...thread.responses
-                  .slice(1)
-                  .map((r) => 314 + (r.positionY || 0) + 320)
-              )}px`,
+              width: "100%",
+              height: (() => {
+                // Calculate total height based on actual overlap amounts
+                let totalHeight = 320; // Base question note height
+
+                // Add height for existing responses
+                for (let i = 0; i < thread.responses.length - 1; i++) {
+                  const overlapSeed = seededRandom(
+                    (thread.responses[i + 1]?.id || "default") + "overlap"
+                  );
+                  const overlap = 13 + overlapSeed * 13; // 13-26px overlap
+                  totalHeight += 320 - overlap;
+                }
+
+                return `${totalHeight}px`;
+              })(),
             }}
           >
             {/* Main Question Note */}
             <div
               style={{
-                width: "320px",
-                height: "320px",
-                backgroundImage: `url(${ORANGE_NOTE_COLOR.bg})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                backgroundRepeat: "no-repeat",
-                boxShadow: "var(--note-shadow)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "40px",
-                boxSizing: "border-box",
+                position: "absolute",
+                top: "0px",
+                left: "50%",
+                transform: `translateX(-50%) translate(${textOffset.x}px, ${textOffset.y}px)`,
+                zIndex: 100,
               }}
             >
-              <div
-                style={{
-                  fontFamily: "var(--font-handwritten)",
-                  fontSize: "18px",
-                  lineHeight: "1.4",
-                  color: ORANGE_NOTE_COLOR.secondary,
-                  textAlign: "center",
-                  width: "100%",
-                  transform: `translate(${textOffset.x}px, ${textOffset.y}px)`,
-                }}
-              >
-                {thread.question}
-              </div>
+              <FlippableNote
+                width={320}
+                height={320}
+                background={ORANGE_NOTE_COLOR.bg}
+                noteColor={ORANGE_NOTE_COLOR}
+                authorName={thread.responses[0]?.authorName || ""}
+                frontContent={
+                  <div
+                    style={{
+                      width: "280px",
+                      height: "240px",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "space-between",
+                      padding: "19px",
+                      boxSizing: "border-box",
+                    }}
+                  >
+                    {/* Question text */}
+                    <div
+                      style={{
+                        fontFamily: "var(--font-handwritten)",
+                        fontSize: "18px",
+                        lineHeight: "1.4",
+                        color: ORANGE_NOTE_COLOR.secondary,
+                        textAlign: "center",
+                        overflow: "hidden",
+                        wordBreak: "break-word",
+                        flex: 1,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginBottom: "19px",
+                      }}
+                    >
+                      {thread.question}
+                    </div>
+
+                    {/* Signature at bottom */}
+                    {thread.responses[0]?.authorName && (
+                      <div
+                        style={{
+                          height: "34px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          transform: "scale(0.33)",
+                          transformOrigin: "center",
+                          filter: ORANGE_NOTE_COLOR.filter,
+                        }}
+                        dangerouslySetInnerHTML={{
+                          __html: thread.responses[0].authorName,
+                        }}
+                      />
+                    )}
+                  </div>
+                }
+              />
             </div>
 
-            {/* All Response Notes */}
+            {/* Existing Response Notes */}
             {thread.responses.length > 1 &&
               thread.responses.slice(1).map((response, index) => {
                 if (!response.drawingData || response.drawingData.trim() === "")
@@ -523,13 +566,29 @@ export default function NotePage() {
                     };
                   })();
 
+                // Calculate overlap for this note (-13 to -26px)
+                const overlapSeed = seededRandom(response.id + "overlap");
+                const overlap = 13 + overlapSeed * 13; // 13-26px overlap
+
+                // Calculate cumulative top position
+                let cumulativeTop = 320; // Start after the question note
+                for (let i = 0; i < index; i++) {
+                  const prevSeed = seededRandom(
+                    (thread.responses[i + 1]?.id || "default") + "overlap"
+                  );
+                  const prevOverlap = 13 + prevSeed * 13;
+                  cumulativeTop += 320 - prevOverlap;
+                }
+                cumulativeTop -= overlap;
+
                 return (
                   <div
                     key={response.id}
                     style={{
                       position: "absolute",
-                      top: `${314 + offset.y}px`,
-                      left: `${offset.x}px`,
+                      top: `${cumulativeTop}px`,
+                      left: "50%",
+                      transform: `translateX(-50%) translate(${offset.x}px, 0)`,
                       zIndex: 100 + index + 1,
                     }}
                   >
@@ -538,9 +597,6 @@ export default function NotePage() {
                       height={320}
                       background={offset.color.bg}
                       authorName={response.authorName || ""}
-                      style={{
-                        transform: `rotate(0deg)`,
-                      }}
                       frontContent={
                         // Check if it's SVG, old image data, or text
                         response.drawingData.startsWith("<svg") ? (
@@ -586,8 +642,8 @@ export default function NotePage() {
                             <div
                               style={{
                                 fontFamily: "var(--font-sans)",
-                                fontSize: "16px", // Updated to match new font size
-                                lineHeight: "22px", // Updated to match new line height
+                                fontSize: "16px",
+                                lineHeight: "22px",
                                 fontWeight: "500",
                                 color: offset.color.secondary,
                                 textAlign: "left",
@@ -608,13 +664,30 @@ export default function NotePage() {
                                   display: "flex",
                                   alignItems: "center",
                                   justifyContent: "center",
-                                  transform: "scale(0.33)",
                                   transformOrigin: "center",
                                 }}
-                                dangerouslySetInnerHTML={{
-                                  __html: response.authorName,
-                                }}
-                              />
+                              >
+                                {index === 0 ? (
+                                  // First connection - show actual signature
+                                  <div
+                                    style={{
+                                      transform: "scale(0.33)",
+                                      transformOrigin: "center",
+                                    }}
+                                    dangerouslySetInnerHTML={{
+                                      __html: response.authorName,
+                                    }}
+                                  />
+                                ) : (
+                                  // Farther connections - show crossout stroke
+                                  <Image
+                                    src={getCrossoutStroke(response.id)}
+                                    alt="crossed out signature"
+                                    width={128}
+                                    height={32}
+                                  />
+                                )}
+                              </div>
                             )}
                           </div>
                         )
@@ -715,7 +788,6 @@ export default function NotePage() {
             </div>
           </div>
         )}
-
         {/* Note Container - Absolute Positioned for Overlap */}
         <div
           style={{
@@ -944,52 +1016,22 @@ export default function NotePage() {
                                 transformOrigin: "center",
                               }}
                             >
-                              {(() => {
-                                // Calculate if this is a direct connection
-                                // If canEdit is true, I'm the current recipient
-                                const myResponseIndex =
-                                  thread.responses.length - 1;
-                                const senderIndex = thread.responses.length - 2;
-                                const actualIndex = index + 1; // Because we're using slice(1)
-
-                                // Show signature for: sender to me, me, person I send to
-                                const isDirectConnection =
-                                  canEdit &&
-                                  (actualIndex === senderIndex || // Person who sent to me
-                                    actualIndex === myResponseIndex || // My response
-                                    actualIndex === myResponseIndex + 1); // Person I send to
-
-                                return isDirectConnection ? (
-                                  // Direct connection - show actual signature
-                                  <div
-                                    dangerouslySetInnerHTML={{
-                                      __html: response.authorName,
-                                    }}
-                                  />
-                                ) : (
-                                  // Farther connections - show crossout stroke
-                                  <Image
-                                    src={getCrossoutStroke(response.id)}
-                                    alt="crossed out signature"
-                                    width={64}
-                                    height={16}
-                                    style={{
-                                      filter: (() => {
-                                        // Find the matching note color for proper filter
-                                        const noteColor = NOTE_COLORS.find(
-                                          (c) =>
-                                            c.secondary ===
-                                            offset.color.secondary
-                                        );
-                                        return noteColor
-                                          ? `${noteColor.filter} opacity(0.8)`
-                                          : "opacity(0.8)";
-                                      })(),
-                                      objectFit: "contain",
-                                    }}
-                                  />
-                                );
-                              })()}
+                              {index === 0 ? (
+                                // First connection - show actual signature
+                                <div
+                                  dangerouslySetInnerHTML={{
+                                    __html: response.authorName,
+                                  }}
+                                />
+                              ) : (
+                                // Farther connections - show crossout stroke
+                                <Image
+                                  src={getCrossoutStroke(response.id)}
+                                  alt="crossed out signature"
+                                  width={128}
+                                  height={32}
+                                />
+                              )}
                             </div>
                           )}
                         </div>
@@ -1047,7 +1089,6 @@ export default function NotePage() {
               );
             })()}
         </div>
-
         {/* Bottom buttons - always show when editing */}
         {canEdit && !hasPassed && (
           <div
@@ -1137,86 +1178,90 @@ export default function NotePage() {
             </button>
           </div>
         )}
-
         {/* Passed state - shows after note is passed */}
         {hasPassed && (
           <div
             style={{
               display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              textAlign: "center",
-              gap: "40px",
-              padding: "0 20px",
+              alignItems: "center", // vertical centering
+              justifyContent: "center", // horizontal centering
+              height: "100vh", // full viewport height
               width: "100%",
-              maxWidth: "400px",
             }}
           >
-            <div
-              style={{
-                fontFamily: "var(--font-sans)",
-                fontWeight: "500",
-                fontSize: "18px",
-                lineHeight: "24px",
-                color: "var(--text-dark)",
-              }}
-            >
-              sent! check this link again when
-              <br />
-              your friend fills out their note.
-            </div>
-
             <div
               style={{
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                gap: "16px",
+                justifyContent: "center",
+                textAlign: "center",
+                gap: "40px",
+                padding: "0 20px",
                 width: "100%",
+                maxWidth: "400px",
               }}
             >
-              <button
-                onClick={async () => {
-                  // Reinvoke share menu
-                  const shareUrl = window.location.href;
-                  await shareNatively(shareUrl);
-                }}
+              <div
                 style={{
-                  background: "transparent",
-                  border: "none",
                   fontFamily: "var(--font-sans)",
-                  fontWeight: "500",
+                  fontWeight: 500,
                   fontSize: "18px",
                   lineHeight: "24px",
                   color: "var(--text-dark)",
-                  cursor: "pointer",
-                  padding: "12px 0",
-                  textDecoration: "none",
                 }}
               >
-                pass this note again &gt;
-              </button>
+                sent! check this link again when
+                <br />
+                your friend fills out their note.
+              </div>
 
-              <button
-                onClick={() => (window.location.href = "/")}
+              <div
                 style={{
-                  background: "#FF5E01",
-                  border: "none",
-                  fontFamily: "var(--font-sans)",
-                  fontWeight: "500",
-                  fontSize: "18px",
-                  lineHeight: "24px",
-                  color: "white",
-                  cursor: "pointer",
-                  padding: "16px 24px",
-                  borderRadius: "0px",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "16px",
                   width: "100%",
-                  maxWidth: "300px",
                 }}
               >
-                or, write your own note &gt;
-              </button>
+                <button
+                  onClick={async () => {
+                    const shareUrl = window.location.href;
+                    await shareNatively(shareUrl);
+                  }}
+                  style={{
+                    background: "#E5E1DE",
+                    border: "none",
+                    fontFamily: "var(--font-sans)",
+                    fontWeight: 500,
+                    fontSize: "14px",
+                    lineHeight: "18px",
+                    color: "black",
+                    cursor: "pointer",
+                    padding: "8px 10px",
+                  }}
+                >
+                  pass this note again &gt;
+                </button>
+
+                <button
+                  onClick={() => (window.location.href = "/")}
+                  style={{
+                    background: "#FF5E01",
+                    border: "none",
+                    fontFamily: "var(--font-sans)",
+                    fontWeight: 500,
+                    fontSize: "14px",
+                    lineHeight: "18px",
+                    color: "white",
+                    cursor: "pointer",
+                    padding: "8px 10px",
+                  }}
+                >
+                  or, write your own note &gt;
+                </button>
+              </div>
             </div>
           </div>
         )}
