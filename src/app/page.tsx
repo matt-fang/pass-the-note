@@ -172,7 +172,7 @@ export default function Home() {
             color: "var(--text-dark)",
           }}
         >
-          {!isNoteFlipped ? (
+          {isNoteFlipped ? (
             <>
               sign it! (legibly)
               <br />
@@ -201,8 +201,9 @@ export default function Home() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "70px 20px", // Extra space for shadow (61px + buffer)
+            padding: "20px 20px", // Extra space for shadow (61px + buffer)
             gap: "14px", // 14px spacing between frames
+            overflow: "visible",
           }}
         >
           {/* Left Toolbar Frame - 54px wide (empty for now) */}
