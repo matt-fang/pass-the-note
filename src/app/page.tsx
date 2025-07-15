@@ -251,30 +251,16 @@ export default function Home() {
           )}
         </div>
 
-        {/* H-Stack Layout: Left Toolbar Frame | Note | Right Toolbar Frame */}
+        {/* Note Container */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             padding: "20px 20px", // Extra space for shadow (61px + buffer)
-            gap: "14px", // 14px spacing between frames
             overflow: "visible",
           }}
         >
-          {/* Left Toolbar Frame - 54px wide (empty for now) */}
-          <div
-            style={{
-              width: "54px",
-              height: `${noteSize}px`,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            {/* Empty for now */}
-          </div>
 
           {/* Note - centered */}
           <div
@@ -293,159 +279,127 @@ export default function Home() {
               authorName={authorNameDrawing}
               onAuthorNameChange={setAuthorNameDrawing}
               isFlipped={isNoteFlipped}
+              onUndo={() => {
+                if (flipNoteRef.current) {
+                  flipNoteRef.current.handleUndo();
+                }
+              }}
               frontContent={
-                <div
-                  style={{
-                    fontFamily: "var(--font-handwritten)",
-                    fontSize: `${fontSize}px`,
-                    lineHeight: "1.4",
-                    color: "var(--text-dark)",
-                    textAlign: "center",
-                    width: "100%",
-                    transform: `translate(${textOffset.x}px, ${textOffset.y}px)`,
-                  }}
-                >
-                  {question}
+                <div style={{ position: "relative", width: "100%", height: "100%" }}>
+                  <div
+                    style={{
+                      fontFamily: "var(--font-handwritten)",
+                      fontSize: `${fontSize}px`,
+                      lineHeight: "1.4",
+                      color: "var(--text-dark)",
+                      textAlign: "center",
+                      width: "100%",
+                      transform: `translate(${textOffset.x}px, ${textOffset.y}px)`,
+                      position: "absolute",
+                      top: "50%",
+                      left: "50%",
+                      transform: `translate(-50%, -50%) translate(${textOffset.x}px, ${textOffset.y}px)`,
+                    }}
+                  >
+                    {question}
+                  </div>
+                  {/* Shuffle button - positioned at bottom of note */}
+                  {question && (
+                    <button
+                      onClick={getNewQuestion}
+                      style={{
+                        position: "absolute",
+                        bottom: "12px",
+                        left: "50%",
+                        transform: "translateX(-50%)",
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        padding: "8px",
+                        borderRadius: "50%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontFamily: "var(--font-sans)",
+                          fontSize: "12px",
+                          fontWeight: "500",
+                          color: "var(--text-dark)",
+                        }}
+                      >
+                        shuffle
+                      </span>
+                    </button>
+                  )}
                 </div>
               }
             />
 
-            {/* Shuffle button - positioned at bottom of note */}
-            {question && (
-              <button
-                onClick={getNewQuestion}
-                style={{
-                  position: "absolute",
-                  bottom: "12px",
-                  left: "50%",
-                  transform: "translateX(-50%)",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  padding: "8px",
-                  borderRadius: "50%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <span
-                  style={{
-                    fontFamily: "var(--font-sans)",
-                    fontSize: "12px",
-                    fontWeight: "500",
-                    color: "var(--text-dark)",
-                    opacity: noteOpacity,
-                    transition: "opacity 0.2s ease-in-out",
-                  }}
-                >
-                  shuffle
-                </span>
-              </button>
-            )}
           </div>
 
-          {/* Right Toolbar Frame - 54px wide with v-stack icons */}
-          <div
-            style={{
-              width: "54px",
-              height: `${noteSize}px`,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "18px",
-            }}
-          >
-            {/* Flip button - black */}
-            <button
-              onClick={() => setIsNoteFlipped(!isNoteFlipped)}
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                padding: "8px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <img
-                src="/flip.svg"
-                alt="flip"
-                style={{
-                  height: "14px",
-                  width: "auto", // Maintain aspect ratio like header icons
-                  filter: "brightness(0)", // Makes it black
-                }}
-              />
-            </button>
-
-            {/* Undo button - black when active, gray when inactive */}
-            <button
-              onClick={() => {
-                if (isNoteFlipped && flipNoteRef.current) {
-                  flipNoteRef.current.handleUndo();
-                }
-              }}
-              disabled={!isNoteFlipped}
-              style={{
-                background: "none",
-                border: "none",
-                cursor: isNoteFlipped ? "pointer" : "default",
-                padding: "8px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                opacity: isNoteFlipped ? 1 : 0.5,
-              }}
-            >
-              <img
-                src="/undo.svg"
-                alt="undo"
-                style={{
-                  height: "14px",
-                  width: "auto", // Maintain aspect ratio like header icons
-                  filter: isNoteFlipped
-                    ? "brightness(0)"
-                    : "brightness(0) saturate(100%) invert(73%) sepia(0%) saturate(2%) hue-rotate(169deg) brightness(96%) contrast(86%)",
-                }}
-              />
-            </button>
-          </div>
         </div>
 
-        {/* Share button with 80pt spacing */}
+        {/* Bottom buttons with 80pt spacing */}
         <div
           style={{
             marginTop: "10px", // 80pt spacing between note and button
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
           }}
         >
+          {/* Back button - only show when flipped */}
+          {isNoteFlipped && (
+            <button
+              onClick={() => setIsNoteFlipped(false)}
+              style={{
+                background: "#E5E1DE",
+                border: "none",
+                fontFamily: "var(--font-sans)",
+                fontWeight: "500",
+                fontSize: "14px",
+                lineHeight: "18px",
+                color: "black",
+                cursor: "pointer",
+                padding: "8px 10px",
+              }}
+            >
+              &lt;
+            </button>
+          )}
+          
+          {/* Main action button */}
           <button
             onClick={async () => {
-              if (!authorNameDrawing) {
-                // If no name is drawn, flip the note to the back for signing
+              if (!isNoteFlipped) {
+                // If not flipped, flip to signing screen
                 setIsNoteFlipped(true);
               } else {
-                // If name is drawn, save signature and share
+                // If flipped and signed, share the note
                 await shareNatively();
               }
             }}
-            disabled={!shareUrl}
+            disabled={!shareUrl || (isNoteFlipped && !authorNameDrawing)}
             style={{
               background:
-                !shareUrl || !authorNameDrawing ? "#E5E1DE" : "#FF5E01",
+                !shareUrl || (isNoteFlipped && !authorNameDrawing) ? "#E5E1DE" : "#FF5E01",
               border: "none",
               fontFamily: "var(--font-sans)",
               fontWeight: "500",
               fontSize: "14px",
               lineHeight: "18px",
-              color: !shareUrl || !authorNameDrawing ? "black" : "white",
-              cursor: !shareUrl || !authorNameDrawing ? "default" : "pointer",
+              color: !shareUrl || (isNoteFlipped && !authorNameDrawing) ? "black" : "white",
+              cursor: !shareUrl || (isNoteFlipped && !authorNameDrawing) ? "default" : "pointer",
               padding: "8px 10px",
             }}
           >
-            share this note &gt;
+            {!isNoteFlipped 
+              ? "sign this note &gt;" 
+              : "pass this note to a friend &gt;"
+            }
           </button>
         </div>
       </div>

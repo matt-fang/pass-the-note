@@ -233,6 +233,38 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
                 )}
               </div>
 
+              {/* Undo button - positioned at bottom of note back */}
+              {isEditable && onUndo && (
+                <button
+                  onClick={onUndo}
+                  style={{
+                    position: "absolute",
+                    bottom: "12px",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    padding: "8px",
+                    borderRadius: "50%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: "var(--font-sans)",
+                      fontSize: "12px",
+                      fontWeight: "500",
+                      color: "var(--text-dark)",
+                    }}
+                  >
+                    undo
+                  </span>
+                </button>
+              )}
+
               {/* Conversation button */}
               {showConversationButton && (
                 <div
