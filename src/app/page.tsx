@@ -308,7 +308,7 @@ export default function Home() {
                       onClick={getNewQuestion}
                       style={{
                         position: "absolute",
-                        bottom: "12px",
+                        bottom: "8px",
                         left: "50%",
                         transform: "translateX(-50%)",
                         background: "none",
