@@ -216,7 +216,11 @@ export default function NotePage() {
             : undefined;
 
         // Use stored data if available, otherwise generate random data
-        const hasStoredColor = response.noteColor && response.noteColor.trim() !== "" && response.noteColorSecondary && response.noteColorSecondary.trim() !== "";
+        const hasStoredColor =
+          response.noteColor &&
+          response.noteColor.trim() !== "" &&
+          response.noteColorSecondary &&
+          response.noteColorSecondary.trim() !== "";
         const color = hasStoredColor
           ? {
               bg: response.noteColor,
@@ -663,6 +667,7 @@ export default function NotePage() {
                                 style={{
                                   height: "34px",
                                   display: "flex",
+                                  transform: "scale(0.33)",
                                   alignItems: "center",
                                   justifyContent: "center",
                                   transformOrigin: "center",
@@ -671,17 +676,18 @@ export default function NotePage() {
                                 {(() => {
                                   // Calculate if this is a direct connection
                                   // In read view, I already responded, so I'm one of the existing responses
-                                  const myResponseIndex = thread.responses.length - 1;
-                                  const senderIndex = thread.responses.length - 2;
+                                  const myResponseIndex =
+                                    thread.responses.length - 1;
+                                  const senderIndex =
+                                    thread.responses.length - 2;
                                   const actualIndex = index + 1; // Because we're using slice(1)
-                                  
+
                                   // Show signature for: sender to me, me, person I send to
-                                  const isDirectConnection = (
+                                  const isDirectConnection =
                                     actualIndex === senderIndex || // Person who sent to me
-                                    actualIndex === myResponseIndex || // My response  
-                                    actualIndex === myResponseIndex + 1 // Person I send to
-                                  );
-                                  
+                                    actualIndex === myResponseIndex || // My response
+                                    actualIndex === myResponseIndex + 1; // Person I send to
+
                                   return isDirectConnection ? (
                                     // Direct connection - show actual signature
                                     <div
@@ -704,7 +710,9 @@ export default function NotePage() {
                                         filter: (() => {
                                           // Find the matching note color for proper filter
                                           const noteColor = NOTE_COLORS.find(
-                                            (c) => c.secondary === offset.color.secondary
+                                            (c) =>
+                                              c.secondary ===
+                                              offset.color.secondary
                                           );
                                           return noteColor
                                             ? `${noteColor.filter} opacity(0.8)`
@@ -1047,17 +1055,18 @@ export default function NotePage() {
                               {(() => {
                                 // Calculate if this is a direct connection
                                 // If canEdit is true, I'm the current recipient
-                                const myResponseIndex = thread.responses.length - 1;
+                                const myResponseIndex =
+                                  thread.responses.length - 1;
                                 const senderIndex = thread.responses.length - 2;
                                 const actualIndex = index + 1; // Because we're using slice(1)
-                                
+
                                 // Show signature for: sender to me, me, person I send to
-                                const isDirectConnection = canEdit && (
-                                  actualIndex === senderIndex || // Person who sent to me
-                                  actualIndex === myResponseIndex || // My response  
-                                  actualIndex === myResponseIndex + 1 // Person I send to
-                                );
-                                
+                                const isDirectConnection =
+                                  canEdit &&
+                                  (actualIndex === senderIndex || // Person who sent to me
+                                    actualIndex === myResponseIndex || // My response
+                                    actualIndex === myResponseIndex + 1); // Person I send to
+
                                 return isDirectConnection ? (
                                   // Direct connection - show actual signature
                                   <div
@@ -1080,7 +1089,9 @@ export default function NotePage() {
                                       filter: (() => {
                                         // Find the matching note color for proper filter
                                         const noteColor = NOTE_COLORS.find(
-                                          (c) => c.secondary === offset.color.secondary
+                                          (c) =>
+                                            c.secondary ===
+                                            offset.color.secondary
                                         );
                                         return noteColor
                                           ? `${noteColor.filter} opacity(0.8)`
