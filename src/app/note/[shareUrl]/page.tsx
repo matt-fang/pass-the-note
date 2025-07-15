@@ -561,7 +561,7 @@ export default function NotePage() {
             <FlippableNote
               width={320}
               height={320}
-              background={noteColor.bg}
+              background={existingResponseOffsets[0]?.color.bg || noteColor.bg}
               authorName={thread.responses[0]?.authorName || ""}
               isFlipped={flippedNotes["question-note"] || false}
               frontContent={
@@ -604,6 +604,8 @@ export default function NotePage() {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
+                        transform: "scale(0.5)",
+                        transformOrigin: "center",
                       }}
                       dangerouslySetInnerHTML={{
                         __html: thread.responses[0].authorName,
@@ -714,6 +716,8 @@ export default function NotePage() {
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "center",
+                                transform: "scale(0.5)",
+                                transformOrigin: "center",
                               }}
                               dangerouslySetInnerHTML={{
                                 __html: response.authorName,
