@@ -130,10 +130,10 @@ export default function NotePage() {
       const responseSeed = seededRandom(
         thread.id + "response" + (thread.responses.length - 1)
       );
-      // Calculate overlap: -13px to -26px (scaled from -12pt to -24pt)
-      const overlapAmount = -13 - (responseSeed * 13); // Random between -13 and -26
+      // Calculate random x-offset: -8px to +8px
+      const xOffset = (responseSeed - 0.5) * 16; // Random between -8 and +8
       setResponseNoteOffset({
-        x: overlapAmount,
+        x: xOffset,
         y: 0,
         rotation: 0, // No rotation
         color: NOTE_COLORS[(colorIndex + 1) % NOTE_COLORS.length], // Different from main note
@@ -646,7 +646,7 @@ export default function NotePage() {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        transform: "scale(0.5)",
+                        transform: "scale(0.33)",
                         transformOrigin: "center",
                       }}
                       dangerouslySetInnerHTML={{
@@ -771,7 +771,7 @@ export default function NotePage() {
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "center",
-                                transform: "scale(0.5)",
+                                transform: "scale(0.33)",
                                 transformOrigin: "center",
                               }}
                               dangerouslySetInnerHTML={{
