@@ -52,20 +52,44 @@ const SVGDrawingCanvas = forwardRef<SVGDrawingCanvasRef, SVGDrawingCanvasProps>(
         pathElements.forEach((pathEl, index) => {
           const d = pathEl.getAttribute('d');
           if (d) {
-            // Simple parsing - could be enhanced
+            // Better path parsing that handles M and L commands properly
             const points: Point[] = [];
-            const commands = d.split(/[ML]/);
-            commands.forEach(cmd => {
-              const coords = cmd.trim().split(/[\s,]+/).filter(Boolean);
-              for (let i = 0; i < coords.length; i += 2) {
-                if (coords[i] && coords[i + 1]) {
-                  points.push({
-                    x: parseFloat(coords[i]),
-                    y: parseFloat(coords[i + 1])
-                  });
+            
+            // Handle both line paths and circle paths (single points)
+            if (d.includes('a 2,2')) {
+              // This is a circle from a single point - extract the center
+              const circleMatch = d.match(/M\s*([\d.-]+)\s+([\d.-]+)/);
+              if (circleMatch) {
+                const x = parseFloat(circleMatch[1]);
+                const y = parseFloat(circleMatch[2]);
+                if (!isNaN(x) && !isNaN(y)) {
+                  points.push({ x, y });
                 }
               }
-            });
+            } else {
+              // This is a regular line path - match M or L commands followed by coordinate pairs
+              const commandMatches = d.match(/[ML]\s*[^ML]+/g);
+              
+              if (commandMatches) {
+                commandMatches.forEach(command => {
+                  const coords = command.replace(/[ML]\s*/, '').trim().split(/[\s,]+/).filter(Boolean);
+                  
+                  // Parse coordinate pairs
+                  for (let i = 0; i < coords.length; i += 2) {
+                    if (coords[i] && coords[i + 1]) {
+                      const x = parseFloat(coords[i]);
+                      const y = parseFloat(coords[i + 1]);
+                      
+                      // Only add valid coordinates
+                      if (!isNaN(x) && !isNaN(y)) {
+                        points.push({ x, y });
+                      }
+                    }
+                  }
+                });
+              }
+            }
+            
             if (points.length > 0) {
               loadedPaths.push({
                 points,
@@ -93,28 +117,44 @@ const SVGDrawingCanvas = forwardRef<SVGDrawingCanvasRef, SVGDrawingCanvasProps>(
   const generateSVGString = (): string => {
     if (paths.length === 0) return '';
     
-    // Calculate bounding box of all paths
+    // Calculate exact bounding box considering actual path geometry
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
     
     paths.forEach(path => {
-      path.points.forEach(point => {
-        minX = Math.min(minX, point.x);
-        minY = Math.min(minY, point.y);
-        maxX = Math.max(maxX, point.x);
-        maxY = Math.max(maxY, point.y);
-      });
+      if (path.points.length === 1) {
+        // Single point becomes a circle with radius 2
+        const p = path.points[0];
+        minX = Math.min(minX, p.x - 2);
+        minY = Math.min(minY, p.y - 2);
+        maxX = Math.max(maxX, p.x + 2);
+        maxY = Math.max(maxY, p.y + 2);
+      } else {
+        // Multiple points - use actual point coordinates
+        path.points.forEach(point => {
+          minX = Math.min(minX, point.x);
+          minY = Math.min(minY, point.y);
+          maxX = Math.max(maxX, point.x);
+          maxY = Math.max(maxY, point.y);
+        });
+      }
     });
     
-    // Add padding around the content (stroke width / 2 + small buffer)
-    const padding = 10;
-    minX -= padding;
-    minY -= padding;
-    maxX += padding;
-    maxY += padding;
+    // Handle edge case where we have no valid bounds
+    if (minX === Infinity) {
+      return '';
+    }
     
-    // Ensure minimum size
-    const boundingWidth = Math.max(maxX - minX, 20);
-    const boundingHeight = Math.max(maxY - minY, 20);
+    // Account for stroke width: stroke-width="6" means 3px on each side
+    // Round line caps can extend slightly beyond, so use 3px padding
+    const strokeRadius = 3;
+    minX -= strokeRadius;
+    minY -= strokeRadius;
+    maxX += strokeRadius;
+    maxY += strokeRadius;
+    
+    // Calculate exact dimensions
+    const boundingWidth = maxX - minX;
+    const boundingHeight = maxY - minY;
     
     const pathStrings = paths.map(path => {
       const d = createPathString(path.points);
