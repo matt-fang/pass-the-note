@@ -123,13 +123,13 @@ export default function NotePage() {
 
       // Use thread ID + response count for new response positioning
       const responseSeed = seededRandom(
-        thread.id + "response" + thread.responses.length
+        thread.id + "response" + (thread.responses.length - 1)
       );
       setResponseNoteOffset({
         x: (responseSeed - 0.5) * 40, // -20px to 20px
         y: 0,
         rotation:
-          (seededRandom(thread.id + "rotation" + thread.responses.length) -
+          (seededRandom(thread.id + "rotation" + (thread.responses.length - 1)) -
             0.5) *
           6, // -3deg to 3deg
         color: NOTE_COLORS[(colorIndex + 1) % NOTE_COLORS.length], // Different from main note
@@ -389,7 +389,7 @@ export default function NotePage() {
               position: "relative",
               minHeight: `${Math.max(
                 320,
-                ...thread.responses.map((r) => 314 + (r.positionY || 0) + 320)
+                ...thread.responses.slice(1).map((r) => 314 + (r.positionY || 0) + 320)
               )}px`,
             }}
           >
@@ -423,11 +423,11 @@ export default function NotePage() {
             </div>
 
             {/* All Response Notes */}
-            {thread.responses.length > 0 &&
-              thread.responses.map((response, index) => {
+            {thread.responses.length > 1 &&
+              thread.responses.slice(1).map((response, index) => {
                 if (!response.drawingData) return null;
 
-                const offset = existingResponseOffsets[index] || {
+                const offset = existingResponseOffsets[index + 1] || {
                   x: 0,
                   y: 0,
                   rotation: 0,
@@ -441,7 +441,7 @@ export default function NotePage() {
                       position: "absolute",
                       top: `${314 + offset.y}px`,
                       left: `${offset.x}px`,
-                      zIndex: 100 + index,
+                      zIndex: 100 + index + 1,
                     }}
                   >
                     <FlippableNote
@@ -497,11 +497,11 @@ export default function NotePage() {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: thread.responses.length > 0 ? "flex-start" : "center",
+        justifyContent: thread.responses.length > 1 ? "flex-start" : "center",
         background: "var(--cream)",
         padding: "0 20px",
-        paddingTop: thread.responses.length > 0 ? "140px" : "0",
-        paddingBottom: thread.responses.length > 0 ? "120px" : "0",
+        paddingTop: thread.responses.length > 1 ? "140px" : "0",
+        paddingBottom: thread.responses.length > 1 ? "120px" : "0",
       }}
     >
       <Header showAbout={showAbout} onAboutChange={setShowAbout} />
@@ -556,7 +556,7 @@ export default function NotePage() {
               width={320}
               height={320}
               background={noteColor.bg}
-              authorName={""} // TODO: Need to add authorName to Thread interface
+              authorName={thread.responses[0]?.authorName || ""}
               isFlipped={flippedNotes["question-note"] || false}
               frontContent={
                 <div
@@ -625,11 +625,11 @@ export default function NotePage() {
           </div>
 
           {/* Existing Response Notes */}
-          {thread.responses.length > 0 &&
-            thread.responses.map((response, index) => {
+          {thread.responses.length > 1 &&
+            thread.responses.slice(1).map((response, index) => {
               if (!response.drawingData) return null;
 
-              const offset = existingResponseOffsets[index] || {
+              const offset = existingResponseOffsets[index + 1] || {
                 x: 0,
                 y: 0,
                 rotation: 0,
@@ -646,7 +646,7 @@ export default function NotePage() {
                     alignItems: "center",
                     gap: "14px",
                     transform: `translate(${offset.x}px, 0) rotate(${offset.rotation}deg)`,
-                    zIndex: 100 + index,
+                    zIndex: 100 + index + 1,
                   }}
                 >
                   <FlippableNote

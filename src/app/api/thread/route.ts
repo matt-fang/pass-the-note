@@ -3,8 +3,9 @@ import { prisma } from '@/lib/prisma';
 import { getRandomQuestion } from '@/lib/questions';
 import { v4 as uuidv4 } from 'uuid';
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
+    const { authorName } = await request.json();
     const question = getRandomQuestion();
     const shareUrl = uuidv4();
     
@@ -15,7 +16,7 @@ export async function POST() {
           create: {
             drawingData: '',
             shareUrl,
-            authorName: 'Original Question'
+            authorName: authorName || 'Anonymous'
           }
         }
       },

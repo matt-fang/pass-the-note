@@ -57,6 +57,12 @@ export default function Home() {
     try {
       const response = await fetch("/api/thread", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          authorName: authorNameDrawing,
+        }),
       });
 
       if (response.ok) {
@@ -88,6 +94,12 @@ export default function Home() {
     try {
       const response = await fetch("/api/thread", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          authorName: authorNameDrawing,
+        }),
       });
 
       if (response.ok) {
