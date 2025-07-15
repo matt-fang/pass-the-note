@@ -97,7 +97,7 @@ const SVGDrawingCanvas = forwardRef<SVGDrawingCanvasRef, SVGDrawingCanvasProps>(
       const d = createPathString(path.points);
       if (!d) return '';
       
-      return `<path d="${d}" stroke="${strokeColor}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.95"/>`;
+      return `<path d="${d}" stroke="${strokeColor}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.95"/>`;
     }).filter(Boolean);
 
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${pathStrings.join('')}</svg>`;
@@ -235,7 +235,7 @@ const SVGDrawingCanvas = forwardRef<SVGDrawingCanvasRef, SVGDrawingCanvasProps>(
             key={path.id}
             d={createPathString(path.points)}
             stroke={strokeColor}
-            strokeWidth="3"
+            strokeWidth="6"
             strokeLinecap="round"
             strokeLinejoin="round"
             fill="none"
@@ -247,7 +247,7 @@ const SVGDrawingCanvas = forwardRef<SVGDrawingCanvasRef, SVGDrawingCanvasProps>(
           <path
             d={createPathString(currentPath)}
             stroke={strokeColor}
-            strokeWidth="3"
+            strokeWidth="6"
             strokeLinecap="round"
             strokeLinejoin="round"
             fill="none"
