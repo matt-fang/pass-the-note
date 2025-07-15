@@ -851,7 +851,7 @@ export default function NotePage() {
                                 transformOrigin: "center",
                               }}
                             >
-                              {index === 0 ? (
+                              {index > 0 ? (
                                 // First connection - show actual signature
                                 <div
                                   dangerouslySetInnerHTML={{
@@ -859,13 +859,13 @@ export default function NotePage() {
                                   }}
                                 />
                               ) : (
-                                // Non-first connection - show crossout stroke
+                                // Direct first connection - show crossout stroke
                                 <img
                                   src={getCrossoutStroke(response.id)}
                                   alt="crossed out signature"
                                   style={{
-                                    width: "60px",
-                                    height: "20px",
+                                    width: "80px", // Much bigger
+                                    height: "24px", // Much bigger (16px minimum)
                                     filter: (() => {
                                       // Find the matching note color for proper filter
                                       const noteColor = NOTE_COLORS.find(c => c.secondary === offset.color.secondary);
