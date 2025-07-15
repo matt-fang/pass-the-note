@@ -469,7 +469,10 @@ export default function NotePage() {
               style={{
                 width: "320px",
                 height: "320px",
-                background: "url(/orangenote.jpg)",
+                backgroundImage: `url(${ORANGE_NOTE_COLOR.bg})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
                 boxShadow: "var(--note-shadow)",
                 display: "flex",
                 alignItems: "center",
@@ -483,7 +486,7 @@ export default function NotePage() {
                   fontFamily: "var(--font-handwritten)",
                   fontSize: "18px",
                   lineHeight: "1.4",
-                  color: "white",
+                  color: ORANGE_NOTE_COLOR.secondary,
                   textAlign: "center",
                   width: "100%",
                   transform: `translate(${textOffset.x}px, ${textOffset.y}px)`,
@@ -751,7 +754,8 @@ export default function NotePage() {
             <FlippableNote
               width={320}
               height={320}
-              background="url(/orangenote.jpg)"
+              background={ORANGE_NOTE_COLOR.bg}
+              noteColor={ORANGE_NOTE_COLOR}
               authorName={thread.responses[0]?.authorName || ""}
               isFlipped={flippedNotes["question-note"] || false}
               frontContent={
@@ -772,7 +776,7 @@ export default function NotePage() {
                       fontFamily: "var(--font-handwritten)",
                       fontSize: "18px",
                       lineHeight: "1.4",
-                      color: "white",
+                      color: ORANGE_NOTE_COLOR.secondary,
                       textAlign: "center",
                       overflow: "hidden",
                       wordBreak: "break-word",
@@ -796,7 +800,7 @@ export default function NotePage() {
                         justifyContent: "center",
                         transform: "scale(0.33)",
                         transformOrigin: "center",
-                        filter: "invert(1) brightness(1)",
+                        filter: ORANGE_NOTE_COLOR.filter,
                       }}
                       dangerouslySetInnerHTML={{
                         __html: thread.responses[0].authorName,
