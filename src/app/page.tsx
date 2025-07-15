@@ -308,7 +308,7 @@ export default function Home() {
                       onClick={getNewQuestion}
                       style={{
                         position: "absolute",
-                        bottom: "12px",
+                        bottom: "20px",
                         left: "50%",
                         transform: "translateX(-50%)",
                         background: "none",
@@ -366,7 +366,7 @@ export default function Home() {
                 padding: "8px 10px",
               }}
             >
-              &lt;
+              <
             </button>
           )}
           
@@ -396,8 +396,8 @@ export default function Home() {
             }}
           >
             {!isNoteFlipped 
-              ? "sign this note &gt;" 
-              : "pass this note to a friend &gt;"
+              ? "1. sign this note >" 
+              : "2. pass this note >"
             }
           </button>
         </div>

@@ -198,7 +198,7 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
                   <SVGDrawingCanvas
                     ref={drawingCanvasRef}
                     width={280}
-                    height={240}
+                    height={200}
                     onDrawingChange={onAuthorNameChange}
                     initialData={authorName}
                     showClearButton={false}
@@ -208,7 +208,7 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
                     <div
                       style={{
                         width: "280px",
-                        height: "240px",
+                        height: "200px",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -233,13 +233,13 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
                 )}
               </div>
 
-              {/* Undo button - positioned at bottom of note back */}
+              {/* Clear button - positioned at bottom of note back */}
               {isEditable && onUndo && (
                 <button
                   onClick={onUndo}
                   style={{
                     position: "absolute",
-                    bottom: "12px",
+                    bottom: "20px",
                     left: "50%",
                     transform: "translateX(-50%)",
                     background: "none",
@@ -260,7 +260,7 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
                       color: "var(--text-dark)",
                     }}
                   >
-                    undo
+                    clear
                   </span>
                 </button>
               )}
