@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
       authorName, 
       positionX, 
       positionY, 
-      rotation, 
+      rotation, // eslint-disable-line @typescript-eslint/no-unused-vars
       noteColor, 
       noteColorSecondary 
     } = await request.json();
