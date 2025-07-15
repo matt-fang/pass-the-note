@@ -861,8 +861,8 @@ export default function NotePage() {
           })()}
         </div>
 
-        {/* Bottom buttons - shows when user has typed something */}
-        {canEdit && !hasPassed && typedResponse.trim() && (
+        {/* Bottom buttons - always show when editing */}
+        {canEdit && !hasPassed && (
           <div
             style={{
               marginTop: "40px",
