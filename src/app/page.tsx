@@ -154,11 +154,12 @@ export default function Home() {
       {/* Main Content */}
       <div
         style={{
+          flex: 1, // <-- allow this div to grow
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: isMobile ? "15px" : "50px", // 50pt spacing between text and note
-          paddingTop: isMobile ? "130px" : "116px", // Account for header + gradient (76px header + 40px gradient)
+          justifyContent: "center", // <-- vertically center its children
+          gap: isMobile ? "15px" : "50px",
         }}
       >
         {/* Text above note */}
