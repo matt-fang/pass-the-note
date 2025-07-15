@@ -190,6 +190,7 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
                   alignItems: "center",
                   justifyContent: "center",
                   position: "relative",
+                  zIndex: 999,
                 }}
               >
                 {isEditable ? (
@@ -226,7 +227,7 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
                       textAlign: "center",
                     }}
                   >
-                    write your name
+                    draw your name
                   </div>
                 )}
               </div>
