@@ -857,8 +857,21 @@ export default function NotePage() {
         {/* Pass button - shows when user has typed something */}
         {canEdit && !hasPassed && (
           <button
-            onClick={passNote}
-            disabled={isSubmitting || !typedResponse.trim()}
+            onClick={() => {
+              if (!authorNameDrawing.trim()) {
+                // No signature yet → flip to the back so they can sign
+                setFlippedNotes((prev) => ({
+                  ...prev,
+                  "active-note": !prev["active-note"],
+                }));
+              } else {
+                // Name is present → go ahead and pass the note
+                passNote();
+              }
+            }}
+            disabled={
+              isSubmitting || !typedResponse.trim() || !authorNameDrawing.trim()
+            }
             style={{
               background:
                 isSubmitting || !typedResponse.trim() ? "#E5E1DE" : "#FF5E01",
