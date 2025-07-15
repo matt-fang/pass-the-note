@@ -1145,9 +1145,8 @@ export default function NotePage() {
               justifyContent: "center",
               textAlign: "center",
               gap: "40px",
-              padding: "0 20px",
               width: "100%",
-              maxWidth: "400px",
+              maxWidth: "300px",
             }}
           >
             <div
@@ -1178,17 +1177,10 @@ export default function NotePage() {
                   const shareUrl = window.location.href;
                   await shareNatively(shareUrl);
                 }}
+                className="btn-link"
                 style={{
-                  background: "transparent",
-                  border: "none",
-                  fontFamily: "var(--font-sans)",
-                  fontWeight: "500",
                   fontSize: "18px",
                   lineHeight: "24px",
-                  color: "var(--text-dark)",
-                  cursor: "pointer",
-                  padding: "12px 0",
-                  textDecoration: "none",
                 }}
               >
                 pass this note again &gt;
@@ -1197,7 +1189,7 @@ export default function NotePage() {
               <button
                 onClick={() => (window.location.href = "/")}
                 style={{
-                  background: "#FF5E01",
+                  background: "#FF6B35",
                   border: "none",
                   fontFamily: "var(--font-sans)",
                   fontWeight: "500",
@@ -1208,7 +1200,6 @@ export default function NotePage() {
                   padding: "16px 24px",
                   borderRadius: "0px",
                   width: "100%",
-                  maxWidth: "300px",
                 }}
               >
                 or, write your own note &gt;
