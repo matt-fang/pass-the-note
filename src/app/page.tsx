@@ -60,9 +60,7 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          authorName: authorNameDrawing,
-        }),
+        body: JSON.stringify({}),
       });
 
       if (response.ok) {
@@ -97,9 +95,7 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          authorName: authorNameDrawing,
-        }),
+        body: JSON.stringify({}),
       });
 
       if (response.ok) {
@@ -121,6 +117,9 @@ export default function Home() {
           y: (Math.random() - 0.5) * 4, // -2px to 2px
         });
 
+        // Reset signature when getting new question
+        setAuthorNameDrawing("");
+
         // Fade back in
         setTimeout(() => setNoteOpacity(1), 50);
       }
@@ -131,6 +130,25 @@ export default function Home() {
   };
 
   const shareNatively = async () => {
+    // Save signature before sharing
+    if (authorNameDrawing && shareUrl) {
+      try {
+        const shareUrlPath = shareUrl.split('/').pop(); // Extract shareUrl from full URL
+        await fetch("/api/thread", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            shareUrl: shareUrlPath,
+            authorName: authorNameDrawing,
+          }),
+        });
+      } catch (error) {
+        console.error("Error saving signature:", error);
+      }
+    }
+
     if (navigator.share) {
       try {
         await navigator.share({
@@ -379,13 +397,13 @@ export default function Home() {
           }}
         >
           <button
-            onClick={() => {
+            onClick={async () => {
               if (!authorNameDrawing) {
                 // If no name is drawn, flip the note to the back for signing
                 setIsNoteFlipped(true);
               } else {
-                // If name is drawn, share normally
-                shareNatively();
+                // If name is drawn, save signature and share
+                await shareNatively();
               }
             }}
             disabled={!shareUrl}
