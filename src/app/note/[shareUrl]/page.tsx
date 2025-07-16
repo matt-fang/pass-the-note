@@ -103,10 +103,15 @@ export default function NotePage() {
     let hash = 0;
     for (let i = 0; i < seed.length; i++) {
       const char = seed.charCodeAt(i);
-      hash = (hash << 5) - hash + char;
-      hash = hash & hash; // Convert to 32bit integer
+      hash = ((hash << 5) - hash + char) & 0xffffffff;
     }
-    return Math.abs(hash) / 2147483647; // Normalize to 0-1
+    // Use MurmurHash3-inspired final mix for better distribution
+    hash ^= hash >>> 16;
+    hash = (hash * 0x85ebca6b) & 0xffffffff;
+    hash ^= hash >>> 13;
+    hash = (hash * 0xc2b2ae35) & 0xffffffff;
+    hash ^= hash >>> 16;
+    return (hash >>> 0) / 0xffffffff; // Ensure unsigned and normalize to 0-1
   };
 
   // Get random crossout stroke SVG path
