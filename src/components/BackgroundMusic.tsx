@@ -30,6 +30,7 @@ declare global {
 
 export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isWidgetReady, setIsWidgetReady] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const widgetRef = useRef<{
     play: () => void;
@@ -56,19 +57,20 @@ export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
 
       widget.bind(window.SC.Widget.Events.READY, () => {
         console.log('SoundCloud widget ready');
+        setIsWidgetReady(true);
       });
     }
   }, [isLoaded]);
 
   useEffect(() => {
-    if (widgetRef.current) {
+    if (widgetRef.current && isWidgetReady) {
       if (isPlaying) {
         widgetRef.current.play();
       } else {
         widgetRef.current.pause();
       }
     }
-  }, [isPlaying]);
+  }, [isPlaying, isWidgetReady]);
 
   return (
     <div style={{ 
