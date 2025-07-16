@@ -33,7 +33,7 @@ declare global {
 export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isWidgetReady, setIsWidgetReady] = useState(false);
-  const [hasUserInteracted, setHasUserInteracted] = useState(false);
+  const [hasSecretlyPrimed, setHasSecretlyPrimed] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const widgetRef = useRef<{
     play: () => void;
@@ -70,6 +70,19 @@ export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
         // Set volume to 70% when widget is ready to ensure it's audible
         widget.setVolume(70);
         setIsWidgetReady(true);
+        
+        // SECRET PRIMING: Toggle on/off quickly to prime the widget for mobile
+        setTimeout(() => {
+          if (!hasSecretlyPrimed) {
+            console.log('🤫 Secretly priming widget...');
+            widget.toggle(); // Start playing
+            setTimeout(() => {
+              widget.toggle(); // Stop playing
+              setHasSecretlyPrimed(true);
+              console.log('🤫 Widget primed and ready!');
+            }, 100); // Very quick toggle
+          }
+        }, 500); // Wait a bit for widget to be fully ready
       });
 
       // Add event listeners for play/pause to track state
@@ -83,56 +96,32 @@ export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
             widget.setVolume(70);
           }
         });
-        setHasUserInteracted(true);
       });
 
       widget.bind(window.SC.Widget.Events.PAUSE, () => {
         console.log('SoundCloud paused');
       });
     }
-  }, [isLoaded]);
+  }, [isLoaded, hasSecretlyPrimed]);
 
   useEffect(() => {
-    if (widgetRef.current && isWidgetReady) {
+    if (widgetRef.current && isWidgetReady && hasSecretlyPrimed) {
       // Add a small delay to ensure widget is fully ready
       const timer = setTimeout(() => {
         if (isPlaying) {
-          // Aggressively ensure volume is audible before any play action
-          console.log('Setting volume to 70 before play');
+          // Now that widget is primed, use simple play/pause
+          console.log('Widget is primed - using regular play');
           widgetRef.current!.setVolume(70);
-          
-          // Double-check volume was set
-          widgetRef.current!.getVolume((currentVolume) => {
-            console.log('Volume after setting:', currentVolume);
-          });
-          
-          // On mobile devices, use a more aggressive approach for the first play
-          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-          
-          if (!hasUserInteracted && isMobile) {
-            console.log('Mobile first play - using toggle()');
-            setHasUserInteracted(true);
-            
-            // Try toggle first, if that fails, try play
-            try {
-              widgetRef.current!.toggle();
-            } catch (error) {
-              console.log('Toggle failed, trying play:', error);
-              widgetRef.current!.play();
-            }
-          } else {
-            console.log('Regular play');
-            widgetRef.current!.play();
-          }
+          widgetRef.current!.play();
         } else {
           console.log('Pausing');
           widgetRef.current!.pause();
         }
-      }, 100); // Small delay to ensure widget is ready
+      }, 50); // Shorter delay since widget is primed
 
       return () => clearTimeout(timer);
     }
-  }, [isPlaying, isWidgetReady, hasUserInteracted]);
+  }, [isPlaying, isWidgetReady, hasSecretlyPrimed]);
 
   return (
     <div style={{ 

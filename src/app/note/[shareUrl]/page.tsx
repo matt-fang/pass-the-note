@@ -1110,8 +1110,6 @@ export default function NotePage() {
             {flippedNotes["active-note"] && (
               <button
                 onClick={() => {
-                  setTypedResponse("");
-                  setAuthorNameDrawing("");
                   if (activeNoteRef.current) {
                     activeNoteRef.current.handleClear();
                   }
