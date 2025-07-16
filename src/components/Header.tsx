@@ -10,7 +10,7 @@ interface HeaderProps {
 
 export default function Header({ showAbout = false, onAboutChange }: HeaderProps) {
   const [isMobile, setIsMobile] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -68,7 +68,9 @@ export default function Header({ showAbout = false, onAboutChange }: HeaderProps
             alignItems: 'center',
             justifyContent: 'center',
             position: 'absolute',
-            right: '32px'
+            right: '32px',
+            width: '20px',
+            height: '20px'
           }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
