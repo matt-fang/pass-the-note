@@ -807,9 +807,23 @@ export default function NotePage() {
                 whiteSpace: "normal", // allows wrapping and <br />s
               }}
             >
-              passed this note chain to you <br /> <br />
-              read the note. <br />
-              take a 30-second pause to reflect. <br />
+              passed this note chain to you <br />
+            </div>
+            <div
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: "16px",
+                lineHeight: "22px",
+                color: "var(--text-light)",
+                fontStyle: "italic",
+                fontWeight: "400",
+                display: "block", // forces normal text layout
+                whiteSpace: "normal", // allows wrapping and <br />s
+              }}
+            >
+              <br />
+              read the note. <br /> <br />
+              take a 30-second pause to reflect. <br /> <br />
               when you’re ready, write your response below.
             </div>
           </div>
