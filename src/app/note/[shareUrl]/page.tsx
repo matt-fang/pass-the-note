@@ -55,6 +55,9 @@ const NOTE_COLORS = [
 // Orange note color for the original question
 const ORANGE_NOTE_COLOR = NOTE_COLORS[3]; // Orange is at index 3
 
+// Response note colors (excluding orange)
+const RESPONSE_NOTE_COLORS = NOTE_COLORS.filter((_, index) => index !== 3);
+
 export default function NotePage() {
   const params = useParams();
   const shareUrl = params.shareUrl as string;
@@ -119,15 +122,15 @@ export default function NotePage() {
     return `/${crossoutFiles[randomIndex]}`;
   };
 
-  // Generate random color ensuring no adjacent duplicates
+  // Generate random color ensuring no adjacent duplicates and excluding orange
   const getRandomColor = useCallback(
     (
       seed: string,
       prevColor?: (typeof NOTE_COLORS)[0]
     ): (typeof NOTE_COLORS)[0] => {
       const availableColors = prevColor
-        ? NOTE_COLORS.filter((color) => color.bg !== prevColor.bg)
-        : NOTE_COLORS;
+        ? RESPONSE_NOTE_COLORS.filter((color) => color.bg !== prevColor.bg)
+        : RESPONSE_NOTE_COLORS;
 
       const randomIndex = Math.floor(
         seededRandom(seed) * availableColors.length
@@ -174,16 +177,16 @@ export default function NotePage() {
       // Generate truly random x-offset for new response
       const xOffset = (Math.random() - 0.5) * 16; // -8px to +8px
       
-      // Get the last response's color to avoid duplicates
+      // Get the last response's color to avoid duplicates (excluding orange)
       const lastResponseColor = thread.responses.length > 1 
         ? {
             bg: thread.responses[thread.responses.length - 1].noteColor,
             secondary: thread.responses[thread.responses.length - 1].noteColorSecondary,
             filter: "none",
           }
-        : undefined;
+        : ORANGE_NOTE_COLOR; // Exclude orange for first response
       
-      // Get a random color that's different from the last response
+      // Get a random color that's different from the last response (excluding orange)
       const newColor = getRandomColor(thread.id + "newresponse" + Date.now(), lastResponseColor);
       
       setResponseNoteOffset({
