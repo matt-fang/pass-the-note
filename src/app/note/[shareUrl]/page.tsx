@@ -803,9 +803,14 @@ export default function NotePage() {
                 fontSize: "16px",
                 lineHeight: "22px",
                 color: "var(--text-dark)",
+                display: "block", // forces normal text layout
+                whiteSpace: "normal", // allows wrapping and <br />s
               }}
             >
-              passed this note chain to you
+              passed this note chain to you <br /> <br />
+              read the note. <br />
+              take a 30-second pause to reflect. <br />
+              when you’re ready, write your response below.
             </div>
           </div>
         )}
