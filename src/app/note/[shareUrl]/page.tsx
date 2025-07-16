@@ -102,14 +102,14 @@ export default function NotePage() {
   // Disable scrolling when in "passed" state
   useEffect(() => {
     if (hasPassed) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = 'auto';
+      document.body.style.overflow = "auto";
     }
 
     // Cleanup on unmount
     return () => {
-      document.body.style.overflow = 'auto';
+      document.body.style.overflow = "auto";
     };
   }, [hasPassed]);
 
@@ -331,7 +331,7 @@ export default function NotePage() {
     if (shareUrl) {
       // 2. Store the generated share URL for later use
       setGeneratedShareUrl(shareUrl);
-      
+
       // 3. Store that user has responded to THIS note
       const hasRespondedKey = `responded_${params.shareUrl}`;
       localStorage.setItem(hasRespondedKey, "true");
@@ -695,7 +695,8 @@ export default function NotePage() {
                             shouldShowSignature={(() => {
                               // In read view, we know the user has already responded
                               // Current user's position in chain (they've already responded)
-                              const currentUserIndex = thread.responses.length - 1;
+                              const currentUserIndex =
+                                thread.responses.length - 1;
                               const responseIndex = index + 1; // Convert to absolute index in responses array
 
                               // Show signature (no crossout) if:
@@ -1229,7 +1230,8 @@ export default function NotePage() {
                   color: "var(--text-dark)",
                 }}
               >
-                passed! come back to this link anytime to see new notes on this chain.
+                passed! come back to this link anytime to see new notes on this
+                chain.
               </div>
 
               <div
@@ -1257,7 +1259,7 @@ export default function NotePage() {
                     padding: "8px 10px",
                   }}
                 >
-                  send note again
+                  get share link again
                 </button>
 
                 <button

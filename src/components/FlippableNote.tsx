@@ -169,7 +169,7 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
                       onTextChange={onTextChange}
                       initialText={typedText}
                       disabled={!isEditable}
-                      placeholder="write your answer here"
+                      placeholder="trust that your friend can hold your honesty..."
                       textColor={noteColor?.secondary || "var(--text-dark)"}
                     />
                   </div>
@@ -278,7 +278,6 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
                   </div>
                 )}
               </div>
-
 
               {/* Conversation button */}
               {showConversationButton && (
