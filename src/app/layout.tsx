@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Little Notes™",
+  title: "little notes",
   description: "Pass a little note to a friend. Start a big conversation.",
   keywords: [
     "notes",

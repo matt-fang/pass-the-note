@@ -1,7 +1,7 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import BackgroundMusic from './BackgroundMusic';
 
 interface HeaderProps {
   showAbout?: boolean;
@@ -9,8 +9,8 @@ interface HeaderProps {
 }
 
 export default function Header({ showAbout = false, onAboutChange }: HeaderProps) {
-  const router = useRouter();
   const [isMobile, setIsMobile] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -22,160 +22,66 @@ export default function Header({ showAbout = false, onAboutChange }: HeaderProps
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const handleNewNote = () => {
-    router.push('/');
-  };
-
-  const handleAbout = () => {
-    if (onAboutChange) {
-      onAboutChange(true);
-    }
+  const toggleMusic = () => {
+    setIsPlaying(!isPlaying);
   };
 
   return (
     <>
+      {/* Background Music */}
+      <BackgroundMusic isPlaying={isPlaying} onToggle={toggleMusic} />
+      
       {/* Header */}
       <div style={{
         position: 'absolute',
         top: '0',
         left: '0',
         right: '0',
-        height: isMobile ? '90px' : '76px', // 26px + 24px logo + 26px
+        height: '88px', // 32px + 24px logo + 32px
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: isMobile ? '30px 0px' : '26px 26px',
+        justifyContent: isMobile ? 'center' : 'flex-start',
+        padding: '32px',
         zIndex: 1000,
-        background: 'transparent' // No background - just transparent
+        background: 'transparent'
       }}>
-        {/* Mobile: Plus button, Desktop: Logo */}
-        {isMobile ? (
-          <div style={{
-            width: '100%',
+        {/* Logo */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img 
+          src="/littlenoteslogo.png" 
+          alt="Little Notes" 
+          style={{
+            height: '24px',
+            width: 'auto'
+          }}
+        />
+        
+        {/* Music toggle button - always on the right */}
+        <button
+          onClick={toggleMusic}
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            padding: '0',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            position: 'relative',
-            maxWidth: '320px',
-            margin: '0 auto',
-            padding: '0 138px' // Added padding to align with note toolbar
-          }}>
-            <button
-              onClick={handleNewNote}
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                padding: '0',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                position: 'absolute',
-                left: '0'
-              }}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img 
-                src="/plus.svg" 
-                alt="New Note" 
-                style={{
-                  width: '14px',
-                  height: '14px'
-                }}
-              />
-            </button>
-            
-            {/* Centered logo */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img 
-              src="/littlenoteslogo.png" 
-              alt="Little Notes" 
-              style={{
-                height: '24px',
-                width: 'auto'
-              }}
-            />
-            
-            {/* Info button aligned to right */}
-            <button
-              onClick={handleAbout}
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                padding: '0',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                position: 'absolute',
-                right: '0'
-              }}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img 
-                src="/info.svg" 
-                alt="About" 
-                style={{
-                  height: '14px',
-                  width: 'auto' // Maintain aspect ratio
-                }}
-              />
-            </button>
-          </div>
-        ) : (
-          /* eslint-disable-next-line @next/next/no-img-element */
+            position: 'absolute',
+            right: '32px'
+          }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img 
-            src="/littlenoteslogo.png" 
-            alt="Little Notes" 
+            src={isPlaying ? "/music.note.svg" : "/music.note.slash.svg"}
+            alt={isPlaying ? "Pause Music" : "Play Music"}
             style={{
-              height: '24px',
-              width: 'auto'
+              width: '16px',
+              height: '16px',
+              filter: isPlaying ? 'brightness(0) saturate(100%) invert(42%) sepia(93%) saturate(1352%) hue-rotate(337deg) brightness(119%) contrast(119%)' : 'none'
             }}
           />
-        )}
-
-        {/* Desktop: Navigation */}
-        {!isMobile && (
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'flex-end',
-            gap: '4px'
-          }}>
-            <button
-              onClick={handleNewNote}
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                fontFamily: 'var(--font-sans)',
-                fontWeight: '500',
-                fontSize: '14px',
-                lineHeight: '18px',
-                color: 'var(--text-dark)',
-                padding: '0'
-              }}
-            >
-              new note &gt;
-            </button>
-            <button
-              onClick={handleAbout}
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                fontFamily: 'var(--font-sans)',
-                fontWeight: '500',
-                fontSize: '14px',
-                lineHeight: '18px',
-                color: 'var(--text-dark)',
-                padding: '0'
-              }}
-            >
-              about &gt;
-            </button>
-          </div>
-        )}
+        </button>
       </div>
 
 

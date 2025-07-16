@@ -456,7 +456,7 @@ export default function NotePage() {
           justifyContent: "flex-start",
           background: "var(--cream)",
           padding: "0 20px",
-          paddingTop: "140px",
+          paddingTop: "120px",
           paddingBottom: "120px",
         }}
       >
@@ -727,7 +727,7 @@ export default function NotePage() {
         justifyContent: hasPassed ? "center" : "flex-start",
         background: "var(--cream)",
         padding: hasPassed ? "0" : "0 20px",
-        paddingTop: hasPassed ? "0" : "140px",
+        paddingTop: hasPassed ? "0" : "120px",
         paddingBottom: hasPassed ? "0" : "120px",
       }}
     >
