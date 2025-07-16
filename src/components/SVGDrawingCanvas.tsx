@@ -14,6 +14,7 @@ interface SVGDrawingCanvasProps {
 
 export interface SVGDrawingCanvasRef {
   undo: () => void;
+  clear: () => void;
 }
 
 interface Point {
@@ -249,7 +250,8 @@ const SVGDrawingCanvas = forwardRef<SVGDrawingCanvasRef, SVGDrawingCanvasProps>(
 
   // Expose undo function to parent via ref
   useImperativeHandle(ref, () => ({
-    undo: undoLastStroke
+    undo: undoLastStroke,
+    clear: clearCanvas
   }));
 
   const createPathString = (points: Point[]): string => {

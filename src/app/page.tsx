@@ -388,7 +388,12 @@ export default function Home() {
             <button
               onClick={() => {
                 if (isNoteFlipped) {
-                  setIsNoteFlipped(false);
+                  // Fade out text first, then flip back
+                  setTextOpacity(0);
+                  setTimeout(() => {
+                    setIsNoteFlipped(false);
+                    setTextOpacity(1);
+                  }, 50);
                 } else {
                   goBackToPreviousQuestion();
                 }
@@ -426,6 +431,31 @@ export default function Home() {
               }}
             >
               shuffle
+            </button>
+          )}
+
+          {/* Clear button - only show when flipped */}
+          {isNoteFlipped && (
+            <button
+              onClick={() => {
+                setAuthorNameDrawing("");
+                if (flipNoteRef.current) {
+                  flipNoteRef.current.handleClear();
+                }
+              }}
+              style={{
+                background: "#E5E1DE",
+                border: "none",
+                fontFamily: "var(--font-sans)",
+                fontWeight: "500",
+                fontSize: "14px",
+                lineHeight: "18px",
+                color: "black",
+                cursor: "pointer",
+                padding: "8px 10px",
+              }}
+            >
+              clear
             </button>
           )}
           

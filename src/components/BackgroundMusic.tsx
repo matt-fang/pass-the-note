@@ -31,10 +31,12 @@ declare global {
 export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isWidgetReady, setIsWidgetReady] = useState(false);
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const widgetRef = useRef<{
     play: () => void;
     pause: () => void;
+    toggle: () => void;
     bind: (event: string, callback: () => void) => void;
   } | null>(null);
 
@@ -59,18 +61,51 @@ export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
         console.log('SoundCloud widget ready');
         setIsWidgetReady(true);
       });
+
+      // Add event listeners for play/pause to track state
+      widget.bind(window.SC.Widget.Events.PLAY, () => {
+        console.log('SoundCloud started playing');
+        setHasUserInteracted(true);
+      });
+
+      widget.bind(window.SC.Widget.Events.PAUSE, () => {
+        console.log('SoundCloud paused');
+      });
     }
   }, [isLoaded]);
 
   useEffect(() => {
     if (widgetRef.current && isWidgetReady) {
-      if (isPlaying) {
-        widgetRef.current.play();
-      } else {
-        widgetRef.current.pause();
-      }
+      // Add a small delay to ensure widget is fully ready
+      const timer = setTimeout(() => {
+        if (isPlaying) {
+          // On mobile devices, use a more aggressive approach for the first play
+          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+          
+          if (!hasUserInteracted && isMobile) {
+            console.log('Mobile first play - using toggle()');
+            setHasUserInteracted(true);
+            
+            // Try toggle first, if that fails, try play
+            try {
+              widgetRef.current!.toggle();
+            } catch (error) {
+              console.log('Toggle failed, trying play:', error);
+              widgetRef.current!.play();
+            }
+          } else {
+            console.log('Regular play');
+            widgetRef.current!.play();
+          }
+        } else {
+          console.log('Pausing');
+          widgetRef.current!.pause();
+        }
+      }, 100); // Small delay to ensure widget is ready
+
+      return () => clearTimeout(timer);
     }
-  }, [isPlaying, isWidgetReady]);
+  }, [isPlaying, isWidgetReady, hasUserInteracted]);
 
   return (
     <div style={{ 
@@ -90,8 +125,9 @@ export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
           height="166"
           scrolling="no"
           frameBorder="no"
-          allow="autoplay"
-          src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/playlists/1901967227&color=%23664729&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true"
+          allow="autoplay; fullscreen"
+          sandbox="allow-scripts allow-same-origin allow-presentation"
+          src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/playlists/1901967227&color=%23664729&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true&buying=false&liking=false&download=false&sharing=false"
         />
       )}
     </div>

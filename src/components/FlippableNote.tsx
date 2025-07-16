@@ -28,6 +28,7 @@ interface FlippableNoteProps {
 
 export interface FlippableNoteRef {
   handleUndo: () => void;
+  handleClear: () => void;
 }
 
 const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
@@ -63,6 +64,12 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
       }
     };
 
+    const handleClear = () => {
+      if (drawingCanvasRef.current) {
+        drawingCanvasRef.current.clear();
+      }
+    };
+
     const handleStartConversation = async () => {
       const message =
         "hey i saw your answer on little notes and im really interested - want to chat?";
@@ -88,9 +95,10 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
       }
     };
 
-    // Expose handleUndo to parent via ref
+    // Expose handleUndo and handleClear to parent via ref
     useImperativeHandle(ref, () => ({
       handleUndo,
+      handleClear,
     }));
 
     return (

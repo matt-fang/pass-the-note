@@ -589,7 +589,7 @@ export default function NotePage() {
                           transform: "scale(0.33)",
                           transformOrigin: "center",
                           filter: ORANGE_NOTE_COLOR.filter,
-                          marginBottom: "5px",
+                          marginBottom: "10px",
                         }}
                         dangerouslySetInnerHTML={{
                           __html: thread.responses[0].authorName,
@@ -899,7 +899,7 @@ export default function NotePage() {
                           transform: "scale(0.33)",
                           transformOrigin: "center",
                           filter: ORANGE_NOTE_COLOR.filter,
-                          marginBottom: "5px",
+                          marginBottom: "10px",
                         }}
                         dangerouslySetInnerHTML={{
                           __html: thread.responses[0].authorName,
@@ -1112,6 +1112,9 @@ export default function NotePage() {
                 onClick={() => {
                   setTypedResponse("");
                   setAuthorNameDrawing("");
+                  if (activeNoteRef.current) {
+                    activeNoteRef.current.handleClear();
+                  }
                 }}
                 style={{
                   background: "#E5E1DE",
