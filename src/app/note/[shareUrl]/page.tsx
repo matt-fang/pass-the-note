@@ -157,10 +157,10 @@ export default function NotePage() {
   // Set deterministic colors and offsets based on thread data
   useEffect(() => {
     if (thread) {
-      // Use thread ID for consistent color selection
-      const colorIndex = Math.floor(
-        seededRandom(thread.id) * NOTE_COLORS.length
-      );
+      // Use thread ID for consistent color selection (keeping for potential future use)
+      // const colorIndex = Math.floor(
+      //   seededRandom(thread.id) * NOTE_COLORS.length
+      // );
 
       // Use thread ID + "offset" for consistent text positioning
       const offsetSeed = seededRandom(thread.id + "offset");
@@ -169,20 +169,29 @@ export default function NotePage() {
         y: (seededRandom(thread.id + "offset2") - 0.5) * 4, // -2px to 2px
       });
 
-      // Use thread ID + response count for new response positioning
-      const responseSeed = seededRandom(
-        thread.id + "response" + (thread.responses.length - 1)
-      );
-      // Calculate random x-offset: -8px to +8px
-      const xOffset = (responseSeed - 0.5) * 16; // Random between -8 and +8
+      // Generate truly random x-offset for new response
+      const xOffset = (Math.random() - 0.5) * 16; // -8px to +8px
+      
+      // Get the last response's color to avoid duplicates
+      const lastResponseColor = thread.responses.length > 1 
+        ? {
+            bg: thread.responses[thread.responses.length - 1].noteColor,
+            secondary: thread.responses[thread.responses.length - 1].noteColorSecondary,
+            filter: "none",
+          }
+        : undefined;
+      
+      // Get a random color that's different from the last response
+      const newColor = getRandomColor(thread.id + "newresponse" + Date.now(), lastResponseColor);
+      
       setResponseNoteOffset({
         x: xOffset,
         y: 0,
         rotation: 0, // No rotation
-        color: NOTE_COLORS[(colorIndex + 1) % NOTE_COLORS.length], // Different from main note
+        color: newColor,
       });
     }
-  }, [thread]);
+  }, [thread, getRandomColor]);
 
   const loadThread = async () => {
     try {
@@ -229,10 +238,11 @@ export default function NotePage() {
             }
           : getRandomColor(response.id + "color", prevColor);
 
+        // Generate truly random x-offset for each response
         const xOffset =
           response.positionX !== null && response.positionX !== undefined
             ? response.positionX
-            : getRandomXOffset(response.id + "xoffset");
+            : (Math.random() - 0.5) * 16; // -8px to +8px
 
         return {
           x: xOffset,
