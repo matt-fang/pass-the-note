@@ -8,7 +8,6 @@ interface FlippableNoteProps {
   width?: number;
   height?: number;
   background: string;
-  backgroundOpacity?: number;
   frontContent?: React.ReactNode;
   isEditable?: boolean;
   authorName?: string;
@@ -37,7 +36,6 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
       width = 320,
       height = 320,
       background,
-      backgroundOpacity = 1,
       frontContent,
       isEditable = false,
       authorName = "",
@@ -130,8 +128,7 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 backgroundRepeat: "no-repeat",
-                opacity: backgroundOpacity,
-                transition: "opacity 0.2s ease-in-out",
+                transition: "background-image 0.3s ease-in-out",
                 boxShadow: "var(--note-shadow)",
                 padding: "19px",
                 boxSizing: "border-box",
