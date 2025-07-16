@@ -452,6 +452,7 @@ export default function Home() {
             zIndex: 1000,
             opacity: showSentContent ? 1 : 0,
             transition: "opacity 0.4s ease-in-out",
+            overflow: "hidden",
           }}
         >
           <div
@@ -463,8 +464,8 @@ export default function Home() {
               textAlign: "center",
               gap: "40px",
               padding: "0 20px",
-              width: "100%",
-              maxWidth: "400px",
+              width: "66.67%",
+              maxWidth: "300px",
             }}
           >
             <div
@@ -476,7 +477,7 @@ export default function Home() {
                 color: "var(--text-dark)",
               }}
             >
-              sent! come back to this link any time to see the chain grow
+              passed! come back to this link anytime to see new notes on this chain.
             </div>
 
             <div
