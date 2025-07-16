@@ -77,7 +77,7 @@ export default function SignedNote({
                 alignItems: "center",
                 justifyContent: "center",
                 transformOrigin: "center",
-                marginBottom: "10px",
+                marginBottom: "20px",
               }}
             >
               {shouldShowSignature ? (
