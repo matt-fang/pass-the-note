@@ -704,7 +704,6 @@ export default function NotePage() {
                                 style={{
                                   height: "34px",
                                   display: "flex",
-                                  transform: "scale(0.33)",
                                   alignItems: "center",
                                   justifyContent: "center",
                                   transformOrigin: "center",
