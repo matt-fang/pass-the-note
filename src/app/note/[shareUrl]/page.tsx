@@ -2,9 +2,9 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams } from "next/navigation";
-import Image from "next/image";
 import FlippableNote, { FlippableNoteRef } from "@/components/FlippableNote";
 import Header from "@/components/Header";
+import SignedNote from "@/components/SignedNote";
 import { useImagePreloader } from "@/hooks/useImagePreloader";
 
 interface Response {
@@ -176,19 +176,25 @@ export default function NotePage() {
 
       // Generate truly random x-offset for new response
       const xOffset = (Math.random() - 0.5) * 16; // -8px to +8px
-      
+
       // Get the last response's color to avoid duplicates (excluding orange)
-      const lastResponseColor = thread.responses.length > 1 
-        ? {
-            bg: thread.responses[thread.responses.length - 1].noteColor,
-            secondary: thread.responses[thread.responses.length - 1].noteColorSecondary,
-            filter: "none",
-          }
-        : ORANGE_NOTE_COLOR; // Exclude orange for first response
-      
+      const lastResponseColor =
+        thread.responses.length > 1
+          ? {
+              bg: thread.responses[thread.responses.length - 1].noteColor,
+              secondary:
+                thread.responses[thread.responses.length - 1]
+                  .noteColorSecondary,
+              filter: "none",
+            }
+          : ORANGE_NOTE_COLOR; // Exclude orange for first response
+
       // Get a random color that's different from the last response (excluding orange)
-      const newColor = getRandomColor(thread.id + "newresponse" + Date.now(), lastResponseColor);
-      
+      const newColor = getRandomColor(
+        thread.id + "newresponse" + Date.now(),
+        lastResponseColor
+      );
+
       setResponseNoteOffset({
         x: xOffset,
         y: 0,
@@ -652,102 +658,29 @@ export default function NotePage() {
                             }}
                           />
                         ) : (
-                          <div
-                            style={{
-                              width: "240px",
-                              height: "240px",
-                              display: "flex",
-                              flexDirection: "column",
-                              justifyContent: "space-between",
-                              padding: "19px",
-                              boxSizing: "border-box",
-                            }}
-                          >
-                            {/* Answer text */}
-                            <div
-                              style={{
-                                width: "100%",
-                                height: "100%",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                position: "relative",
-                                padding: "0",
-                                marginBottom: "19px",
-                              }}
-                            >
-                              <div
-                                style={{
-                                  width: "100%",
-                                  height: "100%",
-                                  fontFamily: "var(--font-sans)",
-                                  fontSize: "16px",
-                                  lineHeight: "22px",
-                                  fontWeight: "500",
-                                  color: offset.color.secondary,
-                                  textAlign: "left",
-                                  overflow: "hidden",
-                                  wordBreak: "break-word",
-                                  display: "flex",
-                                  alignItems: "flex-start",
-                                  justifyContent: "flex-start",
-                                  padding: "0",
-                                }}
-                              >
-                                {response.drawingData}
-                              </div>
-                            </div>
+                          <SignedNote
+                            drawingData={response.drawingData}
+                            authorName={response.authorName || ""}
+                            noteColor={offset.color}
+                            shouldShowSignature={(() => {
+                              // In read view, we know the user has already responded
+                              // So we need to determine their position to show proper signatures
 
-                            {/* Signature at bottom */}
-                            {response.authorName && (
-                              <div
-                                style={{
-                                  height: "34px",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  transformOrigin: "center",
-                                }}
-                              >
-                                {(() => {
-                                  // In read view, we know the user has already responded
-                                  // So we need to determine their position to show proper signatures
-                                  
-                                  // Current user's position in chain (they've already responded)
-                                  const currentUserIndex = thread.responses.length - 1;
-                                  const responseIndex = index + 1; // Convert to absolute index in responses array
-                                  
-                                  // Show signature if:
-                                  // 1. It's the previous person (responseIndex === currentUserIndex - 1)
-                                  // 2. It's the next person (responseIndex === currentUserIndex + 1)
-                                  const shouldShowSignature = 
-                                    responseIndex === currentUserIndex - 1 || // Previous person
-                                    responseIndex === currentUserIndex + 1;   // Next person
-                                  
-                                  return shouldShowSignature ? (
-                                    // Show actual signature
-                                    <div
-                                      style={{
-                                        transform: "scale(0.33)",
-                                        transformOrigin: "center",
-                                      }}
-                                      dangerouslySetInnerHTML={{
-                                        __html: response.authorName,
-                                      }}
-                                    />
-                                  ) : (
-                                    // Show crossout stroke
-                                    <Image
-                                      src={getCrossoutStroke(response.id)}
-                                      alt="crossed out signature"
-                                      width={128}
-                                      height={32}
-                                    />
-                                  );
-                                })()}
-                              </div>
-                            )}
-                          </div>
+                              // Current user's position in chain (they've already responded)
+                              const currentUserIndex =
+                                thread.responses.length - 1;
+                              const responseIndex = index + 1; // Convert to absolute index in responses array
+
+                              // Show signature if:
+                              // 1. It's the previous person (responseIndex === currentUserIndex - 1)
+                              // 2. It's the next person (responseIndex === currentUserIndex + 1)
+                              return (
+                                responseIndex === currentUserIndex - 1 || // Previous person
+                                responseIndex === currentUserIndex + 1 // Next person
+                              );
+                            })()}
+                            crossoutStroke={getCrossoutStroke(response.id)}
+                          />
                         )
                       }
                     />
@@ -867,7 +800,9 @@ export default function NotePage() {
 
                 // Add height for active response note if editing
                 if (canEdit) {
-                  const activeSeed = seededRandom(thread.id + "active-response");
+                  const activeSeed = seededRandom(
+                    thread.id + "active-response"
+                  );
                   const activeOverlap = 13 + activeSeed * 13;
                   totalHeight += 320 - activeOverlap;
                 }
@@ -878,317 +813,245 @@ export default function NotePage() {
               transition: "transform 0.6s ease-in-out",
             }}
           >
-          {/* Main Question Note */}
-          <div
-            style={{
-              position: "absolute",
-              top: "0px",
-              left: "50%",
-              transform: `translateX(-50%) translate(${textOffset.x}px, ${textOffset.y}px)`,
-              zIndex: 100,
-            }}
-          >
-            <FlippableNote
-              width={320}
-              height={320}
-              background={ORANGE_NOTE_COLOR.bg}
-              noteColor={ORANGE_NOTE_COLOR}
-              authorName={thread.responses[0]?.authorName || ""}
-              isFlipped={flippedNotes["question-note"] || false}
-              frontContent={
-                <div
-                  style={{
-                    width: "280px",
-                    height: "240px",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "space-between",
-                    padding: "19px",
-                    boxSizing: "border-box",
-                  }}
-                >
-                  {/* Question text */}
+            {/* Main Question Note */}
+            <div
+              style={{
+                position: "absolute",
+                top: "0px",
+                left: "50%",
+                transform: `translateX(-50%) translate(${textOffset.x}px, ${textOffset.y}px)`,
+                zIndex: 100,
+              }}
+            >
+              <FlippableNote
+                width={320}
+                height={320}
+                background={ORANGE_NOTE_COLOR.bg}
+                noteColor={ORANGE_NOTE_COLOR}
+                authorName={thread.responses[0]?.authorName || ""}
+                isFlipped={flippedNotes["question-note"] || false}
+                frontContent={
                   <div
                     style={{
-                      fontFamily: "var(--font-handwritten)",
-                      fontSize: "18px",
-                      lineHeight: "1.4",
-                      color: ORANGE_NOTE_COLOR.secondary,
-                      textAlign: "center",
-                      overflow: "hidden",
-                      wordBreak: "break-word",
-                      flex: 1,
+                      width: "280px",
+                      height: "240px",
                       display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      marginBottom: "19px",
+                      flexDirection: "column",
+                      justifyContent: "space-between",
+                      padding: "19px",
+                      boxSizing: "border-box",
                     }}
                   >
-                    {thread.question}
-                  </div>
-
-                  {/* Signature at bottom */}
-                  {thread.responses[0]?.authorName && (
+                    {/* Question text */}
                     <div
                       style={{
-                        height: "34px",
+                        fontFamily: "var(--font-handwritten)",
+                        fontSize: "18px",
+                        lineHeight: "1.4",
+                        color: ORANGE_NOTE_COLOR.secondary,
+                        textAlign: "center",
+                        overflow: "hidden",
+                        wordBreak: "break-word",
+                        flex: 1,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        transform: "scale(0.33)",
-                        transformOrigin: "center",
-                        filter: ORANGE_NOTE_COLOR.filter,
+                        marginBottom: "19px",
                       }}
-                      dangerouslySetInnerHTML={{
-                        __html: thread.responses[0].authorName,
-                      }}
-                    />
-                  )}
-                </div>
-              }
-            />
-          </div>
+                    >
+                      {thread.question}
+                    </div>
 
-          {/* Existing Response Notes */}
-          {thread.responses.length > 1 &&
-            thread.responses.slice(1).map((response, index) => {
-              if (!response.drawingData || response.drawingData.trim() === "")
-                return null;
+                    {/* Signature at bottom */}
+                    {thread.responses[0]?.authorName && (
+                      <div
+                        style={{
+                          height: "34px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          transform: "scale(0.33)",
+                          transformOrigin: "center",
+                          filter: ORANGE_NOTE_COLOR.filter,
+                        }}
+                        dangerouslySetInnerHTML={{
+                          __html: thread.responses[0].authorName,
+                        }}
+                      />
+                    )}
+                  </div>
+                }
+              />
+            </div>
 
-              const offset =
-                existingResponseOffsets[index + 1] ||
-                (() => {
-                  // Get previous color for adjacent check (skip orange question note)
-                  const prevColor =
-                    index > 0
-                      ? existingResponseOffsets[index]?.color
-                      : ORANGE_NOTE_COLOR; // Exclude orange for first response
-                  return {
-                    x: getRandomXOffset(response.id + "xoffset"),
-                    y: 0,
-                    rotation: 0,
-                    color: getRandomColor(response.id + "color", prevColor),
-                  };
-                })();
-              const noteId = `response-${response.id}`;
-              const isFlipped = flippedNotes[noteId] || false;
+            {/* Existing Response Notes */}
+            {thread.responses.length > 1 &&
+              thread.responses.slice(1).map((response, index) => {
+                if (!response.drawingData || response.drawingData.trim() === "")
+                  return null;
 
-              // Calculate overlap for this note (-13 to -26px)
-              const overlapSeed = seededRandom(response.id + "overlap");
-              const overlap = 13 + overlapSeed * 13; // 13-26px overlap
+                const offset =
+                  existingResponseOffsets[index + 1] ||
+                  (() => {
+                    // Get previous color for adjacent check (skip orange question note)
+                    const prevColor =
+                      index > 0
+                        ? existingResponseOffsets[index]?.color
+                        : ORANGE_NOTE_COLOR; // Exclude orange for first response
+                    return {
+                      x: getRandomXOffset(response.id + "xoffset"),
+                      y: 0,
+                      rotation: 0,
+                      color: getRandomColor(response.id + "color", prevColor),
+                    };
+                  })();
+                const noteId = `response-${response.id}`;
+                const isFlipped = flippedNotes[noteId] || false;
 
-              // Calculate cumulative top position
-              let cumulativeTop = 320; // Start after the question note
-              for (let i = 0; i < index; i++) {
-                const prevSeed = seededRandom(
-                  (thread.responses[i + 1]?.id || "default") + "overlap"
-                );
-                const prevOverlap = 13 + prevSeed * 13;
-                cumulativeTop += 320 - prevOverlap;
-              }
-              cumulativeTop -= overlap; // Apply current note's overlap
+                // Calculate overlap for this note (-13 to -26px)
+                const overlapSeed = seededRandom(response.id + "overlap");
+                const overlap = 13 + overlapSeed * 13; // 13-26px overlap
 
-              return (
-                <div
-                  key={response.id}
-                  style={{
-                    position: "absolute",
-                    top: `${cumulativeTop}px`,
-                    left: "50%",
-                    transform: `translateX(-50%) translate(${offset.x}px, 0)`,
-                    zIndex: 100 + index + 1,
-                  }}
-                >
-                  <FlippableNote
-                    width={320}
-                    height={320}
-                    background={offset.color.bg}
-                    authorName={response.authorName || ""}
-                    isFlipped={isFlipped}
-                    frontContent={
-                      // Check if it's SVG, old image data, or text
-                      response.drawingData.startsWith("<svg") ? (
-                        <div
-                          style={{
-                            width: "240px",
-                            height: "240px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                          }}
-                          dangerouslySetInnerHTML={{
-                            __html: response.drawingData,
-                          }}
-                        />
-                      ) : response.drawingData.startsWith("data:image") ? (
-                        <div
-                          style={{
-                            width: "240px",
-                            height: "240px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            backgroundImage: `url(${response.drawingData})`,
-                            backgroundSize: "contain",
-                            backgroundRepeat: "no-repeat",
-                            backgroundPosition: "center",
-                          }}
-                        />
-                      ) : (
-                        <div
-                          style={{
-                            width: "240px",
-                            height: "240px",
-                            display: "flex",
-                            flexDirection: "column",
-                            justifyContent: "space-between",
-                            padding: "19px",
-                            boxSizing: "border-box",
-                          }}
-                        >
-                          {/* Answer text */}
+                // Calculate cumulative top position
+                let cumulativeTop = 320; // Start after the question note
+                for (let i = 0; i < index; i++) {
+                  const prevSeed = seededRandom(
+                    (thread.responses[i + 1]?.id || "default") + "overlap"
+                  );
+                  const prevOverlap = 13 + prevSeed * 13;
+                  cumulativeTop += 320 - prevOverlap;
+                }
+                cumulativeTop -= overlap; // Apply current note's overlap
+
+                return (
+                  <div
+                    key={response.id}
+                    style={{
+                      position: "absolute",
+                      top: `${cumulativeTop}px`,
+                      left: "50%",
+                      transform: `translateX(-50%) translate(${offset.x}px, 0)`,
+                      zIndex: 100 + index + 1,
+                    }}
+                  >
+                    <FlippableNote
+                      width={320}
+                      height={320}
+                      background={offset.color.bg}
+                      authorName={response.authorName || ""}
+                      isFlipped={isFlipped}
+                      frontContent={
+                        // Check if it's SVG, old image data, or text
+                        response.drawingData.startsWith("<svg") ? (
                           <div
                             style={{
-                              width: "100%",
-                              height: "100%",
+                              width: "240px",
+                              height: "240px",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
-                              position: "relative",
-                              padding: "0",
-                              marginBottom: "19px",
                             }}
-                          >
-                            <div
-                              style={{
-                                width: "100%",
-                                height: "100%",
-                                fontFamily: "var(--font-sans)",
-                                fontSize: "16px", // Updated to match new font size
-                                lineHeight: "22px", // Updated to match new line height
-                                fontWeight: "500",
-                                color: offset.color.secondary,
-                                textAlign: "left",
-                                overflow: "hidden",
-                                wordBreak: "break-word",
-                                display: "flex",
-                                alignItems: "flex-start",
-                                justifyContent: "flex-start",
-                                padding: "0",
-                              }}
-                            >
-                              {response.drawingData}
-                            </div>
-                          </div>
+                            dangerouslySetInnerHTML={{
+                              __html: response.drawingData,
+                            }}
+                          />
+                        ) : response.drawingData.startsWith("data:image") ? (
+                          <div
+                            style={{
+                              width: "240px",
+                              height: "240px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              backgroundImage: `url(${response.drawingData})`,
+                              backgroundSize: "contain",
+                              backgroundRepeat: "no-repeat",
+                              backgroundPosition: "center",
+                            }}
+                          />
+                        ) : (
+                          <SignedNote
+                            drawingData={response.drawingData}
+                            authorName={response.authorName || ""}
+                            noteColor={offset.color}
+                            shouldShowSignature={(() => {
+                              // Current user's position in chain:
+                              // - thread.responses[0] is original sender
+                              // - thread.responses[1] is first recipient
+                              // - thread.responses[n] is current recipient if canEdit
+                              // - We want to show signatures for:
+                              //   * Original sender (always visible)
+                              //   * Previous person (who passed to current user)
+                              //   * Next person (who current user passes to, when available)
 
-                          {/* Signature at bottom - show signatures for adjacent connections only */}
-                          {response.authorName && (
-                            <div
-                              style={{
-                                height: "34px",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                transformOrigin: "center",
-                              }}
-                            >
-                              {(() => {
-                                // Current user's position in chain:
-                                // - thread.responses[0] is original sender
-                                // - thread.responses[1] is first recipient
-                                // - thread.responses[n] is current recipient if canEdit
-                                // - We want to show signatures for:
-                                //   * Original sender (always visible)
-                                //   * Previous person (who passed to current user)
-                                //   * Next person (who current user passes to, when available)
-                                
-                                const currentUserIndex = canEdit ? thread.responses.length : thread.responses.length - 1;
-                                const responseIndex = index + 1; // Convert to absolute index in responses array
-                                
-                                // Show signature if:
-                                // 1. It's the previous person (responseIndex === currentUserIndex - 1)
-                                // 2. It's the next person (responseIndex === currentUserIndex + 1)
-                                const shouldShowSignature = 
-                                  responseIndex === currentUserIndex - 1 || // Previous person
-                                  responseIndex === currentUserIndex + 1;   // Next person
-                                
-                                return shouldShowSignature ? (
-                                  // Show actual signature
-                                  <div
-                                    style={{
-                                      transform: "scale(0.33)",
-                                      transformOrigin: "center",
-                                    }}
-                                    dangerouslySetInnerHTML={{
-                                      __html: response.authorName,
-                                    }}
-                                  />
-                                ) : (
-                                  // Show crossout stroke
-                                  <Image
-                                    src={getCrossoutStroke(response.id)}
-                                    alt="crossed out signature"
-                                    width={128}
-                                    height={32}
-                                  />
-                                );
-                              })()}
-                            </div>
-                          )}
-                        </div>
-                      )
-                    }
-                  />
-                </div>
-              );
-            })}
+                              const currentUserIndex = canEdit
+                                ? thread.responses.length
+                                : thread.responses.length - 1;
+                              const responseIndex = index + 1; // Convert to absolute index in responses array
 
-          {/* Active Response Note */}
-          {canEdit &&
-            (() => {
-              // Calculate position for active response note
-              const activeSeed = seededRandom(thread.id + "active-response");
-              const activeOverlap = 13 + activeSeed * 13; // 13-26px overlap
-
-              // Calculate cumulative top position for active note
-              let activeTop = 320; // Start after the question note
-              for (let i = 0; i < thread.responses.length - 1; i++) {
-                const prevSeed = seededRandom(
-                  (thread.responses[i + 1]?.id || "default") + "overlap"
+                              // Show signature if:
+                              // 1. It's the previous person (responseIndex === currentUserIndex - 1)
+                              // 2. It's the next person (responseIndex === currentUserIndex + 1)
+                              return (
+                                responseIndex === currentUserIndex - 1 || // Previous person
+                                responseIndex === currentUserIndex + 1 // Next person
+                              );
+                            })()}
+                            crossoutStroke={getCrossoutStroke(response.id)}
+                          />
+                        )
+                      }
+                    />
+                  </div>
                 );
-                const prevOverlap = 13 + prevSeed * 13;
-                activeTop += 320 - prevOverlap;
-              }
-              activeTop -= activeOverlap; // Apply current note's overlap
+              })}
 
-              return (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: `${activeTop}px`,
-                    left: "50%",
-                    transform: `translateX(-50%) translate(${responseNoteOffset.x}px, 0)`,
-                    zIndex: 200,
-                  }}
-                >
-                  <FlippableNote
-                    ref={activeNoteRef}
-                    width={320}
-                    height={320}
-                    background={responseNoteOffset.color.bg}
-                    isEditable={true}
-                    authorName={authorNameDrawing}
-                    onAuthorNameChange={setAuthorNameDrawing}
-                    isFlipped={flippedNotes["active-note"] || false}
-                    isTypingMode={true}
-                    typedText={typedResponse}
-                    onTextChange={setTypedResponse}
-                    noteColor={responseNoteOffset.color}
-                    onUndo={() => activeNoteRef.current?.handleUndo()}
-                  />
-                </div>
-              );
-            })()}
+            {/* Active Response Note */}
+            {canEdit &&
+              (() => {
+                // Calculate position for active response note
+                const activeSeed = seededRandom(thread.id + "active-response");
+                const activeOverlap = 13 + activeSeed * 13; // 13-26px overlap
+
+                // Calculate cumulative top position for active note
+                let activeTop = 320; // Start after the question note
+                for (let i = 0; i < thread.responses.length - 1; i++) {
+                  const prevSeed = seededRandom(
+                    (thread.responses[i + 1]?.id || "default") + "overlap"
+                  );
+                  const prevOverlap = 13 + prevSeed * 13;
+                  activeTop += 320 - prevOverlap;
+                }
+                activeTop -= activeOverlap; // Apply current note's overlap
+
+                return (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: `${activeTop}px`,
+                      left: "50%",
+                      transform: `translateX(-50%) translate(${responseNoteOffset.x}px, 0)`,
+                      zIndex: 200,
+                    }}
+                  >
+                    <FlippableNote
+                      ref={activeNoteRef}
+                      width={320}
+                      height={320}
+                      background={responseNoteOffset.color.bg}
+                      isEditable={true}
+                      authorName={authorNameDrawing}
+                      onAuthorNameChange={setAuthorNameDrawing}
+                      isFlipped={flippedNotes["active-note"] || false}
+                      isTypingMode={true}
+                      typedText={typedResponse}
+                      onTextChange={setTypedResponse}
+                      noteColor={responseNoteOffset.color}
+                      onUndo={() => activeNoteRef.current?.handleUndo()}
+                    />
+                  </div>
+                );
+              })()}
           </div>
         )}
         {/* Bottom buttons - always show when editing */}
