@@ -693,26 +693,26 @@ export default function NotePage() {
                                   transformOrigin: "center",
                                 }}
                               >
-                                {index === 0 ? (
-                                  // First connection - show actual signature
-                                  <div
-                                    style={{
-                                      transform: "scale(0.33)",
-                                      transformOrigin: "center",
-                                    }}
-                                    dangerouslySetInnerHTML={{
-                                      __html: response.authorName,
-                                    }}
-                                  />
-                                ) : (
-                                  // Farther connections - show crossout stroke
-                                  <Image
-                                    src={getCrossoutStroke(response.id)}
-                                    alt="crossed out signature"
-                                    width={128}
-                                    height={32}
-                                  />
-                                )}
+                                {(() => {
+                                  // Show signatures only for adjacent connections:
+                                  // - Original sender (always visible)
+                                  // - Previous person (who passed to current user)
+                                  // - Next person (who current user passes to, when available)
+                                  
+                                  // In read view, we don't know current user's position
+                                  // So we show all signatures for now (this is the read-only view)
+                                  return (
+                                    <div
+                                      style={{
+                                        transform: "scale(0.33)",
+                                        transformOrigin: "center",
+                                      }}
+                                      dangerouslySetInnerHTML={{
+                                        __html: response.authorName,
+                                      }}
+                                    />
+                                  );
+                                })()}
                               </div>
                             )}
                           </div>
@@ -1032,7 +1032,7 @@ export default function NotePage() {
                             {response.drawingData}
                           </div>
 
-                          {/* Signature at bottom - crossout for non-first connections */}
+                          {/* Signature at bottom - show signatures for adjacent connections only */}
                           {response.authorName && (
                             <div
                               style={{
@@ -1043,26 +1043,47 @@ export default function NotePage() {
                                 transformOrigin: "center",
                               }}
                             >
-                              {index === 0 ? (
-                                // First connection - show actual signature
-                                <div
-                                  style={{
-                                    transform: "scale(0.33)",
-                                    transformOrigin: "center",
-                                  }}
-                                  dangerouslySetInnerHTML={{
-                                    __html: response.authorName,
-                                  }}
-                                />
-                              ) : (
-                                // Farther connections - show crossout stroke
-                                <Image
-                                  src={getCrossoutStroke(response.id)}
-                                  alt="crossed out signature"
-                                  width={128}
-                                  height={32}
-                                />
-                              )}
+                              {(() => {
+                                // Current user's position in chain:
+                                // - thread.responses[0] is original sender
+                                // - thread.responses[1] is first recipient
+                                // - thread.responses[n] is current recipient if canEdit
+                                // - We want to show signatures for:
+                                //   * Original sender (always visible)
+                                //   * Previous person (who passed to current user)
+                                //   * Next person (who current user passes to, when available)
+                                
+                                const currentUserIndex = canEdit ? thread.responses.length : thread.responses.length - 1;
+                                const responseIndex = index + 1; // Convert to absolute index in responses array
+                                
+                                // Show signature if:
+                                // 1. It's the previous person (responseIndex === currentUserIndex - 1)
+                                // 2. It's the next person (responseIndex === currentUserIndex + 1)
+                                const shouldShowSignature = 
+                                  responseIndex === currentUserIndex - 1 || // Previous person
+                                  responseIndex === currentUserIndex + 1;   // Next person
+                                
+                                return shouldShowSignature ? (
+                                  // Show actual signature
+                                  <div
+                                    style={{
+                                      transform: "scale(0.33)",
+                                      transformOrigin: "center",
+                                    }}
+                                    dangerouslySetInnerHTML={{
+                                      __html: response.authorName,
+                                    }}
+                                  />
+                                ) : (
+                                  // Show crossout stroke
+                                  <Image
+                                    src={getCrossoutStroke(response.id)}
+                                    alt="crossed out signature"
+                                    width={128}
+                                    height={32}
+                                  />
+                                );
+                              })()}
                             </div>
                           )}
                         </div>

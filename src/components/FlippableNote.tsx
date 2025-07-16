@@ -157,8 +157,6 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
                     }}
                   >
                     <TypingCanvas
-                      width={242} // 280 - 38 (19px padding on each side)
-                      height={224} // 187 - 38 (19px padding on top and bottom)
                       onTextChange={onTextChange}
                       initialText={typedText}
                       disabled={!isEditable}
