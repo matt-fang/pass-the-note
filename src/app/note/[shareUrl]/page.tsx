@@ -96,6 +96,7 @@ export default function NotePage() {
     {}
   );
   const [typedResponse, setTypedResponse] = useState("");
+  const [generatedShareUrl, setGeneratedShareUrl] = useState<string>("");
   const activeNoteRef = useRef<FlippableNoteRef>(null);
 
   // Disable scrolling when in "passed" state
@@ -328,14 +329,17 @@ export default function NotePage() {
     const shareUrl = await submitResponse();
 
     if (shareUrl) {
-      // 2. Store that user has responded to THIS note
+      // 2. Store the generated share URL for later use
+      setGeneratedShareUrl(shareUrl);
+      
+      // 3. Store that user has responded to THIS note
       const hasRespondedKey = `responded_${params.shareUrl}`;
       localStorage.setItem(hasRespondedKey, "true");
 
-      // 3. Open native sharing interface immediately
+      // 4. Open native sharing interface immediately
       await shareNatively(shareUrl);
 
-      // 4. Trigger animation and passed state
+      // 5. Trigger animation and passed state
       setNotesSlideOut(true);
       setTimeout(() => {
         setSlideAnimationComplete(true);
@@ -1239,8 +1243,7 @@ export default function NotePage() {
               >
                 <button
                   onClick={async () => {
-                    const shareUrl = window.location.href;
-                    await shareNatively(shareUrl);
+                    await shareNatively(generatedShareUrl);
                   }}
                   style={{
                     background: "#E5E1DE",
@@ -1254,7 +1257,7 @@ export default function NotePage() {
                     padding: "8px 10px",
                   }}
                 >
-                  get the share link again
+                  send note again
                 </button>
 
                 <button
