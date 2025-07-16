@@ -654,7 +654,7 @@ export default function NotePage() {
                         ) : (
                           <div
                             style={{
-                              width: "280px",
+                              width: "240px",
                               height: "240px",
                               display: "flex",
                               flexDirection: "column",
@@ -666,19 +666,36 @@ export default function NotePage() {
                             {/* Answer text */}
                             <div
                               style={{
-                                fontFamily: "var(--font-sans)",
-                                fontSize: "16px",
-                                lineHeight: "22px",
-                                fontWeight: "500",
-                                color: offset.color.secondary,
-                                textAlign: "left",
-                                overflow: "hidden",
-                                wordBreak: "break-word",
-                                flex: 1,
+                                width: "100%",
+                                height: "100%",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                position: "relative",
+                                padding: "0",
                                 marginBottom: "19px",
                               }}
                             >
-                              {response.drawingData}
+                              <div
+                                style={{
+                                  width: "100%",
+                                  height: "100%",
+                                  fontFamily: "var(--font-sans)",
+                                  fontSize: "16px",
+                                  lineHeight: "22px",
+                                  fontWeight: "500",
+                                  color: offset.color.secondary,
+                                  textAlign: "left",
+                                  overflow: "hidden",
+                                  wordBreak: "break-word",
+                                  display: "flex",
+                                  alignItems: "flex-start",
+                                  justifyContent: "flex-start",
+                                  padding: "0",
+                                }}
+                              >
+                                {response.drawingData}
+                              </div>
                             </div>
 
                             {/* Signature at bottom */}
@@ -1005,7 +1022,7 @@ export default function NotePage() {
                       ) : (
                         <div
                           style={{
-                            width: "280px",
+                            width: "240px",
                             height: "240px",
                             display: "flex",
                             flexDirection: "column",
@@ -1017,19 +1034,36 @@ export default function NotePage() {
                           {/* Answer text */}
                           <div
                             style={{
-                              fontFamily: "var(--font-sans)",
-                              fontSize: "16px", // Updated to match new font size
-                              lineHeight: "22px", // Updated to match new line height
-                              fontWeight: "500",
-                              color: offset.color.secondary,
-                              textAlign: "left",
-                              overflow: "hidden",
-                              wordBreak: "break-word",
-                              flex: 1,
+                              width: "100%",
+                              height: "100%",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              position: "relative",
+                              padding: "0",
                               marginBottom: "19px",
                             }}
                           >
-                            {response.drawingData}
+                            <div
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                fontFamily: "var(--font-sans)",
+                                fontSize: "16px", // Updated to match new font size
+                                lineHeight: "22px", // Updated to match new line height
+                                fontWeight: "500",
+                                color: offset.color.secondary,
+                                textAlign: "left",
+                                overflow: "hidden",
+                                wordBreak: "break-word",
+                                display: "flex",
+                                alignItems: "flex-start",
+                                justifyContent: "flex-start",
+                                padding: "0",
+                              }}
+                            >
+                              {response.drawingData}
+                            </div>
                           </div>
 
                           {/* Signature at bottom - show signatures for adjacent connections only */}
