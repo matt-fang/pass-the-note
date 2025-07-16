@@ -86,6 +86,8 @@ export default function NotePage() {
   const [hasPassed, setHasPassed] = useState(false);
   const [notesSlideOut, setNotesSlideOut] = useState(false);
   const [showReadView, setShowReadView] = useState(false);
+  const [slideAnimationComplete, setSlideAnimationComplete] = useState(false);
+  const [showSentContent, setShowSentContent] = useState(false);
   const [authorNameDrawing, setAuthorNameDrawing] = useState("");
   const [flippedNotes, setFlippedNotes] = useState<{ [key: string]: boolean }>(
     {}
@@ -308,8 +310,13 @@ export default function NotePage() {
       // 4. Trigger animation and passed state
       setNotesSlideOut(true);
       setTimeout(() => {
+        setSlideAnimationComplete(true);
         setHasPassed(true);
         setCanEdit(false);
+        // Start fade-in of sent content after a brief delay
+        setTimeout(() => {
+          setShowSentContent(true);
+        }, 100);
       }, 600); // Wait for slide animation to complete
     }
   };
@@ -835,36 +842,37 @@ export default function NotePage() {
           </div>
         )}
         {/* Note Container - Absolute Positioned for Overlap */}
-        <div
-          style={{
-            position: "relative",
-            width: "100%",
-            height: (() => {
-              // Calculate total height based on actual overlap amounts
-              let totalHeight = 320; // Base question note height
+        {!slideAnimationComplete && (
+          <div
+            style={{
+              position: "relative",
+              width: "100%",
+              height: (() => {
+                // Calculate total height based on actual overlap amounts
+                let totalHeight = 320; // Base question note height
 
-              // Add height for existing responses
-              for (let i = 0; i < thread.responses.length - 1; i++) {
-                const overlapSeed = seededRandom(
-                  (thread.responses[i + 1]?.id || "default") + "overlap"
-                );
-                const overlap = 13 + overlapSeed * 13; // 13-26px overlap
-                totalHeight += 320 - overlap;
-              }
+                // Add height for existing responses
+                for (let i = 0; i < thread.responses.length - 1; i++) {
+                  const overlapSeed = seededRandom(
+                    (thread.responses[i + 1]?.id || "default") + "overlap"
+                  );
+                  const overlap = 13 + overlapSeed * 13; // 13-26px overlap
+                  totalHeight += 320 - overlap;
+                }
 
-              // Add height for active response note if editing
-              if (canEdit) {
-                const activeSeed = seededRandom(thread.id + "active-response");
-                const activeOverlap = 13 + activeSeed * 13;
-                totalHeight += 320 - activeOverlap;
-              }
+                // Add height for active response note if editing
+                if (canEdit) {
+                  const activeSeed = seededRandom(thread.id + "active-response");
+                  const activeOverlap = 13 + activeSeed * 13;
+                  totalHeight += 320 - activeOverlap;
+                }
 
-              return `${totalHeight}px`;
-            })(),
-            transform: notesSlideOut ? "translateY(-100vh)" : "translateY(0)",
-            transition: "transform 0.6s ease-in-out",
-          }}
-        >
+                return `${totalHeight}px`;
+              })(),
+              transform: notesSlideOut ? "translateY(-100vh)" : "translateY(0)",
+              transition: "transform 0.6s ease-in-out",
+            }}
+          >
           {/* Main Question Note */}
           <div
             style={{
@@ -1168,7 +1176,8 @@ export default function NotePage() {
                 </div>
               );
             })()}
-        </div>
+          </div>
+        )}
         {/* Bottom buttons - always show when editing */}
         {canEdit && !hasPassed && (
           <div
@@ -1262,11 +1271,18 @@ export default function NotePage() {
         {hasPassed && (
           <div
             style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
               display: "flex",
-              alignItems: "center", // vertical centering
-              justifyContent: "center", // horizontal centering
-              height: "100vh", // full viewport height
-              width: "100%",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "var(--cream)",
+              zIndex: 1000,
+              opacity: showSentContent ? 1 : 0,
+              transition: "opacity 0.4s ease-in-out",
             }}
           >
             <div
