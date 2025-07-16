@@ -4,7 +4,14 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Little Notes™",
   description: "Pass a little note to a friend. Start a big conversation.",
-  keywords: ["notes", "drawing", "friends", "conversation", "social", "creative"],
+  keywords: [
+    "notes",
+    "drawing",
+    "friends",
+    "conversation",
+    "social",
+    "creative",
+  ],
   authors: [{ name: "Little Notes" }],
   creator: "Little Notes",
   publisher: "Little Notes",
@@ -20,7 +27,7 @@ export const metadata: Metadata = {
     siteName: "Little Notes",
     images: [
       {
-        url: "/url.jpg",
+        url: "/url.jpeg",
         width: 1200,
         height: 630,
         alt: "Little Notes - Pass a little note to a friend",
@@ -33,7 +40,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "a note for a special friend",
     description: "write ur answer and pass it on !",
-    images: ["/url.jpg"],
+    images: ["/url.jpeg"],
     creator: "@littlenotes",
   },
   robots: {
@@ -70,12 +77,10 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Little Notes" />
         <link rel="apple-touch-icon" href="/littlenoteslogo.png" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/favicon.png" />
         <link rel="manifest" href="/manifest.json" />
       </head>
-      <body>
-        {children}
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
