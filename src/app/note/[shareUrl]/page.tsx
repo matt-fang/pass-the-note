@@ -98,6 +98,20 @@ export default function NotePage() {
   const [typedResponse, setTypedResponse] = useState("");
   const activeNoteRef = useRef<FlippableNoteRef>(null);
 
+  // Disable scrolling when in "passed" state
+  useEffect(() => {
+    if (hasPassed) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [hasPassed]);
+
   // Deterministic random function based on string input
   const seededRandom = (seed: string): number => {
     let hash = 0;
