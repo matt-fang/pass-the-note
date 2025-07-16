@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getRandomQuestion } from '@/lib/questions';
-import { v4 as uuidv4 } from 'uuid';
+import { generateUniqueUrl } from '@/lib/friendlyUrls';
 
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}));
     const { authorName } = body;
     const question = getRandomQuestion();
-    const shareUrl = uuidv4();
+    const shareUrl = await generateUniqueUrl(prisma);
     
     const thread = await prisma.noteThread.create({
       data: {

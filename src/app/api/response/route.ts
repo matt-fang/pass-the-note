@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { v4 as uuidv4 } from 'uuid';
+import { generateUniqueUrl } from '@/lib/friendlyUrls';
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const newShareUrl = uuidv4();
+    const newShareUrl = await generateUniqueUrl(prisma);
     
     const response = await prisma.response.create({
       data: {
