@@ -36,6 +36,10 @@ export default function Home() {
   const [isMobile, setIsMobile] = useState(false);
   const [authorNameDrawing, setAuthorNameDrawing] = useState("");
   const [isNoteFlipped, setIsNoteFlipped] = useState(false);
+  const [hasPassed, setHasPassed] = useState(false);
+  const [notesSlideOut, setNotesSlideOut] = useState(false);
+  const [slideAnimationComplete, setSlideAnimationComplete] = useState(false);
+  const [showSentContent, setShowSentContent] = useState(false);
   const flipNoteRef = useRef<FlippableNoteRef>(null);
   
   // Preload note images
@@ -134,7 +138,26 @@ export default function Home() {
     }
   };
 
-  const shareNatively = async () => {
+  const shareNatively = async (url: string) => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          url: url,
+        });
+      } catch {
+        // User cancelled, do nothing
+      }
+    } else {
+      // Fallback: copy to clipboard
+      try {
+        await navigator.clipboard.writeText(url);
+      } catch {
+        // Clipboard API failed, do nothing
+      }
+    }
+  };
+
+  const passNote = async () => {
     // Save signature before sharing
     if (authorNameDrawing && shareUrl) {
       try {
@@ -154,15 +177,19 @@ export default function Home() {
       }
     }
 
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          url: shareUrl,
-        });
-      } catch {
-        // User cancelled, do nothing
-      }
-    }
+    // Open native sharing interface immediately
+    await shareNatively(shareUrl);
+
+    // Trigger animation and passed state
+    setNotesSlideOut(true);
+    setTimeout(() => {
+      setSlideAnimationComplete(true);
+      setHasPassed(true);
+      // Start fade-in of sent content after a brief delay
+      setTimeout(() => {
+        setShowSentContent(true);
+      }, 100);
+    }, 600); // Wait for slide animation to complete
   };
 
   const noteSize = 320; // Keep note size consistent across mobile and desktop
@@ -192,29 +219,33 @@ export default function Home() {
     <div
       style={{
         minHeight: "100vh",
-        overflow: "visible", // Changed from 'hidden' to allow shadow
+        height: hasPassed ? "100vh" : "auto",
+        overflow: hasPassed ? "hidden" : "visible", // Changed from 'hidden' to allow shadow
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center",
+        justifyContent: hasPassed ? "center" : "center",
         background: "var(--cream)",
-        padding: "0 20px",
+        padding: hasPassed ? "0" : "0 20px",
         position: "relative",
       }}
     >
       <Header showAbout={showAbout} onAboutChange={setShowAbout} />
 
       {/* Main Content */}
-      <div
-        style={{
-          flex: 1, // <-- allow this div to grow
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center", // <-- vertically center its children
-          gap: isMobile ? "15px" : "50px",
-        }}
-      >
+      {!slideAnimationComplete && (
+        <div
+          style={{
+            flex: 1, // <-- allow this div to grow
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center", // <-- vertically center its children
+            gap: isMobile ? "15px" : "50px",
+            transform: notesSlideOut ? "translateY(-100vh)" : "translateY(0)",
+            transition: "transform 0.6s ease-in-out",
+          }}
+        >
         {/* Text above note */}
         <div
           style={{
@@ -341,14 +372,15 @@ export default function Home() {
         </div>
 
         {/* Bottom buttons with 80pt spacing */}
-        <div
-          style={{
-            marginTop: "10px", // 80pt spacing between note and button
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-          }}
-        >
+        {!hasPassed && (
+          <div
+            style={{
+              marginTop: "10px", // 80pt spacing between note and button
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+            }}
+          >
           {/* Back button - only show when flipped */}
           {isNoteFlipped && (
             <button
@@ -376,8 +408,8 @@ export default function Home() {
                 // If not flipped, flip to signing screen
                 setIsNoteFlipped(true);
               } else {
-                // If flipped and signed, share the note
-                await shareNatively();
+                // If flipped and signed, pass the note
+                await passNote();
               }
             }}
             disabled={!shareUrl || (isNoteFlipped && !authorNameDrawing)}
@@ -400,7 +432,101 @@ export default function Home() {
             }
           </button>
         </div>
+        )}
       </div>
+      )}
+
+      {/* Passed state - shows after note is passed */}
+      {hasPassed && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "var(--cream)",
+            zIndex: 1000,
+            opacity: showSentContent ? 1 : 0,
+            transition: "opacity 0.4s ease-in-out",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              textAlign: "center",
+              gap: "40px",
+              padding: "0 20px",
+              width: "100%",
+              maxWidth: "400px",
+            }}
+          >
+            <div
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontWeight: 500,
+                fontSize: "16px",
+                lineHeight: "22px",
+                color: "var(--text-dark)",
+              }}
+            >
+              sent! come back to this link any time to see the chain grow
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "16px",
+                width: "100%",
+              }}
+            >
+              <button
+                onClick={async () => {
+                  await shareNatively(shareUrl);
+                }}
+                style={{
+                  background: "#E5E1DE",
+                  border: "none",
+                  fontFamily: "var(--font-sans)",
+                  fontWeight: 500,
+                  fontSize: "14px",
+                  lineHeight: "18px",
+                  color: "black",
+                  cursor: "pointer",
+                  padding: "8px 10px",
+                }}
+              >
+                get the share link again
+              </button>
+
+              <button
+                onClick={() => (window.location.href = "/")}
+                style={{
+                  background: "#FF5E01",
+                  border: "none",
+                  fontFamily: "var(--font-sans)",
+                  fontWeight: 500,
+                  fontSize: "14px",
+                  lineHeight: "18px",
+                  color: "white",
+                  cursor: "pointer",
+                  padding: "8px 10px",
+                }}
+              >
+                write another note &gt;
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
