@@ -344,6 +344,13 @@ export default function NotePage() {
       } catch {
         // User cancelled, do nothing
       }
+    } else {
+      // Fallback: copy to clipboard
+      try {
+        await navigator.clipboard.writeText(url);
+      } catch {
+        // Clipboard API failed, do nothing
+      }
     }
   };
 
@@ -1175,14 +1182,12 @@ export default function NotePage() {
                 style={{
                   fontFamily: "var(--font-sans)",
                   fontWeight: 500,
-                  fontSize: "18px",
-                  lineHeight: "24px",
+                  fontSize: "16px",
+                  lineHeight: "22px",
                   color: "var(--text-dark)",
                 }}
               >
-                sent! check this link again when
-                <br />
-                your friend fills out their note.
+                sent! come back to this link any time to see the chain grow
               </div>
 
               <div
@@ -1211,7 +1216,7 @@ export default function NotePage() {
                     padding: "8px 10px",
                   }}
                 >
-                  pass this note again &gt;
+                  get the share link again
                 </button>
 
                 <button
