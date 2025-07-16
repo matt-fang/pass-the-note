@@ -10,7 +10,7 @@ interface HeaderProps {
 
 export default function Header({ showAbout = false, onAboutChange }: HeaderProps) {
   const [isMobile, setIsMobile] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -76,9 +76,9 @@ export default function Header({ showAbout = false, onAboutChange }: HeaderProps
             src={isPlaying ? "/music.note.svg" : "/music.note.slash.svg"}
             alt={isPlaying ? "Pause Music" : "Play Music"}
             style={{
-              width: '16px',
               height: '16px',
-              filter: isPlaying ? 'brightness(0) saturate(100%) invert(42%) sepia(93%) saturate(1352%) hue-rotate(337deg) brightness(119%) contrast(119%)' : 'none'
+              width: 'auto',
+              filter: isPlaying ? 'brightness(0) saturate(100%) invert(42%) sepia(93%) saturate(1352%) hue-rotate(337deg) brightness(119%) contrast(119%)' : 'brightness(0) saturate(100%) invert(0%)'
             }}
           />
         </button>
