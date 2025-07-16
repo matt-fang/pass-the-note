@@ -31,7 +31,8 @@ export default function Home() {
   const [question, setQuestion] = useState("");
   const [noteColor, setNoteColor] = useState(NOTE_COLORS[0]);
   const [textOffset, setTextOffset] = useState({ x: 0, y: 0 });
-  const [noteOpacity, setNoteOpacity] = useState(1);
+  const [textOpacity, setTextOpacity] = useState(1);
+  const [backgroundOpacity, setBackgroundOpacity] = useState(1);
   const [showAbout, setShowAbout] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [authorNameDrawing, setAuthorNameDrawing] = useState("");
@@ -97,8 +98,9 @@ export default function Home() {
 
 
   const getNewQuestion = async () => {
-    // Instant fade out
-    setNoteOpacity(0);
+    // Fade out text and background
+    setTextOpacity(0);
+    setBackgroundOpacity(0);
 
     try {
       const response = await fetch("/api/thread", {
@@ -140,18 +142,23 @@ export default function Home() {
         setAuthorNameDrawing("");
 
         // Fade back in
-        setTimeout(() => setNoteOpacity(1), 50);
+        setTimeout(() => {
+          setTextOpacity(1);
+          setBackgroundOpacity(1);
+        }, 50);
       }
     } catch (error) {
       console.error("Error getting new question:", error);
-      setNoteOpacity(1); // Reset opacity on error
+      setTextOpacity(1); // Reset opacity on error
+      setBackgroundOpacity(1);
     }
   };
 
   const goBackToPreviousQuestion = () => {
     if (questionHistory.length > 0) {
-      // Instant fade out
-      setNoteOpacity(0);
+      // Fade out text and background
+      setTextOpacity(0);
+      setBackgroundOpacity(0);
 
       const previousQuestion = questionHistory[questionHistory.length - 1];
       
@@ -168,7 +175,10 @@ export default function Home() {
       setAuthorNameDrawing("");
 
       // Fade back in
-      setTimeout(() => setNoteOpacity(1), 50);
+      setTimeout(() => {
+        setTextOpacity(1);
+        setBackgroundOpacity(1);
+      }, 50);
     }
   };
 
@@ -328,8 +338,6 @@ export default function Home() {
           {/* Note - centered */}
           <div
             style={{
-              opacity: noteOpacity,
-              transition: "opacity 0.2s ease-in-out",
               position: "relative",
             }}
           >
@@ -338,6 +346,7 @@ export default function Home() {
               width={noteSize}
               height={noteSize}
               background={noteColor.bg}
+              backgroundOpacity={backgroundOpacity}
               isEditable={true}
               authorName={authorNameDrawing}
               onAuthorNameChange={setAuthorNameDrawing}
@@ -362,6 +371,8 @@ export default function Home() {
                       top: "50%",
                       left: "50%",
                       transform: `translate(calc(-50% + ${textOffset.x}px), calc(-50% + ${textOffset.y}px))`,
+                      opacity: textOpacity,
+                      transition: "opacity 0.2s ease-in-out",
                     }}
                   >
                     {question}
