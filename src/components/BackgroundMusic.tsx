@@ -17,6 +17,8 @@ declare global {
           play: () => void;
           pause: () => void;
           toggle: () => void;
+          setVolume: (volume: number) => void;
+          getVolume: (callback: (volume: number) => void) => void;
         };
         Events: {
           READY: string;
@@ -37,6 +39,8 @@ export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
     play: () => void;
     pause: () => void;
     toggle: () => void;
+    setVolume: (volume: number) => void;
+    getVolume: (callback: (volume: number) => void) => void;
     bind: (event: string, callback: () => void) => void;
   } | null>(null);
 
@@ -59,12 +63,26 @@ export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
 
       widget.bind(window.SC.Widget.Events.READY, () => {
         console.log('SoundCloud widget ready');
+        // Check initial volume
+        widget.getVolume((volume) => {
+          console.log('Initial volume:', volume);
+        });
+        // Set volume to 70% when widget is ready to ensure it's audible
+        widget.setVolume(70);
         setIsWidgetReady(true);
       });
 
       // Add event listeners for play/pause to track state
       widget.bind(window.SC.Widget.Events.PLAY, () => {
         console.log('SoundCloud started playing');
+        // Double-check volume when play starts
+        widget.getVolume((volume) => {
+          console.log('Current volume:', volume);
+          if (volume < 50) {
+            console.log('Volume too low, setting to 70');
+            widget.setVolume(70);
+          }
+        });
         setHasUserInteracted(true);
       });
 
@@ -79,6 +97,15 @@ export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
       // Add a small delay to ensure widget is fully ready
       const timer = setTimeout(() => {
         if (isPlaying) {
+          // Aggressively ensure volume is audible before any play action
+          console.log('Setting volume to 70 before play');
+          widgetRef.current!.setVolume(70);
+          
+          // Double-check volume was set
+          widgetRef.current!.getVolume((currentVolume) => {
+            console.log('Volume after setting:', currentVolume);
+          });
+          
           // On mobile devices, use a more aggressive approach for the first play
           const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
           
