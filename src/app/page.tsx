@@ -40,6 +40,7 @@ export default function Home() {
   const [notesSlideOut, setNotesSlideOut] = useState(false);
   const [slideAnimationComplete, setSlideAnimationComplete] = useState(false);
   const [showSentContent, setShowSentContent] = useState(false);
+  const [questionHistory, setQuestionHistory] = useState<Array<{question: string, shareUrl: string, noteColor: typeof NOTE_COLORS[0], textOffset: {x: number, y: number}}>>([]);
   const flipNoteRef = useRef<FlippableNoteRef>(null);
   
   // Preload note images
@@ -48,7 +49,39 @@ export default function Home() {
 
   // Load question immediately when component mounts
   useEffect(() => {
-    createNewNote();
+    const loadInitialNote = async () => {
+      try {
+        const response = await fetch("/api/thread", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({}),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setQuestion(data.question);
+          const fullUrl = `${window.location.origin}/note/${data.shareUrl}`;
+          setShareUrl(fullUrl);
+
+          // Set random note color
+          const randomColor =
+            NOTE_COLORS[Math.floor(Math.random() * NOTE_COLORS.length)];
+          setNoteColor(randomColor);
+
+          // Set random text offset
+          setTextOffset({
+            x: (Math.random() - 0.5) * 6, // -3px to 3px
+            y: (Math.random() - 0.5) * 4, // -2px to 2px
+          });
+        }
+      } catch (error) {
+        console.error("Error creating note:", error);
+      }
+    };
+
+    loadInitialNote();
   }, []);
 
   // Check if mobile on mount and resize
@@ -62,37 +95,6 @@ export default function Home() {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  const createNewNote = async () => {
-    try {
-      const response = await fetch("/api/thread", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({}),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setQuestion(data.question);
-        const fullUrl = `${window.location.origin}/note/${data.shareUrl}`;
-        setShareUrl(fullUrl);
-
-        // Set random note color
-        const randomColor =
-          NOTE_COLORS[Math.floor(Math.random() * NOTE_COLORS.length)];
-        setNoteColor(randomColor);
-
-        // Set random text offset
-        setTextOffset({
-          x: (Math.random() - 0.5) * 6, // -3px to 3px
-          y: (Math.random() - 0.5) * 4, // -2px to 2px
-        });
-      }
-    } catch (error) {
-      console.error("Error creating note:", error);
-    }
-  };
 
   const getNewQuestion = async () => {
     // Instant fade out
@@ -109,6 +111,14 @@ export default function Home() {
 
       if (response.ok) {
         const data = await response.json();
+
+        // Save current question to history before setting new one
+        setQuestionHistory(prev => [...prev, {
+          question,
+          shareUrl,
+          noteColor,
+          textOffset
+        }]);
 
         // Update everything instantly
         setQuestion(data.question);
@@ -135,6 +145,30 @@ export default function Home() {
     } catch (error) {
       console.error("Error getting new question:", error);
       setNoteOpacity(1); // Reset opacity on error
+    }
+  };
+
+  const goBackToPreviousQuestion = () => {
+    if (questionHistory.length > 0) {
+      // Instant fade out
+      setNoteOpacity(0);
+
+      const previousQuestion = questionHistory[questionHistory.length - 1];
+      
+      // Restore previous question data
+      setQuestion(previousQuestion.question);
+      setShareUrl(previousQuestion.shareUrl);
+      setNoteColor(previousQuestion.noteColor);
+      setTextOffset(previousQuestion.textOffset);
+
+      // Remove the last item from history
+      setQuestionHistory(prev => prev.slice(0, -1));
+
+      // Reset signature when going back
+      setAuthorNameDrawing("");
+
+      // Fade back in
+      setTimeout(() => setNoteOpacity(1), 50);
     }
   };
 
@@ -381,10 +415,16 @@ export default function Home() {
               gap: "12px",
             }}
           >
-          {/* Back button - only show when flipped */}
-          {isNoteFlipped && (
+          {/* Back button - show when flipped OR when there's question history */}
+          {(isNoteFlipped || questionHistory.length > 0) && (
             <button
-              onClick={() => setIsNoteFlipped(false)}
+              onClick={() => {
+                if (isNoteFlipped) {
+                  setIsNoteFlipped(false);
+                } else {
+                  goBackToPreviousQuestion();
+                }
+              }}
               style={{
                 background: "#E5E1DE",
                 border: "none",
