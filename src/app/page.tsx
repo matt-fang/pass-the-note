@@ -352,11 +352,6 @@ export default function Home() {
               onAuthorNameChange={setAuthorNameDrawing}
               isFlipped={isNoteFlipped}
               noteColor={noteColor}
-              onUndo={() => {
-                if (flipNoteRef.current) {
-                  flipNoteRef.current.handleUndo();
-                }
-              }}
               frontContent={
                 <div style={{ position: "relative", width: "100%", height: "100%" }}>
                   <div
@@ -377,37 +372,6 @@ export default function Home() {
                   >
                     {question}
                   </div>
-                  {/* Shuffle button - positioned at bottom of note */}
-                  {question && (
-                    <button
-                      onClick={getNewQuestion}
-                      style={{
-                        position: "absolute",
-                        bottom: "8px",
-                        left: "50%",
-                        transform: "translateX(-50%)",
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        padding: "8px",
-                        borderRadius: "50%",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontFamily: "var(--font-sans)",
-                          fontSize: "12px",
-                          fontWeight: "500",
-                          color: "var(--text-dark)",
-                        }}
-                      >
-                        shuffle
-                      </span>
-                    </button>
-                  )}
                 </div>
               }
             />
@@ -449,6 +413,26 @@ export default function Home() {
               }}
             >
               &lt;
+            </button>
+          )}
+
+          {/* Shuffle button - only show when not flipped */}
+          {!isNoteFlipped && (
+            <button
+              onClick={getNewQuestion}
+              style={{
+                background: "#E5E1DE",
+                border: "none",
+                fontFamily: "var(--font-sans)",
+                fontWeight: "500",
+                fontSize: "14px",
+                lineHeight: "18px",
+                color: "black",
+                cursor: "pointer",
+                padding: "8px 10px",
+              }}
+            >
+              shuffle
             </button>
           )}
           

@@ -1065,7 +1065,6 @@ export default function NotePage() {
                       typedText={typedResponse}
                       onTextChange={setTypedResponse}
                       noteColor={responseNoteOffset.color}
-                      onUndo={() => activeNoteRef.current?.handleUndo()}
                     />
                   </div>
                 );
@@ -1104,6 +1103,29 @@ export default function NotePage() {
                 }}
               >
                 &lt;
+              </button>
+            )}
+
+            {/* Clear button - always show when flipped */}
+            {flippedNotes["active-note"] && (
+              <button
+                onClick={() => {
+                  setTypedResponse("");
+                  setAuthorNameDrawing("");
+                }}
+                style={{
+                  background: "#E5E1DE",
+                  border: "none",
+                  fontFamily: "var(--font-sans)",
+                  fontWeight: "500",
+                  fontSize: "14px",
+                  lineHeight: "18px",
+                  color: "black",
+                  cursor: "pointer",
+                  padding: "8px 10px",
+                }}
+              >
+                clear
               </button>
             )}
 
