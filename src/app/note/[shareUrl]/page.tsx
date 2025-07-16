@@ -575,11 +575,11 @@ export default function NotePage() {
                 const offset =
                   existingResponseOffsets[index + 1] ||
                   (() => {
-                    // Get previous color for adjacent check
+                    // Get previous color for adjacent check (skip orange question note)
                     const prevColor =
                       index > 0
                         ? existingResponseOffsets[index]?.color
-                        : undefined;
+                        : ORANGE_NOTE_COLOR; // Exclude orange for first response
                     return {
                       x: getRandomXOffset(response.id + "xoffset"),
                       y: 0,
@@ -923,11 +923,11 @@ export default function NotePage() {
               const offset =
                 existingResponseOffsets[index + 1] ||
                 (() => {
-                  // Get previous color for adjacent check
+                  // Get previous color for adjacent check (skip orange question note)
                   const prevColor =
                     index > 0
                       ? existingResponseOffsets[index]?.color
-                      : undefined;
+                      : ORANGE_NOTE_COLOR; // Exclude orange for first response
                   return {
                     x: getRandomXOffset(response.id + "xoffset"),
                     y: 0,
