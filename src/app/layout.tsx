@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     siteName: "Little Notes",
     images: [
       {
-        url: "/littlenoteslogo.png",
+        url: "/url.jpg",
         width: 1200,
         height: 630,
         alt: "Little Notes - Pass a little note to a friend",
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Little Notes™",
     description: "I sent you a little note ✨",
-    images: ["/littlenoteslogo.png"],
+    images: ["/url.jpg"],
     creator: "@littlenotes",
   },
   robots: {
