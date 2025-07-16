@@ -157,8 +157,6 @@ export default function Home() {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: "Little Notes",
-          text: "i sent you a little note.",
           url: shareUrl,
         });
       } catch {
