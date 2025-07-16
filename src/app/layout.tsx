@@ -14,8 +14,8 @@ export const metadata: Metadata = {
     telephone: false,
   },
   openGraph: {
-    title: "Little Notes™",
-    description: "I sent you a little note ✨",
+    title: "a note for a special friend",
+    description: "write ur answer and pass it on !",
     url: "https://littlenotes.app",
     siteName: "Little Notes",
     images: [
@@ -31,8 +31,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Little Notes™",
-    description: "I sent you a little note ✨",
+    title: "a note for a special friend",
+    description: "write ur answer and pass it on !",
     images: ["/url.jpg"],
     creator: "@littlenotes",
   },
