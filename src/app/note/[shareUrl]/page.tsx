@@ -552,6 +552,7 @@ export default function NotePage() {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
+                        marginTop: "50px",
                         marginBottom: "19px",
                       }}
                     >
@@ -569,7 +570,7 @@ export default function NotePage() {
                           transform: "scale(0.33)",
                           transformOrigin: "center",
                           filter: ORANGE_NOTE_COLOR.filter,
-                          marginBottom: "11pt",
+                          marginBottom: "5px",
                         }}
                         dangerouslySetInnerHTML={{
                           __html: thread.responses[0].authorName,
@@ -861,6 +862,7 @@ export default function NotePage() {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
+                        marginTop: "50px",
                         marginBottom: "19px",
                       }}
                     >
@@ -878,7 +880,7 @@ export default function NotePage() {
                           transform: "scale(0.33)",
                           transformOrigin: "center",
                           filter: ORANGE_NOTE_COLOR.filter,
-                          marginBottom: "11pt",
+                          marginBottom: "5px",
                         }}
                         dangerouslySetInnerHTML={{
                           __html: thread.responses[0].authorName,
