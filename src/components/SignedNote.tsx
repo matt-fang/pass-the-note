@@ -24,12 +24,12 @@ export default function SignedNote({
   return (
     <div
       style={{
-        width: "240px",
-        height: "240px",
+        width: "100%",
+        height: "100%",
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
-        padding: "19px",
+        padding: "0",
         boxSizing: "border-box",
       }}
     >
@@ -77,6 +77,7 @@ export default function SignedNote({
                 alignItems: "center",
                 justifyContent: "center",
                 transformOrigin: "center",
+                marginBottom: "11pt",
               }}
             >
               {shouldShowSignature ? (

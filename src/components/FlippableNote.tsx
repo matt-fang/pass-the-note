@@ -139,8 +139,8 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
               {isTypingMode ? (
                 <div
                   style={{
-                    width: "280px",
-                    height: "240px",
+                    width: "100%",
+                    height: "100%",
                     display: "flex",
                     flexDirection: "column",
                     justifyContent: "space-between",
@@ -173,6 +173,7 @@ const FlippableNote = forwardRef<FlippableNoteRef, FlippableNoteProps>(
                       alignItems: "center",
                       justifyContent: "center",
                       paddingBottom: "10px",
+                      marginBottom: "11pt",
                     }}
                   >
                     {/* Signature will be added when note is flipped and signed */}

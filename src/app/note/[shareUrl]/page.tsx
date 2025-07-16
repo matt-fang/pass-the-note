@@ -524,12 +524,12 @@ export default function NotePage() {
                 frontContent={
                   <div
                     style={{
-                      width: "280px",
-                      height: "240px",
+                      width: "100%",
+                      height: "100%",
                       display: "flex",
                       flexDirection: "column",
                       justifyContent: "space-between",
-                      padding: "19px",
+                      padding: "0",
                       boxSizing: "border-box",
                     }}
                   >
@@ -564,6 +564,7 @@ export default function NotePage() {
                           transform: "scale(0.33)",
                           transformOrigin: "center",
                           filter: ORANGE_NOTE_COLOR.filter,
+                          marginBottom: "11pt",
                         }}
                         dangerouslySetInnerHTML={{
                           __html: thread.responses[0].authorName,
@@ -832,12 +833,12 @@ export default function NotePage() {
                 frontContent={
                   <div
                     style={{
-                      width: "280px",
-                      height: "240px",
+                      width: "100%",
+                      height: "100%",
                       display: "flex",
                       flexDirection: "column",
                       justifyContent: "space-between",
-                      padding: "19px",
+                      padding: "0",
                       boxSizing: "border-box",
                     }}
                   >
@@ -872,6 +873,7 @@ export default function NotePage() {
                           transform: "scale(0.33)",
                           transformOrigin: "center",
                           filter: ORANGE_NOTE_COLOR.filter,
+                          marginBottom: "11pt",
                         }}
                         dangerouslySetInnerHTML={{
                           __html: thread.responses[0].authorName,
