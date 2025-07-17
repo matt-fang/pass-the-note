@@ -98,7 +98,6 @@ export default function NotePage() {
   const [typedResponse, setTypedResponse] = useState("");
   const [generatedShareUrl, setGeneratedShareUrl] = useState<string>("");
   const [scrollOffset, setScrollOffset] = useState(0);
-  const [bounceOffset, setBounceOffset] = useState(0);
   const activeNoteRef = useRef<FlippableNoteRef>(null);
 
   // Disable scrolling when in "passed" state
@@ -127,24 +126,7 @@ export default function NotePage() {
         e.stopPropagation();
         setScrollOffset((prev) => {
           const newOffset = prev + e.deltaY * 0.5; // Slower scroll
-          const maxScroll = 600;
-
-          // If trying to scroll beyond bounds, add bounce effect
-          if (newOffset < 0) {
-            const bounceAmount = Math.min(Math.abs(newOffset), 50); // Max 50px bounce
-            setBounceOffset(-bounceAmount);
-            // Auto-return bounce after short delay
-            setTimeout(() => setBounceOffset(0), 150);
-            return 0;
-          } else if (newOffset > maxScroll) {
-            const bounceAmount = Math.min(newOffset - maxScroll, 50); // Max 50px bounce
-            setBounceOffset(bounceAmount);
-            // Auto-return bounce after short delay
-            setTimeout(() => setBounceOffset(0), 150);
-            return maxScroll;
-          }
-
-          return newOffset;
+          return Math.max(0, Math.min(newOffset, 600)); // Limit scroll range
         });
       };
 
@@ -163,24 +145,7 @@ export default function NotePage() {
           const deltaY = lastTouchY - currentTouchY;
           setScrollOffset((prev) => {
             const newOffset = prev + deltaY * 1.5; // Faster touch scroll
-            const maxScroll = 600;
-
-            // If trying to scroll beyond bounds, add bounce effect
-            if (newOffset < 0) {
-              const bounceAmount = Math.min(Math.abs(newOffset), 50); // Max 50px bounce
-              setBounceOffset(-bounceAmount);
-              // Auto-return bounce after short delay
-              setTimeout(() => setBounceOffset(0), 150);
-              return 0;
-            } else if (newOffset > maxScroll) {
-              const bounceAmount = Math.min(newOffset - maxScroll, 50); // Max 50px bounce
-              setBounceOffset(bounceAmount);
-              // Auto-return bounce after short delay
-              setTimeout(() => setBounceOffset(0), 150);
-              return maxScroll;
-            }
-
-            return newOffset;
+            return Math.max(0, Math.min(newOffset, 600));
           });
           lastTouchY = currentTouchY;
         }
@@ -627,14 +592,11 @@ export default function NotePage() {
         <div
           style={{
             position: "absolute",
-            top: `${300 - scrollOffset + bounceOffset}px`,
+            top: `${300 - scrollOffset}px`,
             left: "50%",
             transform: "translateX(-50%)",
             zIndex: 100,
-            transition:
-              bounceOffset !== 0
-                ? "top 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
-                : "top 0.1s ease-out",
+            transition: "top 0.1s ease-out",
             width: "100%",
             height: (() => {
               // Calculate total height based on actual overlap amounts
@@ -1016,7 +978,7 @@ export default function NotePage() {
           <div
             style={{
               position: "absolute",
-              top: `${300 - scrollOffset + bounceOffset}px`,
+              top: `${300 - scrollOffset}px`,
               left: "50%",
               zIndex: 100,
               width: "100%",
@@ -1053,8 +1015,6 @@ export default function NotePage() {
                 : "translateX(-50%)",
               transition: notesSlideOut
                 ? "transform 0.6s ease-in-out"
-                : bounceOffset !== 0
-                ? "top 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
                 : "top 0.1s ease-out",
             }}
           >
