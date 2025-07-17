@@ -439,7 +439,7 @@ export default function NotePage() {
           padding: "0 20px",
         }}
       >
-        <Header showAbout={showAbout} onAboutChange={setShowAbout} />
+        <Header showAbout={showAbout} onAboutChange={setShowAbout} defaultMusicOn={true} />
         <div
           style={{
             fontFamily: "var(--font-sans)",
@@ -468,7 +468,7 @@ export default function NotePage() {
           padding: "0 20px",
         }}
       >
-        <Header showAbout={showAbout} onAboutChange={setShowAbout} />
+        <Header showAbout={showAbout} onAboutChange={setShowAbout} defaultMusicOn={true} />
 
         {/* Main Content */}
         <div
@@ -537,7 +537,7 @@ export default function NotePage() {
           background: "var(--cream)",
         }}
       >
-        <Header showAbout={showAbout} onAboutChange={setShowAbout} />
+        <Header showAbout={showAbout} onAboutChange={setShowAbout} defaultMusicOn={true} />
 
         {/* Fixed Text Content */}
         <div
@@ -822,7 +822,7 @@ export default function NotePage() {
         justifyContent: hasPassed ? "center" : "initial",
       }}
     >
-      <Header showAbout={showAbout} onAboutChange={setShowAbout} />
+      <Header showAbout={showAbout} onAboutChange={setShowAbout} defaultMusicOn={true} />
 
       {/* Main Content Container */}
       <div>
@@ -1210,22 +1210,44 @@ export default function NotePage() {
                   </div>
                 );
               })()}
-          </div>
-        )}
-        {/* Fixed Bottom Buttons */}
-        {canEdit && !hasPassed && (
-          <div
-            style={{
-              position: "fixed",
-              bottom: "40px",
-              left: "50%",
-              transform: "translateX(-50%)",
-              zIndex: 50,
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-            }}
-          >
+
+            {/* Bottom Buttons - positioned after the active note */}
+            {canEdit && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: `${(() => {
+                    // Calculate position after all notes
+                    let totalTop = 320; // Start after the question note
+                    
+                    // Add height for existing responses
+                    for (let i = 0; i < thread.responses.length - 1; i++) {
+                      const overlapSeed = seededRandom(
+                        (thread.responses[i + 1]?.id || "default") + "overlap"
+                      );
+                      const overlap = 13 + overlapSeed * 13; // 13-26px overlap
+                      totalTop += 320 - overlap;
+                    }
+                    
+                    // Add height for active response note if editing
+                    if (canEdit) {
+                      const activeSeed = seededRandom(
+                        thread.id + "active-response"
+                      );
+                      const activeOverlap = 13 + activeSeed * 13;
+                      totalTop += 320 - activeOverlap;
+                    }
+                    
+                    return totalTop + 40; // Add 40px spacing after notes
+                  })()}px`,
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  zIndex: 50,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                }}
+              >
             {/* Back button - only show when flipped */}
             {flippedNotes["active-note"] && (
               <button
@@ -1327,6 +1349,8 @@ export default function NotePage() {
                 ? "1. sign this note >"
                 : "2. pass this note >"}
             </button>
+            </div>
+            )}
           </div>
         )}
         {/* Passed state - shows after note is passed */}

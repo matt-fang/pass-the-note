@@ -6,11 +6,12 @@ import BackgroundMusic from './BackgroundMusic';
 interface HeaderProps {
   showAbout?: boolean;
   onAboutChange?: (show: boolean) => void;
+  defaultMusicOn?: boolean;
 }
 
-export default function Header({ showAbout = false, onAboutChange }: HeaderProps) {
+export default function Header({ showAbout = false, onAboutChange, defaultMusicOn = false }: HeaderProps) {
   const [isMobile, setIsMobile] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(defaultMusicOn);
 
   useEffect(() => {
     const checkMobile = () => {

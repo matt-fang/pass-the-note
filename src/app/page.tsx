@@ -268,7 +268,7 @@ export default function Home() {
         position: "relative",
       }}
     >
-      <Header showAbout={showAbout} onAboutChange={setShowAbout} />
+      <Header showAbout={showAbout} onAboutChange={setShowAbout} defaultMusicOn={false} />
 
       {/* Main Content */}
       {!slideAnimationComplete && (
