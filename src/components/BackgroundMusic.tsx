@@ -124,10 +124,18 @@ export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
           widgetRef.current!.play();
           
           // Set a flag to indicate we might need user gesture if autoplay fails
+          console.log('🎵 Setting needsUserGesture to true');
           setNeedsUserGesture(true);
+          
+          // Clear the flag after some time if music doesn't start
+          setTimeout(() => {
+            console.log('🎵 Checking if music started after delay...');
+            // If music didn't start, keep the flag for user gesture
+          }, 2000);
         } else {
           console.log('🎵 Calling widget.pause()');
           widgetRef.current!.pause();
+          setNeedsUserGesture(false);
         }
       }, 500); // Much longer delay to ensure priming is complete
 
@@ -146,9 +154,21 @@ export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
   useEffect(() => {
     const handleUserGesture = () => {
       console.log('🎵 User gesture detected, checking if music should resume...');
+      console.log('🎵 Current state:', {
+        needsUserGesture,
+        isPlaying,
+        hasWidget: !!widgetRef.current,
+        isWidgetReady,
+        hasSecretlyPrimed
+      });
       
       if (needsUserGesture && isPlaying && widgetRef.current && isWidgetReady && hasSecretlyPrimed) {
         console.log('🎵 Resuming music after user gesture');
+        widgetRef.current.setVolume(70);
+        widgetRef.current.play();
+        setNeedsUserGesture(false);
+      } else if (needsUserGesture && isPlaying && widgetRef.current) {
+        console.log('🎵 Conditions not fully met, but trying anyway...');
         widgetRef.current.setVolume(70);
         widgetRef.current.play();
         setNeedsUserGesture(false);

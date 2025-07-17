@@ -85,6 +85,7 @@ export default function SignedNote({
                   style={{
                     transform: "scale(0.33)",
                     transformOrigin: "center",
+                    opacity: 0.3,
                   }}
                   dangerouslySetInnerHTML={{
                     __html: authorName,
