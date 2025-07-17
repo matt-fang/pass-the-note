@@ -49,6 +49,8 @@ export default function Home() {
     }>
   >([]);
   const flipNoteRef = useRef<FlippableNoteRef>(null);
+  const [loadingStartTime] = useState(Date.now());
+  const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false);
 
   // Preload note images
   const noteImages = NOTE_COLORS.map((color) => color.bg);
@@ -85,11 +87,19 @@ export default function Home() {
         }
       } catch (error) {
         console.error("Error creating note:", error);
+      } finally {
+        // Ensure minimum 2 seconds of loading time
+        const elapsedTime = Date.now() - loadingStartTime;
+        const remainingTime = Math.max(0, 2000 - elapsedTime);
+        
+        setTimeout(() => {
+          setIsInitialLoadComplete(true);
+        }, remainingTime);
       }
     };
 
     loadInitialNote();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Check if mobile on mount and resize
   useEffect(() => {
@@ -242,8 +252,8 @@ export default function Home() {
   const noteSize = 320; // Keep note size consistent across mobile and desktop
   const fontSize = 18;
 
-  // Show loading until images are preloaded
-  if (!imagesLoaded) {
+  // Show loading until images are preloaded AND minimum time has elapsed
+  if (!imagesLoaded || !isInitialLoadComplete) {
     return (
       <div
         style={{

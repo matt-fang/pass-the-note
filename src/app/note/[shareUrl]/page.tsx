@@ -66,6 +66,7 @@ export default function NotePage() {
   const [canEdit, setCanEdit] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loadingStartTime] = useState(Date.now());
 
   // Preload note images
   const noteImages = NOTE_COLORS.map((color) => color.bg);
@@ -240,7 +241,13 @@ export default function NotePage() {
     } catch (error) {
       console.error("Error loading thread:", error);
     } finally {
-      setIsLoading(false);
+      // Ensure minimum 2 seconds of loading time
+      const elapsedTime = Date.now() - loadingStartTime;
+      const remainingTime = Math.max(0, 2000 - elapsedTime);
+      
+      setTimeout(() => {
+        setIsLoading(false);
+      }, remainingTime);
     }
   };
 
