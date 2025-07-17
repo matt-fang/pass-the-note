@@ -114,6 +114,55 @@ export default function NotePage() {
     };
   }, [hasPassed]);
 
+  // Custom scroll handler for read view
+  useEffect(() => {
+    if (showReadView && thread) {
+      document.body.style.overflow = "hidden";
+      
+      const handleWheel = (e: WheelEvent) => {
+        e.preventDefault();
+        setScrollOffset(prev => {
+          const newOffset = prev + e.deltaY;
+          return Math.max(0, Math.min(newOffset, 800)); // Limit scroll range
+        });
+      };
+      
+      interface TouchHandler {
+        lastTouch?: Touch;
+      }
+      
+      const handleTouch = (e: TouchEvent) => {
+        if (e.touches.length === 1) {
+          const touch = e.touches[0];
+          const lastTouch = (handleTouch as TouchHandler).lastTouch;
+          if (lastTouch) {
+            const deltaY = lastTouch.clientY - touch.clientY;
+            setScrollOffset(prev => {
+              const newOffset = prev + deltaY * 2; // Multiply for faster scroll
+              return Math.max(0, Math.min(newOffset, 800));
+            });
+          }
+          (handleTouch as TouchHandler).lastTouch = touch;
+        }
+      };
+      
+      const handleTouchEnd = () => {
+        (handleTouch as TouchHandler).lastTouch = undefined;
+      };
+      
+      window.addEventListener('wheel', handleWheel, { passive: false });
+      window.addEventListener('touchmove', handleTouch, { passive: false });
+      window.addEventListener('touchend', handleTouchEnd);
+      
+      return () => {
+        document.body.style.overflow = "auto";
+        window.removeEventListener('wheel', handleWheel);
+        window.removeEventListener('touchmove', handleTouch);
+        window.removeEventListener('touchend', handleTouchEnd);
+      };
+    }
+  }, [showReadView, thread]);
+
   // Deterministic random function based on string input
   const seededRandom = (seed: string): number => {
     let hash = 0;
@@ -471,48 +520,6 @@ export default function NotePage() {
 
   // If user has already responded, show read view
   if (showReadView && thread) {
-    // Disable body scroll and add custom scroll handler
-    useEffect(() => {
-      document.body.style.overflow = "hidden";
-      
-      const handleWheel = (e: WheelEvent) => {
-        e.preventDefault();
-        setScrollOffset(prev => {
-          const newOffset = prev + e.deltaY;
-          return Math.max(0, Math.min(newOffset, 800)); // Limit scroll range
-        });
-      };
-      
-      const handleTouch = (e: TouchEvent) => {
-        if (e.touches.length === 1) {
-          const touch = e.touches[0];
-          const lastTouch = (handleTouch as any).lastTouch;
-          if (lastTouch) {
-            const deltaY = lastTouch.clientY - touch.clientY;
-            setScrollOffset(prev => {
-              const newOffset = prev + deltaY * 2; // Multiply for faster scroll
-              return Math.max(0, Math.min(newOffset, 800));
-            });
-          }
-          (handleTouch as any).lastTouch = touch;
-        }
-      };
-      
-      const handleTouchEnd = () => {
-        (handleTouch as any).lastTouch = null;
-      };
-      
-      window.addEventListener('wheel', handleWheel, { passive: false });
-      window.addEventListener('touchmove', handleTouch, { passive: false });
-      window.addEventListener('touchend', handleTouchEnd);
-      
-      return () => {
-        document.body.style.overflow = "auto";
-        window.removeEventListener('wheel', handleWheel);
-        window.removeEventListener('touchmove', handleTouch);
-        window.removeEventListener('touchend', handleTouchEnd);
-      };
-    }, []);
     
     return (
       <div

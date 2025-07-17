@@ -50,9 +50,11 @@ export default function Header({ showAbout = false, onAboutChange }: HeaderProps
         <img 
           src="/littlenoteslogo.png" 
           alt="Little Notes" 
+          onClick={() => window.location.href = '/'}
           style={{
             height: '24px',
-            width: 'auto'
+            width: 'auto',
+            cursor: 'pointer'
           }}
         />
         
@@ -68,7 +70,7 @@ export default function Header({ showAbout = false, onAboutChange }: HeaderProps
             alignItems: 'center',
             justifyContent: 'center',
             position: 'absolute',
-            right: '32px',
+            right: '20px',
             width: '20px',
             height: '20px'
           }}
@@ -80,7 +82,7 @@ export default function Header({ showAbout = false, onAboutChange }: HeaderProps
             style={{
               height: '16px',
               width: 'auto',
-              filter: isPlaying ? 'brightness(0) saturate(100%) invert(42%) sepia(93%) saturate(1352%) hue-rotate(337deg) brightness(119%) contrast(119%)' : 'brightness(0) saturate(100%) invert(0%)'
+              filter: isPlaying ? 'brightness(0) saturate(100%) invert(42%) sepia(93%) saturate(1352%) hue-rotate(337deg) brightness(119%) contrast(119%)' : 'brightness(0) saturate(100%) invert(60%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(59%) contrast(100%)'
             }}
           />
         </button>
