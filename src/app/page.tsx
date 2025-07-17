@@ -51,6 +51,7 @@ export default function Home() {
   const flipNoteRef = useRef<FlippableNoteRef>(null);
   const [loadingStartTime] = useState(Date.now());
   const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false);
+  const [isQuoteScreenFadingOut, setIsQuoteScreenFadingOut] = useState(false);
 
   // Preload note images
   const noteImages = NOTE_COLORS.map((color) => color.bg);
@@ -88,12 +89,16 @@ export default function Home() {
       } catch (error) {
         console.error("Error creating note:", error);
       } finally {
-        // Ensure minimum 2 seconds of loading time
+        // Ensure minimum 1 second of loading time
         const elapsedTime = Date.now() - loadingStartTime;
-        const remainingTime = Math.max(0, 2000 - elapsedTime);
+        const remainingTime = Math.max(0, 1000 - elapsedTime);
         
         setTimeout(() => {
-          setIsInitialLoadComplete(true);
+          setIsQuoteScreenFadingOut(true);
+          // Complete fade out after animation
+          setTimeout(() => {
+            setIsInitialLoadComplete(true);
+          }, 400); // Match fade out animation duration
         }, remainingTime);
       }
     };
@@ -262,6 +267,10 @@ export default function Home() {
           alignItems: "center",
           justifyContent: "center",
           background: "var(--cream)",
+          opacity: 1,
+          animation: isQuoteScreenFadingOut 
+            ? "fadeOut 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards" 
+            : "fadeIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
         }}
       >
         <div
@@ -275,6 +284,10 @@ export default function Home() {
             fontWeight: "500",
             marginTop: "24px",
             display: "block",
+            opacity: 1,
+            animation: isQuoteScreenFadingOut 
+              ? "fadeOut 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards"
+              : "fadeInText 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.2s both",
           }}
         >
           <i>
