@@ -117,48 +117,51 @@ export default function NotePage() {
   // Custom scroll handler for read view
   useEffect(() => {
     if (showReadView && thread) {
+      // Disable all scrolling
       document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
       
       const handleWheel = (e: WheelEvent) => {
         e.preventDefault();
+        e.stopPropagation();
         setScrollOffset(prev => {
-          const newOffset = prev + e.deltaY;
-          return Math.max(0, Math.min(newOffset, 800)); // Limit scroll range
+          const newOffset = prev + e.deltaY * 0.5; // Slower scroll
+          return Math.max(0, Math.min(newOffset, 600)); // Limit scroll range
         });
       };
       
-      interface TouchHandler {
-        lastTouch?: Touch;
-      }
-      
-      const handleTouch = (e: TouchEvent) => {
+      let lastTouchY = 0;
+      const handleTouchStart = (e: TouchEvent) => {
         if (e.touches.length === 1) {
-          const touch = e.touches[0];
-          const lastTouch = (handleTouch as TouchHandler).lastTouch;
-          if (lastTouch) {
-            const deltaY = lastTouch.clientY - touch.clientY;
-            setScrollOffset(prev => {
-              const newOffset = prev + deltaY * 2; // Multiply for faster scroll
-              return Math.max(0, Math.min(newOffset, 800));
-            });
-          }
-          (handleTouch as TouchHandler).lastTouch = touch;
+          lastTouchY = e.touches[0].clientY;
         }
       };
       
-      const handleTouchEnd = () => {
-        (handleTouch as TouchHandler).lastTouch = undefined;
+      const handleTouchMove = (e: TouchEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.touches.length === 1) {
+          const currentTouchY = e.touches[0].clientY;
+          const deltaY = lastTouchY - currentTouchY;
+          setScrollOffset(prev => {
+            const newOffset = prev + deltaY * 1.5; // Faster touch scroll
+            return Math.max(0, Math.min(newOffset, 600));
+          });
+          lastTouchY = currentTouchY;
+        }
       };
       
-      window.addEventListener('wheel', handleWheel, { passive: false });
-      window.addEventListener('touchmove', handleTouch, { passive: false });
-      window.addEventListener('touchend', handleTouchEnd);
+      // Add event listeners with capture to ensure they run first
+      window.addEventListener('wheel', handleWheel, { passive: false, capture: true });
+      window.addEventListener('touchstart', handleTouchStart, { passive: false, capture: true });
+      window.addEventListener('touchmove', handleTouchMove, { passive: false, capture: true });
       
       return () => {
         document.body.style.overflow = "auto";
-        window.removeEventListener('wheel', handleWheel);
-        window.removeEventListener('touchmove', handleTouch);
-        window.removeEventListener('touchend', handleTouchEnd);
+        document.documentElement.style.overflow = "auto";
+        window.removeEventListener('wheel', handleWheel, { capture: true });
+        window.removeEventListener('touchstart', handleTouchStart, { capture: true });
+        window.removeEventListener('touchmove', handleTouchMove, { capture: true });
       };
     }
   }, [showReadView, thread]);
@@ -440,8 +443,8 @@ export default function NotePage() {
         <div
           style={{
             fontFamily: "var(--font-sans)",
-            fontSize: "14px",
-            lineHeight: "18px",
+            fontSize: "16px",
+            lineHeight: "22px",
             color: "var(--text-dark)",
           }}
         >
@@ -481,8 +484,8 @@ export default function NotePage() {
               textAlign: "center",
               fontFamily: "var(--font-sans)",
               fontWeight: "500",
-              fontSize: "14px",
-              lineHeight: "18px",
+              fontSize: "16px",
+              lineHeight: "22px",
               color: "var(--text-dark)",
             }}
           >
@@ -522,18 +525,16 @@ export default function NotePage() {
 
   // If user has already responded, show read view
   if (showReadView && thread) {
-    
     return (
       <div
         style={{
-          minHeight: "100vh",
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          height: "100vh",
           overflow: "hidden",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "flex-start",
           background: "var(--cream)",
-          position: "relative",
         }}
       >
         <Header showAbout={showAbout} onAboutChange={setShowAbout} />
@@ -541,45 +542,36 @@ export default function NotePage() {
         {/* Fixed Text Content */}
         <div
           style={{
-            position: "fixed",
+            position: "absolute",
             top: "120px",
             left: "50%",
             transform: "translateX(-50%)",
-            zIndex: 50,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "40px",
+            zIndex: 10,
+            textAlign: "center",
             padding: "0 20px",
             maxWidth: "100vw",
             boxSizing: "border-box",
+            fontFamily: "var(--font-sans)",
+            fontWeight: "500",
+            fontSize: "16px",
+            lineHeight: "22px",
+            color: "var(--text-dark)",
           }}
         >
-          <div
-            style={{
-              textAlign: "center",
-              fontFamily: "var(--font-sans)",
-              fontWeight: "500",
-              fontSize: "14px",
-              lineHeight: "18px",
-              color: "var(--text-dark)",
-            }}
-          >
-            you&apos;ve already responded to this note.
-            <br />
-            here&apos;s the conversation so far.
-          </div>
+          you&apos;ve already responded to this note.
+          <br />
+          here&apos;s the conversation so far.
         </div>
 
         {/* Scrollable Note Container */}
         <div
           style={{
-            position: "fixed",
-            top: "0px",
+            position: "absolute",
+            top: `${300 - scrollOffset}px`,
             left: "50%",
-            transform: `translateX(-50%) translateY(${300 - scrollOffset}px)`,
+            transform: "translateX(-50%)",
             zIndex: 100,
-            transition: "transform 0.1s ease-out",
+            transition: "top 0.1s ease-out",
             width: "100%",
             height: (() => {
               // Calculate total height based on actual overlap amounts
@@ -597,7 +589,7 @@ export default function NotePage() {
               return `${totalHeight}px`;
             })(),
           }}
-          >
+        >
             {/* Main Question Note */}
             <div
               style={{
@@ -874,23 +866,21 @@ export default function NotePage() {
               style={{
                 fontFamily: "var(--font-sans)",
                 fontWeight: "500",
-                fontSize: "14px",
-                lineHeight: "18px",
+                fontSize: "16px",
+                lineHeight: "22px",
                 color: "var(--text-dark)",
                 display: "block", // forces normal text layout
                 whiteSpace: "normal", // allows wrapping and <br />s
-                marginTop: "24px",
               }}
             >
-              passed you a note:
+              passed you a note.
             </div>
             <div
               style={{
                 fontFamily: "var(--font-sans)",
-                fontSize: "14px",
-                lineHeight: "18px",
-                color: "var(--text-light)",
-                fontStyle: "italic",
+                fontSize: "16px",
+                lineHeight: "22px",
+                color: "#989797",
                 fontWeight: "500",
                 display: "block", // forces normal text layout
                 whiteSpace: "normal", // allows wrapping and <br />s
@@ -1320,8 +1310,8 @@ export default function NotePage() {
                 style={{
                   fontFamily: "var(--font-sans)",
                   fontWeight: 500,
-                  fontSize: "14px",
-                  lineHeight: "18px",
+                  fontSize: "16px",
+                  lineHeight: "22px",
                   color: "var(--text-dark)",
                 }}
               >
