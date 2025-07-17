@@ -114,9 +114,9 @@ export default function NotePage() {
     };
   }, [hasPassed]);
 
-  // Custom scroll handler for read view
+  // Custom scroll handler for both read view and editing view
   useEffect(() => {
-    if (showReadView && thread) {
+    if ((showReadView || canEdit) && thread && !hasPassed) {
       // Disable all scrolling
       document.body.style.overflow = "hidden";
       document.documentElement.style.overflow = "hidden";
@@ -164,7 +164,7 @@ export default function NotePage() {
         window.removeEventListener('touchmove', handleTouchMove, { capture: true });
       };
     }
-  }, [showReadView, thread]);
+  }, [showReadView, canEdit, thread, hasPassed]);
 
   // Deterministic random function based on string input
   const seededRandom = (seed: string): number => {
@@ -810,40 +810,43 @@ export default function NotePage() {
   return (
     <div
       style={{
-        minHeight: "100vh",
-        height: hasPassed ? "100vh" : "auto",
-        overflow: hasPassed ? "hidden" : "auto",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: hasPassed ? "center" : "flex-start",
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100vw",
+        height: "100vh",
+        overflow: "hidden",
         background: "var(--cream)",
-        padding: hasPassed ? "0" : "0 20px",
-        paddingTop: hasPassed ? "0" : "100px",
-        paddingBottom: hasPassed ? "0" : "120px",
+        display: hasPassed ? "flex" : "block",
+        alignItems: hasPassed ? "center" : "initial",
+        justifyContent: hasPassed ? "center" : "initial",
       }}
     >
       <Header showAbout={showAbout} onAboutChange={setShowAbout} />
 
-      {/* Main Content */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "40px",
-        }}
-      >
-        {/* Text above note */}
-        {canEdit && (
+      {/* Main Content Container */}
+      <div>
+        {/* Fixed Top Text Content - only show in edit mode */}
+      {canEdit && !hasPassed && (
+        <div
+          style={{
+            position: "absolute",
+            top: "120px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 10,
+            textAlign: "center",
+            padding: "0 20px",
+            maxWidth: "100vw",
+            boxSizing: "border-box",
+          }}
+        >
           <div
             style={{
-              textAlign: "center",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
               gap: "0px", // Zero spacing between signature and text
-              marginBottom: "38px",
             }}
           >
             {/* Previous person's signature and "passed you a note." */}
@@ -890,7 +893,7 @@ export default function NotePage() {
               style={{
                 opacity: 0,
                 animation: "fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
-                animationDelay: "1s",
+                animationDelay: "0.5s",
                 fontFamily: "var(--font-sans)",
                 fontSize: "16px",
                 lineHeight: "22px",
@@ -907,7 +910,7 @@ export default function NotePage() {
               style={{
                 opacity: 0,
                 animation: "fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
-                animationDelay: "2s",
+                animationDelay: "1s",
                 fontFamily: "var(--font-sans)",
                 fontSize: "16px",
                 lineHeight: "22px",
@@ -923,7 +926,7 @@ export default function NotePage() {
               style={{
                 opacity: 0,
                 animation: "fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
-                animationDelay: "3s",
+                animationDelay: "1.5s",
                 fontFamily: "var(--font-sans)",
                 fontSize: "16px",
                 lineHeight: "22px",
@@ -934,16 +937,20 @@ export default function NotePage() {
               3. answer when you&apos;re ready
             </div>
           </div>
-        )}
-        {/* Note Container - Absolute Positioned for Overlap */}
+        </div>
+      )}
+        {/* Scrollable Note Container */}
         {!slideAnimationComplete && (
           <div
             style={{
-              position: "relative",
+              position: "absolute",
+              top: `${300 - scrollOffset}px`,
+              left: "50%",
+              zIndex: 100,
               width: "100%",
               opacity: 0,
               animation: "fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
-              animationDelay: "4s",
+              animationDelay: "2s",
               height: (() => {
                 // Calculate total height based on actual overlap amounts
                 let totalHeight = 320; // Base question note height
@@ -968,8 +975,8 @@ export default function NotePage() {
 
                 return `${totalHeight}px`;
               })(),
-              transform: notesSlideOut ? "translateY(-100vh)" : "translateY(0)",
-              transition: "transform 0.6s ease-in-out",
+              transform: notesSlideOut ? "translateX(-50%) translateY(-100vh)" : "translateX(-50%)",
+              transition: notesSlideOut ? "transform 0.6s ease-in-out" : "top 0.1s ease-out",
             }}
           >
             {/* Main Question Note */}
@@ -1205,11 +1212,15 @@ export default function NotePage() {
               })()}
           </div>
         )}
-        {/* Bottom buttons - always show when editing */}
+        {/* Fixed Bottom Buttons */}
         {canEdit && !hasPassed && (
           <div
             style={{
-              marginTop: "40px",
+              position: "fixed",
+              bottom: "40px",
+              left: "50%",
+              transform: "translateX(-50%)",
+              zIndex: 50,
               display: "flex",
               alignItems: "center",
               gap: "12px",
