@@ -1281,8 +1281,8 @@ export default function NotePage() {
               {isSubmitting
                 ? "sending your note..."
                 : !flippedNotes["active-note"]
-                ? "1. sign this note >"
-                : "2. pass this note >"}
+                ? "4. sign this note >"
+                : "5. pass this note >"}
             </button>
           </div>
         )}
