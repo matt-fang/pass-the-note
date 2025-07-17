@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface BackgroundMusicProps {
   isPlaying: boolean;
@@ -16,14 +16,10 @@ declare global {
           bind: (event: string, callback: () => void) => void;
           play: () => void;
           pause: () => void;
-          toggle: () => void;
           setVolume: (volume: number) => void;
-          getVolume: (callback: (volume: number) => void) => void;
         };
         Events: {
           READY: string;
-          PLAY: string;
-          PAUSE: string;
         };
       };
     };
@@ -33,19 +29,12 @@ declare global {
 export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isWidgetReady, setIsWidgetReady] = useState(false);
-  const [hasSecretlyPrimed, setHasSecretlyPrimed] = useState(false);
+  const [isUnlocked, setIsUnlocked] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const widgetRef = useRef<{
-    play: () => void;
-    pause: () => void;
-    toggle: () => void;
-    setVolume: (volume: number) => void;
-    getVolume: (callback: (volume: number) => void) => void;
-    bind: (event: string, callback: () => void) => void;
-  } | null>(null);
+  const widgetRef = useRef<any>(null);
 
+  // Load SoundCloud widget API
   useEffect(() => {
-    // Load the SoundCloud widget API
     if (!window.SC) {
       const script = document.createElement('script');
       script.src = 'https://w.soundcloud.com/player/api.js';
@@ -56,107 +45,50 @@ export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
     }
   }, []);
 
+  // Initialize widget when loaded
   useEffect(() => {
     if (isLoaded && iframeRef.current && window.SC) {
       const widget = window.SC.Widget(iframeRef.current);
       widgetRef.current = widget;
-
       widget.bind(window.SC.Widget.Events.READY, () => {
-        console.log('SoundCloud widget ready');
-        // Check initial volume
-        widget.getVolume((volume) => {
-          console.log('Initial volume:', volume);
-        });
-        // Set volume to 70% when widget is ready to ensure it's audible
         widget.setVolume(70);
         setIsWidgetReady(true);
-        
-        // SECRET PRIMING: Toggle on/off quickly to prime the widget for mobile
-        setTimeout(() => {
-          if (!hasSecretlyPrimed) {
-            console.log('🤫 Secretly priming widget...');
-            widget.toggle(); // Start playing
-            setTimeout(() => {
-              widget.toggle(); // Stop playing
-              console.log('🤫 Widget primed and ready!');
-              setHasSecretlyPrimed(true);
-            }, 100); // Very quick toggle
-          }
-        }, 500); // Wait a bit for widget to be fully ready
-      });
-
-      // Add event listeners for play/pause to track state
-      widget.bind(window.SC.Widget.Events.PLAY, () => {
-        console.log('SoundCloud started playing');
-        
-        // Double-check volume when play starts
-        widget.getVolume((volume) => {
-          console.log('Current volume:', volume);
-          if (volume < 50) {
-            console.log('Volume too low, setting to 70');
-            widget.setVolume(70);
-          }
-        });
-      });
-
-      widget.bind(window.SC.Widget.Events.PAUSE, () => {
-        console.log('SoundCloud paused');
       });
     }
-  }, [isLoaded, hasSecretlyPrimed, isPlaying]);
+  }, [isLoaded]);
 
-  // Simple play/pause effect
+  // One-time user gesture to unlock audio
   useEffect(() => {
-    if (widgetRef.current && isWidgetReady && hasSecretlyPrimed) {
-      console.log('🎵 Music state changed, isPlaying:', isPlaying);
-      
-      if (isPlaying) {
-        console.log('🎵 Attempting to play music');
-        widgetRef.current.setVolume(70);
-        widgetRef.current.play();
-      } else {
-        console.log('🎵 Pausing music');
-        widgetRef.current.pause();
-      }
-    }
-  }, [isPlaying, isWidgetReady, hasSecretlyPrimed]);
-
-  // Add global click handler to resume audio context on any user interaction
-  useEffect(() => {
-    const handleUserGesture = () => {
-      console.log('🎵 User gesture detected, checking if music should resume...');
-      console.log('🎵 Current state:', {
-        needsUserGesture,
-        isPlaying,
-        hasWidget: !!widgetRef.current,
-        isWidgetReady,
-        hasSecretlyPrimed
-      });
-      
-      // Simplified logic: if user wants music and we have a widget, just try to play it
-      if (isPlaying && widgetRef.current) {
-        console.log('🎵 User wants music and we have a widget - attempting to play');
-        widgetRef.current.setVolume(70);
-        widgetRef.current.play();
-        setNeedsUserGesture(false);
-      }
+    if (!isWidgetReady || isUnlocked) return;
+    const unlock = () => {
+      setIsUnlocked(true);
+      document.removeEventListener('click', unlock);
+      document.removeEventListener('keydown', unlock);
+      document.removeEventListener('wheel', unlock);
+      document.removeEventListener('touchstart', unlock);
     };
-
-    // Add listeners for various user interactions
-    document.addEventListener('click', handleUserGesture);
-    document.addEventListener('touchstart', handleUserGesture);
-    document.addEventListener('keydown', handleUserGesture);
-    document.addEventListener('wheel', handleUserGesture);
-    document.addEventListener('touchmove', handleUserGesture);
-
+    document.addEventListener('click', unlock);
+    document.addEventListener('keydown', unlock);
+    document.addEventListener('wheel', unlock);
+    document.addEventListener('touchstart', unlock);
     return () => {
-      document.removeEventListener('click', handleUserGesture);
-      document.removeEventListener('touchstart', handleUserGesture);
-      document.removeEventListener('keydown', handleUserGesture);
-      document.removeEventListener('wheel', handleUserGesture);
-      document.removeEventListener('touchmove', handleUserGesture);
+      document.removeEventListener('click', unlock);
+      document.removeEventListener('keydown', unlock);
+      document.removeEventListener('wheel', unlock);
+      document.removeEventListener('touchstart', unlock);
     };
-  }, [needsUserGesture, isPlaying, isWidgetReady, hasSecretlyPrimed]);
+  }, [isWidgetReady, isUnlocked]);
+
+  // Respond to isPlaying changes after unlock
+  useEffect(() => {
+    if (!isWidgetReady || !isUnlocked || !widgetRef.current) return;
+    if (isPlaying) {
+      widgetRef.current.setVolume(70);
+      widgetRef.current.play();
+    } else {
+      widgetRef.current.pause();
+    }
+  }, [isPlaying, isWidgetReady, isUnlocked]);
 
   return (
     <div style={{ 
