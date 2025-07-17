@@ -40,11 +40,18 @@ export default function Home() {
   const [notesSlideOut, setNotesSlideOut] = useState(false);
   const [slideAnimationComplete, setSlideAnimationComplete] = useState(false);
   const [showSentContent, setShowSentContent] = useState(false);
-  const [questionHistory, setQuestionHistory] = useState<Array<{question: string, shareUrl: string, noteColor: typeof NOTE_COLORS[0], textOffset: {x: number, y: number}}>>([]);
+  const [questionHistory, setQuestionHistory] = useState<
+    Array<{
+      question: string;
+      shareUrl: string;
+      noteColor: (typeof NOTE_COLORS)[0];
+      textOffset: { x: number; y: number };
+    }>
+  >([]);
   const flipNoteRef = useRef<FlippableNoteRef>(null);
-  
+
   // Preload note images
-  const noteImages = NOTE_COLORS.map(color => color.bg);
+  const noteImages = NOTE_COLORS.map((color) => color.bg);
   const imagesLoaded = useImagePreloader(noteImages);
 
   // Load question immediately when component mounts
@@ -95,7 +102,6 @@ export default function Home() {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-
   const getNewQuestion = async () => {
     // Fade out text only
     setTextOpacity(0);
@@ -113,12 +119,15 @@ export default function Home() {
         const data = await response.json();
 
         // Save current question to history before setting new one
-        setQuestionHistory(prev => [...prev, {
-          question,
-          shareUrl,
-          noteColor,
-          textOffset
-        }]);
+        setQuestionHistory((prev) => [
+          ...prev,
+          {
+            question,
+            shareUrl,
+            noteColor,
+            textOffset,
+          },
+        ]);
 
         // Update everything instantly
         setQuestion(data.question);
@@ -156,7 +165,7 @@ export default function Home() {
       setTextOpacity(0);
 
       const previousQuestion = questionHistory[questionHistory.length - 1];
-      
+
       // Restore previous question data
       setQuestion(previousQuestion.question);
       setShareUrl(previousQuestion.shareUrl);
@@ -164,7 +173,7 @@ export default function Home() {
       setTextOffset(previousQuestion.textOffset);
 
       // Remove the last item from history
-      setQuestionHistory(prev => prev.slice(0, -1));
+      setQuestionHistory((prev) => prev.slice(0, -1));
 
       // Reset signature when going back
       setAuthorNameDrawing("");
@@ -199,7 +208,7 @@ export default function Home() {
     // Save signature before sharing
     if (authorNameDrawing && shareUrl) {
       try {
-        const shareUrlPath = shareUrl.split('/').pop(); // Extract shareUrl from full URL
+        const shareUrlPath = shareUrl.split("/").pop(); // Extract shareUrl from full URL
         await fetch("/api/thread", {
           method: "PUT",
           headers: {
@@ -236,18 +245,27 @@ export default function Home() {
   // Show loading until images are preloaded
   if (!imagesLoaded) {
     return (
-      <div style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "var(--cream)",
-      }}>
-        <div style={{
-          fontFamily: "var(--font-sans)",
-          color: "var(--text-light)",
-        }}>
-          Loading...
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "var(--cream)",
+        }}
+      >
+        <div
+          style={{
+            fontFamily: "var(--font-sans)",
+            color: "var(--text-light)",
+          }}
+        >
+          <i>
+            {" "}
+            &quot;What happens when people open their hearts?&quot; <br />
+            &quot;They get better.&quot; <br />{" "}
+          </i>
+          ― Haruki Murakami
         </div>
       </div>
     );
@@ -268,7 +286,11 @@ export default function Home() {
         position: "relative",
       }}
     >
-      <Header showAbout={showAbout} onAboutChange={setShowAbout} defaultMusicOn={false} />
+      <Header
+        showAbout={showAbout}
+        onAboutChange={setShowAbout}
+        defaultMusicOn={false}
+      />
 
       {/* Main Content */}
       {!slideAnimationComplete && (
@@ -284,214 +306,222 @@ export default function Home() {
             transition: "transform 0.6s ease-in-out",
           }}
         >
-        {/* Text above note */}
-        <div
-          style={{
-            textAlign: "center",
-            fontFamily: "var(--font-sans)",
-            fontWeight: "500",
-            fontSize: "16px",
-            lineHeight: "22px",
-            color: "var(--text-dark)",
-          }}
-        >
-          {isNoteFlipped ? (
-            <>
-              sign it! (legibly)
-              <br />
-              <span
-                style={{
-                  color: "var(--text-light)",
-                  fontStyle: "italic",
-                  fontWeight: "400",
-                }}
-              >
-                this is only visible to who you send it to
-              </span>
-            </>
-          ) : (
-            <>
-              pass a little note to a friend.
-              <br />
-              start a big conversation.
-            </>
-          )}
-        </div>
-
-        {/* Note Container */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "20px 20px", // Extra space for shadow (61px + buffer)
-            overflow: "visible",
-          }}
-        >
-
-          {/* Note - centered */}
+          {/* Text above note */}
           <div
             style={{
-              position: "relative",
-            }}
-          >
-            <FlippableNote
-              ref={flipNoteRef}
-              width={noteSize}
-              height={noteSize}
-              background={noteColor.bg}
-              isEditable={true}
-              authorName={authorNameDrawing}
-              onAuthorNameChange={setAuthorNameDrawing}
-              isFlipped={isNoteFlipped}
-              noteColor={noteColor}
-              frontContent={
-                <div style={{ position: "relative", width: "100%", height: "100%" }}>
-                  <div
-                    style={{
-                      fontFamily: "var(--font-handwritten)",
-                      fontSize: `${fontSize}px`,
-                      lineHeight: "1.4",
-                      color: "var(--text-dark)",
-                      textAlign: "center",
-                      width: "100%",
-                      position: "absolute",
-                      top: "50%",
-                      left: "50%",
-                      transform: `translate(calc(-50% + ${textOffset.x}px), calc(-50% + ${textOffset.y}px))`,
-                      opacity: textOpacity,
-                      transition: "opacity 0.2s ease-in-out",
-                    }}
-                  >
-                    {question}
-                  </div>
-                </div>
-              }
-            />
-
-          </div>
-
-        </div>
-
-        {/* Bottom buttons with 80pt spacing */}
-        {!hasPassed && (
-          <div
-            style={{
-              marginTop: "10px", // 80pt spacing between note and button
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-            }}
-          >
-          {/* Back button - show when flipped OR when there's question history */}
-          {(isNoteFlipped || questionHistory.length > 0) && (
-            <button
-              onClick={() => {
-                if (isNoteFlipped) {
-                  // Fade out text first, then flip back
-                  setTextOpacity(0);
-                  setTimeout(() => {
-                    setIsNoteFlipped(false);
-                    setTextOpacity(1);
-                  }, 50);
-                } else {
-                  goBackToPreviousQuestion();
-                }
-              }}
-              style={{
-                background: "#E5E1DE",
-                border: "none",
-                fontFamily: "var(--font-sans)",
-                fontWeight: "500",
-                fontSize: "14px",
-                lineHeight: "18px",
-                color: "black",
-                cursor: "pointer",
-                padding: "8px 10px",
-              }}
-            >
-              &lt;
-            </button>
-          )}
-
-          {/* Shuffle button - only show when not flipped */}
-          {!isNoteFlipped && (
-            <button
-              onClick={getNewQuestion}
-              style={{
-                background: "#E5E1DE",
-                border: "none",
-                fontFamily: "var(--font-sans)",
-                fontWeight: "500",
-                fontSize: "14px",
-                lineHeight: "18px",
-                color: "black",
-                cursor: "pointer",
-                padding: "8px 10px",
-              }}
-            >
-              shuffle
-            </button>
-          )}
-
-          {/* Clear button - only show when flipped */}
-          {isNoteFlipped && (
-            <button
-              onClick={() => {
-                setAuthorNameDrawing("");
-                if (flipNoteRef.current) {
-                  flipNoteRef.current.handleClear();
-                }
-              }}
-              style={{
-                background: "#E5E1DE",
-                border: "none",
-                fontFamily: "var(--font-sans)",
-                fontWeight: "500",
-                fontSize: "14px",
-                lineHeight: "18px",
-                color: "black",
-                cursor: "pointer",
-                padding: "8px 10px",
-              }}
-            >
-              clear
-            </button>
-          )}
-          
-          {/* Main action button */}
-          <button
-            onClick={async () => {
-              if (!isNoteFlipped) {
-                // If not flipped, flip to signing screen
-                setIsNoteFlipped(true);
-              } else {
-                // If flipped and signed, pass the note
-                await passNote();
-              }
-            }}
-            disabled={!shareUrl || (isNoteFlipped && !authorNameDrawing)}
-            style={{
-              background:
-                !shareUrl || (isNoteFlipped && !authorNameDrawing) ? "#E5E1DE" : "#FF5E01",
-              border: "none",
+              textAlign: "center",
               fontFamily: "var(--font-sans)",
               fontWeight: "500",
-              fontSize: "14px",
-              lineHeight: "18px",
-              color: !shareUrl || (isNoteFlipped && !authorNameDrawing) ? "black" : "white",
-              cursor: !shareUrl || (isNoteFlipped && !authorNameDrawing) ? "default" : "pointer",
-              padding: "8px 10px",
+              fontSize: "16px",
+              lineHeight: "22px",
+              color: "var(--text-dark)",
             }}
           >
-            {!isNoteFlipped 
-              ? "1. sign this note >" 
-              : "2. pass this note >"
-            }
-          </button>
+            {isNoteFlipped ? (
+              <>
+                sign it! (legibly)
+                <br />
+                <span
+                  style={{
+                    color: "var(--text-light)",
+                    fontStyle: "italic",
+                    fontWeight: "400",
+                  }}
+                >
+                  this is only visible to who you send it to
+                </span>
+              </>
+            ) : (
+              <>
+                pass a little note to a friend.
+                <br />
+                start a big conversation.
+              </>
+            )}
+          </div>
+
+          {/* Note Container */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "20px 20px", // Extra space for shadow (61px + buffer)
+              overflow: "visible",
+            }}
+          >
+            {/* Note - centered */}
+            <div
+              style={{
+                position: "relative",
+              }}
+            >
+              <FlippableNote
+                ref={flipNoteRef}
+                width={noteSize}
+                height={noteSize}
+                background={noteColor.bg}
+                isEditable={true}
+                authorName={authorNameDrawing}
+                onAuthorNameChange={setAuthorNameDrawing}
+                isFlipped={isNoteFlipped}
+                noteColor={noteColor}
+                frontContent={
+                  <div
+                    style={{
+                      position: "relative",
+                      width: "100%",
+                      height: "100%",
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontFamily: "var(--font-handwritten)",
+                        fontSize: `${fontSize}px`,
+                        lineHeight: "1.4",
+                        color: "var(--text-dark)",
+                        textAlign: "center",
+                        width: "100%",
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        transform: `translate(calc(-50% + ${textOffset.x}px), calc(-50% + ${textOffset.y}px))`,
+                        opacity: textOpacity,
+                        transition: "opacity 0.2s ease-in-out",
+                      }}
+                    >
+                      {question}
+                    </div>
+                  </div>
+                }
+              />
+            </div>
+          </div>
+
+          {/* Bottom buttons with 80pt spacing */}
+          {!hasPassed && (
+            <div
+              style={{
+                marginTop: "10px", // 80pt spacing between note and button
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+              }}
+            >
+              {/* Back button - show when flipped OR when there's question history */}
+              {(isNoteFlipped || questionHistory.length > 0) && (
+                <button
+                  onClick={() => {
+                    if (isNoteFlipped) {
+                      // Fade out text first, then flip back
+                      setTextOpacity(0);
+                      setTimeout(() => {
+                        setIsNoteFlipped(false);
+                        setTextOpacity(1);
+                      }, 50);
+                    } else {
+                      goBackToPreviousQuestion();
+                    }
+                  }}
+                  style={{
+                    background: "#E5E1DE",
+                    border: "none",
+                    fontFamily: "var(--font-sans)",
+                    fontWeight: "500",
+                    fontSize: "14px",
+                    lineHeight: "18px",
+                    color: "black",
+                    cursor: "pointer",
+                    padding: "8px 10px",
+                  }}
+                >
+                  &lt;
+                </button>
+              )}
+
+              {/* Shuffle button - only show when not flipped */}
+              {!isNoteFlipped && (
+                <button
+                  onClick={getNewQuestion}
+                  style={{
+                    background: "#E5E1DE",
+                    border: "none",
+                    fontFamily: "var(--font-sans)",
+                    fontWeight: "500",
+                    fontSize: "14px",
+                    lineHeight: "18px",
+                    color: "black",
+                    cursor: "pointer",
+                    padding: "8px 10px",
+                  }}
+                >
+                  shuffle
+                </button>
+              )}
+
+              {/* Clear button - only show when flipped */}
+              {isNoteFlipped && (
+                <button
+                  onClick={() => {
+                    setAuthorNameDrawing("");
+                    if (flipNoteRef.current) {
+                      flipNoteRef.current.handleClear();
+                    }
+                  }}
+                  style={{
+                    background: "#E5E1DE",
+                    border: "none",
+                    fontFamily: "var(--font-sans)",
+                    fontWeight: "500",
+                    fontSize: "14px",
+                    lineHeight: "18px",
+                    color: "black",
+                    cursor: "pointer",
+                    padding: "8px 10px",
+                  }}
+                >
+                  clear
+                </button>
+              )}
+
+              {/* Main action button */}
+              <button
+                onClick={async () => {
+                  if (!isNoteFlipped) {
+                    // If not flipped, flip to signing screen
+                    setIsNoteFlipped(true);
+                  } else {
+                    // If flipped and signed, pass the note
+                    await passNote();
+                  }
+                }}
+                disabled={!shareUrl || (isNoteFlipped && !authorNameDrawing)}
+                style={{
+                  background:
+                    !shareUrl || (isNoteFlipped && !authorNameDrawing)
+                      ? "#E5E1DE"
+                      : "#FF5E01",
+                  border: "none",
+                  fontFamily: "var(--font-sans)",
+                  fontWeight: "500",
+                  fontSize: "14px",
+                  lineHeight: "18px",
+                  color:
+                    !shareUrl || (isNoteFlipped && !authorNameDrawing)
+                      ? "black"
+                      : "white",
+                  cursor:
+                    !shareUrl || (isNoteFlipped && !authorNameDrawing)
+                      ? "default"
+                      : "pointer",
+                  padding: "8px 10px",
+                }}
+              >
+                {!isNoteFlipped ? "1. sign this note >" : "2. pass this note >"}
+              </button>
+            </div>
+          )}
         </div>
-        )}
-      </div>
       )}
 
       {/* Passed state - shows after note is passed */}
@@ -535,7 +565,8 @@ export default function Home() {
                 color: "var(--text-dark)",
               }}
             >
-              passed! come back to this link anytime to see new notes on this chain.
+              passed! come back to this link anytime to see new notes on this
+              chain.
             </div>
 
             <div
