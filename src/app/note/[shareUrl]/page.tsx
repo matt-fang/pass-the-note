@@ -97,6 +97,7 @@ export default function NotePage() {
   );
   const [typedResponse, setTypedResponse] = useState("");
   const [generatedShareUrl, setGeneratedShareUrl] = useState<string>("");
+  const [scrollOffset, setScrollOffset] = useState(0);
   const activeNoteRef = useRef<FlippableNoteRef>(null);
 
   // Disable scrolling when in "passed" state
@@ -470,30 +471,79 @@ export default function NotePage() {
 
   // If user has already responded, show read view
   if (showReadView && thread) {
+    // Disable body scroll and add custom scroll handler
+    useEffect(() => {
+      document.body.style.overflow = "hidden";
+      
+      const handleWheel = (e: WheelEvent) => {
+        e.preventDefault();
+        setScrollOffset(prev => {
+          const newOffset = prev + e.deltaY;
+          return Math.max(0, Math.min(newOffset, 800)); // Limit scroll range
+        });
+      };
+      
+      const handleTouch = (e: TouchEvent) => {
+        if (e.touches.length === 1) {
+          const touch = e.touches[0];
+          const lastTouch = (handleTouch as any).lastTouch;
+          if (lastTouch) {
+            const deltaY = lastTouch.clientY - touch.clientY;
+            setScrollOffset(prev => {
+              const newOffset = prev + deltaY * 2; // Multiply for faster scroll
+              return Math.max(0, Math.min(newOffset, 800));
+            });
+          }
+          (handleTouch as any).lastTouch = touch;
+        }
+      };
+      
+      const handleTouchEnd = () => {
+        (handleTouch as any).lastTouch = null;
+      };
+      
+      window.addEventListener('wheel', handleWheel, { passive: false });
+      window.addEventListener('touchmove', handleTouch, { passive: false });
+      window.addEventListener('touchend', handleTouchEnd);
+      
+      return () => {
+        document.body.style.overflow = "auto";
+        window.removeEventListener('wheel', handleWheel);
+        window.removeEventListener('touchmove', handleTouch);
+        window.removeEventListener('touchend', handleTouchEnd);
+      };
+    }, []);
+    
     return (
       <div
         style={{
           minHeight: "100vh",
-          overflow: "auto",
+          overflow: "hidden",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "flex-start",
           background: "var(--cream)",
-          padding: "0 20px",
-          paddingTop: "120px",
-          paddingBottom: "120px",
+          position: "relative",
         }}
       >
         <Header showAbout={showAbout} onAboutChange={setShowAbout} />
 
-        {/* Read View Content */}
+        {/* Fixed Text Content */}
         <div
           style={{
+            position: "fixed",
+            top: "120px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 50,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             gap: "40px",
+            padding: "0 20px",
+            maxWidth: "100vw",
+            boxSizing: "border-box",
           }}
         >
           <div
@@ -510,28 +560,34 @@ export default function NotePage() {
             <br />
             here&apos;s the conversation so far.
           </div>
+        </div>
 
-          {/* Note Container - Read Only - Using same layout as active editing */}
-          <div
-            style={{
-              position: "relative",
-              width: "100%",
-              height: (() => {
-                // Calculate total height based on actual overlap amounts
-                let totalHeight = 320; // Base question note height
+        {/* Scrollable Note Container */}
+        <div
+          style={{
+            position: "fixed",
+            top: "0px",
+            left: "50%",
+            transform: `translateX(-50%) translateY(${300 - scrollOffset}px)`,
+            zIndex: 100,
+            transition: "transform 0.1s ease-out",
+            width: "100%",
+            height: (() => {
+              // Calculate total height based on actual overlap amounts
+              let totalHeight = 320; // Base question note height
 
-                // Add height for existing responses
-                for (let i = 0; i < thread.responses.length - 1; i++) {
-                  const overlapSeed = seededRandom(
-                    (thread.responses[i + 1]?.id || "default") + "overlap"
-                  );
-                  const overlap = 13 + overlapSeed * 13; // 13-26px overlap
-                  totalHeight += 320 - overlap;
-                }
+              // Add height for existing responses
+              for (let i = 0; i < thread.responses.length - 1; i++) {
+                const overlapSeed = seededRandom(
+                  (thread.responses[i + 1]?.id || "default") + "overlap"
+                );
+                const overlap = 13 + overlapSeed * 13; // 13-26px overlap
+                totalHeight += 320 - overlap;
+              }
 
-                return `${totalHeight}px`;
-              })(),
-            }}
+              return `${totalHeight}px`;
+            })(),
+          }}
           >
             {/* Main Question Note */}
             <div
@@ -719,6 +775,16 @@ export default function NotePage() {
               })}
           </div>
 
+        {/* Fixed Bottom Button */}
+        <div
+          style={{
+            position: "fixed",
+            bottom: "40px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 50,
+          }}
+        >
           <button
             onClick={() => (window.location.href = "/")}
             style={{
@@ -731,7 +797,6 @@ export default function NotePage() {
               color: "white",
               cursor: "pointer",
               padding: "8px 10px",
-              marginTop: "40px",
             }}
           >
             write your own note &gt;
