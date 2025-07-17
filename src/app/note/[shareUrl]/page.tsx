@@ -440,6 +440,8 @@ export default function NotePage() {
         <div
           style={{
             fontFamily: "var(--font-sans)",
+            fontSize: "14px",
+            lineHeight: "18px",
             color: "var(--text-dark)",
           }}
         >
@@ -479,8 +481,8 @@ export default function NotePage() {
               textAlign: "center",
               fontFamily: "var(--font-sans)",
               fontWeight: "500",
-              fontSize: "16px",
-              lineHeight: "22px",
+              fontSize: "14px",
+              lineHeight: "18px",
               color: "var(--text-dark)",
             }}
           >
@@ -558,8 +560,8 @@ export default function NotePage() {
               textAlign: "center",
               fontFamily: "var(--font-sans)",
               fontWeight: "500",
-              fontSize: "16px",
-              lineHeight: "22px",
+              fontSize: "14px",
+              lineHeight: "18px",
               color: "var(--text-dark)",
             }}
           >
@@ -856,7 +858,7 @@ export default function NotePage() {
               thread.responses[thread.responses.length - 1]?.authorName && (
                 <div
                   style={{
-                    transform: "scale(0.75)",
+                    transform: "scale(0.33)",
                     transformOrigin: "center",
                     filter: "brightness(0) saturate(100%) invert(0%)", // Make it black
                   }}
@@ -872,31 +874,33 @@ export default function NotePage() {
               style={{
                 fontFamily: "var(--font-sans)",
                 fontWeight: "500",
-                fontSize: "16px",
-                lineHeight: "22px",
+                fontSize: "14px",
+                lineHeight: "18px",
                 color: "var(--text-dark)",
                 display: "block", // forces normal text layout
                 whiteSpace: "normal", // allows wrapping and <br />s
+                marginTop: "24px",
               }}
             >
-              passed this note chain to you
+              passed you a note:
             </div>
             <div
               style={{
                 fontFamily: "var(--font-sans)",
-                fontSize: "16px",
-                lineHeight: "22px",
+                fontSize: "14px",
+                lineHeight: "18px",
                 color: "var(--text-light)",
                 fontStyle: "italic",
-                fontWeight: "400",
+                fontWeight: "500",
                 display: "block", // forces normal text layout
                 whiteSpace: "normal", // allows wrapping and <br />s
+                marginTop: "24px",
+                marginBottom: "38px",
               }}
             >
-              <br /> <br />
-              read the note. <br /> <br />
-              take a 30-second pause to reflect. <br /> <br />
-              when you’re ready, write your response below.
+              1. read the question<br />
+              2. reflect for 30 sec<br />
+              3. answer when you&apos;re ready
             </div>
           </div>
         )}
@@ -1316,8 +1320,8 @@ export default function NotePage() {
                 style={{
                   fontFamily: "var(--font-sans)",
                   fontWeight: 500,
-                  fontSize: "16px",
-                  lineHeight: "22px",
+                  fontSize: "14px",
+                  lineHeight: "18px",
                   color: "var(--text-dark)",
                 }}
               >
