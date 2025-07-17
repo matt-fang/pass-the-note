@@ -409,8 +409,8 @@ export default function NotePage() {
         >
           <i>
             {" "}
-            'What happens when people open their hearts?' <br />
-            'They get better.' <br />{" "}
+            \"What happens when people open their hearts?\" <br />
+            \"They get better.\" <br />{" "}
           </i>
           ― Haruki Murakami
         </div>
