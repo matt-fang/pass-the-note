@@ -28,7 +28,7 @@ export const deepQuestions = [
   "What's your aesthetic? How did you arrive at it?",
   "Do you have any nicknames? If so, what's the story behind them?",
   "When was the last time you did something for the first time?",
-  "What is your latest discovery about or in the city in which you live?",
+  "What is your latest discovery about the city in which you live?",
   "Would you like to be famous? In what way or for what?",
   "What's your best memory from high school?",
   "What's the best compliment you've ever received?",
