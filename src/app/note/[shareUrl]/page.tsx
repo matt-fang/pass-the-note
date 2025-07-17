@@ -407,8 +407,12 @@ export default function NotePage() {
             display: "block",
           }}
         >
-          “What happens when people open their hearts?" <br />
-          "They get better.” <br />― Haruki Murakami
+          <i>
+            {" "}
+            'What happens when people open their hearts?' <br />
+            'They get better.' <br />{" "}
+          </i>
+          ― Haruki Murakami
         </div>
       </div>
     );
