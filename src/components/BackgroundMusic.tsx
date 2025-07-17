@@ -31,7 +31,7 @@ export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
   const [isWidgetReady, setIsWidgetReady] = useState(false);
   const [isUnlocked, setIsUnlocked] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const widgetRef = useRef<any>(null);
+  const widgetRef = useRef<ReturnType<NonNullable<Window['SC']>['Widget']> | null>(null);
 
   // Load SoundCloud widget API
   useEffect(() => {
