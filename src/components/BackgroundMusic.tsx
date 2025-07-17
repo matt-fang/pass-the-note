@@ -89,8 +89,12 @@ export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
       // Add event listeners for play/pause to track state
       widget.bind(window.SC.Widget.Events.PLAY, () => {
         console.log('SoundCloud started playing');
-        // Music started successfully, no need for user gesture
-        setNeedsUserGesture(false);
+        
+        // Wait a bit before clearing the flag to see if it gets paused immediately
+        setTimeout(() => {
+          console.log('Music play event happened, clearing needsUserGesture flag after delay');
+          setNeedsUserGesture(false);
+        }, 1000);
         
         // Double-check volume when play starts
         widget.getVolume((volume) => {
@@ -104,9 +108,14 @@ export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
 
       widget.bind(window.SC.Widget.Events.PAUSE, () => {
         console.log('SoundCloud paused');
+        // If music was paused and we wanted it playing, set flag for user gesture
+        if (isPlaying) {
+          console.log('Music was paused but should be playing, setting needsUserGesture flag');
+          setNeedsUserGesture(true);
+        }
       });
     }
-  }, [isLoaded, hasSecretlyPrimed]);
+  }, [isLoaded, hasSecretlyPrimed, isPlaying]);
 
   useEffect(() => {
     console.log('🎵 Play/pause useEffect triggered:', { isPlaying, isWidgetReady, hasSecretlyPrimed });
@@ -179,11 +188,15 @@ export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
     document.addEventListener('click', handleUserGesture);
     document.addEventListener('touchstart', handleUserGesture);
     document.addEventListener('keydown', handleUserGesture);
+    document.addEventListener('wheel', handleUserGesture);
+    document.addEventListener('touchmove', handleUserGesture);
 
     return () => {
       document.removeEventListener('click', handleUserGesture);
       document.removeEventListener('touchstart', handleUserGesture);
       document.removeEventListener('keydown', handleUserGesture);
+      document.removeEventListener('wheel', handleUserGesture);
+      document.removeEventListener('touchmove', handleUserGesture);
     };
   }, [needsUserGesture, isPlaying, isWidgetReady, hasSecretlyPrimed]);
 
