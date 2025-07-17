@@ -34,7 +34,6 @@ export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isWidgetReady, setIsWidgetReady] = useState(false);
   const [hasSecretlyPrimed, setHasSecretlyPrimed] = useState(false);
-  const [needsUserGesture, setNeedsUserGesture] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const widgetRef = useRef<{
     play: () => void;
@@ -90,12 +89,6 @@ export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
       widget.bind(window.SC.Widget.Events.PLAY, () => {
         console.log('SoundCloud started playing');
         
-        // Wait a bit before clearing the flag to see if it gets paused immediately
-        setTimeout(() => {
-          console.log('Music play event happened, clearing needsUserGesture flag after delay');
-          setNeedsUserGesture(false);
-        }, 1000);
-        
         // Double-check volume when play starts
         widget.getVolume((volume) => {
           console.log('Current volume:', volume);
@@ -108,54 +101,23 @@ export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
 
       widget.bind(window.SC.Widget.Events.PAUSE, () => {
         console.log('SoundCloud paused');
-        // If music was paused and we wanted it playing, set flag for user gesture
-        if (isPlaying) {
-          console.log('Music was paused but should be playing, setting needsUserGesture flag');
-          setNeedsUserGesture(true);
-        }
       });
     }
   }, [isLoaded, hasSecretlyPrimed, isPlaying]);
 
+  // Simple play/pause effect
   useEffect(() => {
-    console.log('🎵 Play/pause useEffect triggered:', { isPlaying, isWidgetReady, hasSecretlyPrimed });
-    
     if (widgetRef.current && isWidgetReady && hasSecretlyPrimed) {
-      console.log('🎵 All conditions met, scheduling music action...');
+      console.log('🎵 Music state changed, isPlaying:', isPlaying);
       
-      // Give extra time after priming to ensure widget is fully ready
-      const timer = setTimeout(() => {
-        console.log('🎵 Executing music action, isPlaying:', isPlaying);
-        
-        if (isPlaying) {
-          console.log('🎵 Calling widget.play()');
-          widgetRef.current!.setVolume(70);
-          widgetRef.current!.play();
-          
-          // Set a flag to indicate we might need user gesture if autoplay fails
-          console.log('🎵 Setting needsUserGesture to true');
-          setNeedsUserGesture(true);
-          
-          // Clear the flag after some time if music doesn't start
-          setTimeout(() => {
-            console.log('🎵 Checking if music started after delay...');
-            // If music didn't start, keep the flag for user gesture
-          }, 2000);
-        } else {
-          console.log('🎵 Calling widget.pause()');
-          widgetRef.current!.pause();
-          setNeedsUserGesture(false);
-        }
-      }, 500); // Much longer delay to ensure priming is complete
-
-      return () => clearTimeout(timer);
-    } else {
-      console.log('🎵 Conditions not met yet:', { 
-        hasWidget: !!widgetRef.current, 
-        isWidgetReady, 
-        hasSecretlyPrimed, 
-        isPlaying 
-      });
+      if (isPlaying) {
+        console.log('🎵 Attempting to play music');
+        widgetRef.current.setVolume(70);
+        widgetRef.current.play();
+      } else {
+        console.log('🎵 Pausing music');
+        widgetRef.current.pause();
+      }
     }
   }, [isPlaying, isWidgetReady, hasSecretlyPrimed]);
 
@@ -171,13 +133,9 @@ export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
         hasSecretlyPrimed
       });
       
-      if (needsUserGesture && isPlaying && widgetRef.current && isWidgetReady && hasSecretlyPrimed) {
-        console.log('🎵 Resuming music after user gesture');
-        widgetRef.current.setVolume(70);
-        widgetRef.current.play();
-        setNeedsUserGesture(false);
-      } else if (needsUserGesture && isPlaying && widgetRef.current) {
-        console.log('🎵 Conditions not fully met, but trying anyway...');
+      // Simplified logic: if user wants music and we have a widget, just try to play it
+      if (isPlaying && widgetRef.current) {
+        console.log('🎵 User wants music and we have a widget - attempting to play');
         widgetRef.current.setVolume(70);
         widgetRef.current.play();
         setNeedsUserGesture(false);
