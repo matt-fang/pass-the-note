@@ -943,7 +943,7 @@ export default function NotePage() {
                   opacity: 0,
                   animation:
                     "fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
-                  animationDelay: "2.5s",
+                  animationDelay: "3s",
                   fontFamily: "var(--font-sans)",
                   fontSize: "16px",
                   lineHeight: "22px",
@@ -960,7 +960,7 @@ export default function NotePage() {
                   opacity: 0,
                   animation:
                     "fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
-                  animationDelay: "3s",
+                  animationDelay: "4s",
                   fontFamily: "var(--font-sans)",
                   fontSize: "16px",
                   lineHeight: "22px",
@@ -985,7 +985,7 @@ export default function NotePage() {
               opacity: 0,
               animation:
                 "fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
-              animationDelay: "5s",
+              animationDelay: "6s",
               height: (() => {
                 // Calculate total height based on actual overlap amounts
                 let totalHeight = 320; // Base question note height
