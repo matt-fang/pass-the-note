@@ -34,6 +34,7 @@ export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isWidgetReady, setIsWidgetReady] = useState(false);
   const [hasSecretlyPrimed, setHasSecretlyPrimed] = useState(false);
+  const [needsUserGesture, setNeedsUserGesture] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const widgetRef = useRef<{
     play: () => void;
@@ -88,6 +89,9 @@ export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
       // Add event listeners for play/pause to track state
       widget.bind(window.SC.Widget.Events.PLAY, () => {
         console.log('SoundCloud started playing');
+        // Music started successfully, no need for user gesture
+        setNeedsUserGesture(false);
+        
         // Double-check volume when play starts
         widget.getVolume((volume) => {
           console.log('Current volume:', volume);
@@ -118,6 +122,9 @@ export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
           console.log('🎵 Calling widget.play()');
           widgetRef.current!.setVolume(70);
           widgetRef.current!.play();
+          
+          // Set a flag to indicate we might need user gesture if autoplay fails
+          setNeedsUserGesture(true);
         } else {
           console.log('🎵 Calling widget.pause()');
           widgetRef.current!.pause();
@@ -134,6 +141,31 @@ export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
       });
     }
   }, [isPlaying, isWidgetReady, hasSecretlyPrimed]);
+
+  // Add global click handler to resume audio context on any user interaction
+  useEffect(() => {
+    const handleUserGesture = () => {
+      console.log('🎵 User gesture detected, checking if music should resume...');
+      
+      if (needsUserGesture && isPlaying && widgetRef.current && isWidgetReady && hasSecretlyPrimed) {
+        console.log('🎵 Resuming music after user gesture');
+        widgetRef.current.setVolume(70);
+        widgetRef.current.play();
+        setNeedsUserGesture(false);
+      }
+    };
+
+    // Add listeners for various user interactions
+    document.addEventListener('click', handleUserGesture);
+    document.addEventListener('touchstart', handleUserGesture);
+    document.addEventListener('keydown', handleUserGesture);
+
+    return () => {
+      document.removeEventListener('click', handleUserGesture);
+      document.removeEventListener('touchstart', handleUserGesture);
+      document.removeEventListener('keydown', handleUserGesture);
+    };
+  }, [needsUserGesture, isPlaying, isWidgetReady, hasSecretlyPrimed]);
 
   return (
     <div style={{ 
@@ -153,7 +185,7 @@ export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
           height="166"
           scrolling="no"
           frameBorder="no"
-          allow="autoplay; fullscreen"
+          allow="autoplay; fullscreen; encrypted-media"
           sandbox="allow-scripts allow-same-origin allow-presentation"
           src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/playlists/1901967227&color=%23664729&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true&buying=false&liking=false&download=false&sharing=false"
         />

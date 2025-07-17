@@ -803,7 +803,6 @@ export default function NotePage() {
               flexDirection: "column",
               alignItems: "center",
               gap: "0px", // Zero spacing between signature and text
-              marginBottom: "38px",
             }}
           >
             {/* Previous person's signature and "passed you a note." */}
@@ -853,7 +852,7 @@ export default function NotePage() {
                 opacity: 0,
                 animation:
                   "fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
-                animationDelay: "1s",
+                animationDelay: "2s",
                 fontFamily: "var(--font-sans)",
                 fontSize: "16px",
                 lineHeight: "22px",
@@ -871,7 +870,7 @@ export default function NotePage() {
                 opacity: 0,
                 animation:
                   "fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
-                animationDelay: "2s",
+                animationDelay: "3s",
                 fontFamily: "var(--font-sans)",
                 fontSize: "16px",
                 lineHeight: "22px",
@@ -888,7 +887,7 @@ export default function NotePage() {
                 opacity: 0,
                 animation:
                   "fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
-                animationDelay: "3s",
+                animationDelay: "4s",
                 fontFamily: "var(--font-sans)",
                 fontSize: "16px",
                 lineHeight: "22px",
@@ -909,7 +908,7 @@ export default function NotePage() {
               opacity: 0,
               animation:
                 "fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
-              animationDelay: "4s",
+              animationDelay: "5s",
               height: (() => {
                 // Calculate total height based on actual overlap amounts
                 let totalHeight = 320; // Base question note height
