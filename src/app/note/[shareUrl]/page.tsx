@@ -819,7 +819,7 @@ export default function NotePage() {
         justifyContent: hasPassed ? "center" : "flex-start",
         background: "var(--cream)",
         padding: hasPassed ? "0" : "0 20px",
-        paddingTop: hasPassed ? "0" : "120px",
+        paddingTop: hasPassed ? "0" : "100px",
         paddingBottom: hasPassed ? "0" : "120px",
       }}
     >
@@ -843,13 +843,14 @@ export default function NotePage() {
               flexDirection: "column",
               alignItems: "center",
               gap: "0px", // Zero spacing between signature and text
+              marginBottom: "38px",
             }}
           >
             {/* Previous person's signature and "passed you a note." */}
             <div
               style={{
                 opacity: 0,
-                animation: "fadeIn 0.5s ease-in-out forwards",
+                animation: "fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
                 animationDelay: "0s",
               }}
             >
@@ -888,8 +889,8 @@ export default function NotePage() {
             <div
               style={{
                 opacity: 0,
-                animation: "fadeIn 0.5s ease-in-out forwards",
-                animationDelay: "2s",
+                animation: "fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
+                animationDelay: "1s",
                 fontFamily: "var(--font-sans)",
                 fontSize: "16px",
                 lineHeight: "22px",
@@ -905,8 +906,8 @@ export default function NotePage() {
             <div
               style={{
                 opacity: 0,
-                animation: "fadeIn 0.5s ease-in-out forwards",
-                animationDelay: "4s",
+                animation: "fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
+                animationDelay: "2s",
                 fontFamily: "var(--font-sans)",
                 fontSize: "16px",
                 lineHeight: "22px",
@@ -921,14 +922,13 @@ export default function NotePage() {
             <div
               style={{
                 opacity: 0,
-                animation: "fadeIn 0.5s ease-in-out forwards",
-                animationDelay: "6s",
+                animation: "fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
+                animationDelay: "3s",
                 fontFamily: "var(--font-sans)",
                 fontSize: "16px",
                 lineHeight: "22px",
                 color: "#989797",
                 fontWeight: "500",
-                marginBottom: "38px",
               }}
             >
               3. answer when you&apos;re ready
@@ -942,8 +942,8 @@ export default function NotePage() {
               position: "relative",
               width: "100%",
               opacity: 0,
-              animation: "fadeIn 0.5s ease-in-out forwards",
-              animationDelay: "8s",
+              animation: "fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
+              animationDelay: "4s",
               height: (() => {
                 // Calculate total height based on actual overlap amounts
                 let totalHeight = 320; // Base question note height
