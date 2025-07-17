@@ -80,6 +80,15 @@ export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
               widget.toggle(); // Stop playing
               setHasSecretlyPrimed(true);
               console.log('🤫 Widget primed and ready!');
+              
+              // If music should be playing by default, start it now that widget is primed
+              if (isPlaying) {
+                console.log('🎵 Starting music after priming because defaultMusicOn is true');
+                setTimeout(() => {
+                  widget.setVolume(70);
+                  widget.play();
+                }, 100); // Small delay to ensure priming is complete
+              }
             }, 100); // Very quick toggle
           }
         }, 500); // Wait a bit for widget to be fully ready
@@ -102,7 +111,7 @@ export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
         console.log('SoundCloud paused');
       });
     }
-  }, [isLoaded, hasSecretlyPrimed]);
+  }, [isLoaded, hasSecretlyPrimed, isPlaying]);
 
   useEffect(() => {
     if (widgetRef.current && isWidgetReady && hasSecretlyPrimed) {
