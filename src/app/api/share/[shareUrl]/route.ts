@@ -35,7 +35,9 @@ export async function GET(
     return NextResponse.json({
       thread: response.thread,
       canEdit: !nextResponse,
-      nextShareUrl: nextResponse?.shareUrl || null
+      nextShareUrl: nextResponse?.shareUrl || null,
+      ownerIndex: response.ownerIndex,
+      isUsed: response.isUsed
     });
   } catch (error) {
     console.error('Error fetching shared thread:', error);

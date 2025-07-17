@@ -17,7 +17,9 @@ export async function POST(request: Request) {
           create: {
             drawingData: '',
             shareUrl,
-            authorName: authorName || 'Anonymous'
+            authorName: authorName || 'Anonymous',
+            ownerIndex: 0, // First response is always at index 0
+            isUsed: false // Initial response hasn't been used yet
           }
         }
       },

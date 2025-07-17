@@ -64,6 +64,7 @@ export default function NotePage() {
 
   const [thread, setThread] = useState<Thread | null>(null);
   const [canEdit, setCanEdit] = useState(false);
+  const [ownerIndex, setOwnerIndex] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loadingStartTime] = useState(Date.now());
@@ -235,6 +236,7 @@ export default function NotePage() {
         const data = await response.json();
         setThread(data.thread);
         setCanEdit(data.canEdit);
+        setOwnerIndex(data.ownerIndex);
       } else {
         console.error("Thread not found");
       }
@@ -729,20 +731,19 @@ export default function NotePage() {
                             authorName={response.authorName || ""}
                             noteColor={offset.color}
                             shouldShowSignature={(() => {
-                              // In read view, we know the user has already responded
-                              // Current user's position in chain (they've already responded)
-                              const currentUserIndex =
-                                thread.responses.length - 1;
+                              // Use ownerIndex to determine which response belongs to this share URL owner
+                              if (ownerIndex === null) return false;
+                              
                               const responseIndex = index + 1; // Convert to absolute index in responses array
 
                               // Show signature (no crossout) if:
-                              // 1. It's the current user's note (responseIndex === currentUserIndex)
-                              // 2. It's the note before current user (responseIndex === currentUserIndex - 1)
-                              // 3. It's the note after current user (responseIndex === currentUserIndex + 1)
+                              // 1. It's the current user's note (responseIndex === ownerIndex)
+                              // 2. It's the note before current user (responseIndex === ownerIndex - 1)  
+                              // 3. It's the note after current user (responseIndex === ownerIndex + 1)
                               return (
-                                responseIndex === currentUserIndex || // Current user's note
-                                responseIndex === currentUserIndex - 1 || // Previous person (mutual)
-                                responseIndex === currentUserIndex + 1 // Next person (mutual)
+                                responseIndex === ownerIndex || // Current user's note
+                                responseIndex === ownerIndex - 1 || // Previous person (mutual)
+                                responseIndex === ownerIndex + 1 // Next person (mutual)
                               );
                             })()}
                             crossoutStroke={getCrossoutStroke(response.id)}
@@ -1121,17 +1122,17 @@ export default function NotePage() {
                             authorName={response.authorName || ""}
                             noteColor={offset.color}
                             shouldShowSignature={(() => {
-                              // In edit view, current user is about to respond
-                              // Current user's position in chain (they haven't responded yet)
-                              const currentUserIndex = thread.responses.length; // Will be their position after they respond
+                              // Use ownerIndex to determine adjacency to this share URL owner
+                              if (ownerIndex === null) return false;
+                              
                               const responseIndex = index + 1; // Convert to absolute index in responses array
 
                               // Show signature (no crossout) if:
-                              // 1. It's the note before current user (responseIndex === currentUserIndex - 1)
-                              // 2. It's the note after current user (responseIndex === currentUserIndex + 1)
+                              // 1. It's the note before current user (responseIndex === ownerIndex - 1)
+                              // 2. It's the note after current user (responseIndex === ownerIndex + 1)
                               return (
-                                responseIndex === currentUserIndex - 1 || // Previous person (mutual)
-                                responseIndex === currentUserIndex + 1 // Next person (mutual)
+                                responseIndex === ownerIndex - 1 || // Previous person (mutual)
+                                responseIndex === ownerIndex + 1 // Next person (mutual)
                               );
                             })()}
                             crossoutStroke={getCrossoutStroke(response.id)}

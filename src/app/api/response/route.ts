@@ -19,6 +19,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
+    // Get current responses count to determine the owner index for this response
+    const currentResponsesCount = await prisma.response.count({
+      where: { threadId }
+    });
+    
     const newShareUrl = await generateUniqueUrl(prisma);
     
     const response = await prisma.response.create({
@@ -27,6 +32,8 @@ export async function POST(request: NextRequest) {
         drawingData,
         authorName: authorName || 'Anonymous',
         shareUrl: newShareUrl,
+        ownerIndex: currentResponsesCount, // This response will be at index currentResponsesCount
+        isUsed: true, // Mark as used since we're creating the actual response
         positionX: positionX || 0,
         positionY: positionY || 0,
         rotation: 0, // Always 0 rotation for new responses
