@@ -256,14 +256,21 @@ export default function Home() {
       >
         <div
           style={{
+            textAlign: "center",
+            alignItems: "center",
             fontFamily: "var(--font-sans)",
-            color: "var(--text-light)",
+            fontSize: "16px",
+            lineHeight: "22px",
+            color: "#989797",
+            fontWeight: "500",
+            marginTop: "24px",
+            display: "block",
           }}
         >
           <i>
             {" "}
             &quot;What happens when people open their hearts?&quot; <br />
-            &quot;They get better.&quot; <br />{" "}
+            &quot;They get better.&quot; <br /> <br />{" "}
           </i>
           ― Haruki Murakami
         </div>
