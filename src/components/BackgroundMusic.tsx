@@ -57,7 +57,7 @@ export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
   }, []);
 
   useEffect(() => {
-    if (isLoaded && iframeRef.current && window.SC) {
+    if (isLoaded && iframeRef.current && window.SC && !hasSecretlyPrimed) {
       const widget = window.SC.Widget(iframeRef.current);
       widgetRef.current = widget;
 
@@ -71,18 +71,26 @@ export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
         widget.setVolume(70);
         setIsWidgetReady(true);
 
-        // SECRET PRIMING: Toggle on/off quickly to prime the widget for mobile
+        // SECRET PRIMING: More aggressive priming for mobile
         setTimeout(() => {
-          if (!hasSecretlyPrimed) {
-            console.log("🤫 Secretly priming widget...");
-            widget.toggle(); // Start playing
+          console.log("🤫 Secretly priming widget...");
+          
+          // First prime: play for a moment
+          widget.play();
+          setTimeout(() => {
+            widget.pause();
+            
+            // Second prime: play again briefly to ensure it works
             setTimeout(() => {
-              widget.toggle(); // Stop playing
-              setHasSecretlyPrimed(true);
-              console.log("🤫 Widget primed and ready!");
-            }, 100); // Very quick toggle
-          }
-        }, 500); // Wait a bit for widget to be fully ready
+              widget.play();
+              setTimeout(() => {
+                widget.pause();
+                setHasSecretlyPrimed(true);
+                console.log("🤫 Widget double-primed and ready!");
+              }, 150); // Slightly longer to ensure audio context starts
+            }, 100);
+          }, 150);
+        }, 800); // Longer wait for widget to be fully ready
       });
 
       // Add event listeners for play/pause to track state
@@ -102,7 +110,8 @@ export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
         console.log("SoundCloud paused");
       });
     }
-  }, [isLoaded, hasSecretlyPrimed]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoaded]); // hasSecretlyPrimed intentionally omitted to prevent race condition
 
   useEffect(() => {
     if (widgetRef.current && isWidgetReady && hasSecretlyPrimed) {
@@ -117,7 +126,7 @@ export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
           console.log("Pausing");
           widgetRef.current!.pause();
         }
-      }, 50); // Shorter delay since widget is primed
+      }, 100); // Slightly longer delay for better reliability
 
       return () => clearTimeout(timer);
     }
