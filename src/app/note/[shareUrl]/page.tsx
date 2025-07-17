@@ -98,6 +98,7 @@ export default function NotePage() {
   const [typedResponse, setTypedResponse] = useState("");
   const [generatedShareUrl, setGeneratedShareUrl] = useState<string>("");
   const [scrollOffset, setScrollOffset] = useState(0);
+  const [bounceOffset, setBounceOffset] = useState(0);
   const activeNoteRef = useRef<FlippableNoteRef>(null);
 
   // Disable scrolling when in "passed" state
@@ -120,48 +121,95 @@ export default function NotePage() {
       // Disable all scrolling
       document.body.style.overflow = "hidden";
       document.documentElement.style.overflow = "hidden";
-      
+
       const handleWheel = (e: WheelEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        setScrollOffset(prev => {
+        setScrollOffset((prev) => {
           const newOffset = prev + e.deltaY * 0.5; // Slower scroll
-          return Math.max(0, Math.min(newOffset, 600)); // Limit scroll range
+          const maxScroll = 600;
+
+          // If trying to scroll beyond bounds, add bounce effect
+          if (newOffset < 0) {
+            const bounceAmount = Math.min(Math.abs(newOffset), 50); // Max 50px bounce
+            setBounceOffset(-bounceAmount);
+            // Auto-return bounce after short delay
+            setTimeout(() => setBounceOffset(0), 150);
+            return 0;
+          } else if (newOffset > maxScroll) {
+            const bounceAmount = Math.min(newOffset - maxScroll, 50); // Max 50px bounce
+            setBounceOffset(bounceAmount);
+            // Auto-return bounce after short delay
+            setTimeout(() => setBounceOffset(0), 150);
+            return maxScroll;
+          }
+
+          return newOffset;
         });
       };
-      
+
       let lastTouchY = 0;
       const handleTouchStart = (e: TouchEvent) => {
         if (e.touches.length === 1) {
           lastTouchY = e.touches[0].clientY;
         }
       };
-      
+
       const handleTouchMove = (e: TouchEvent) => {
         e.preventDefault();
         e.stopPropagation();
         if (e.touches.length === 1) {
           const currentTouchY = e.touches[0].clientY;
           const deltaY = lastTouchY - currentTouchY;
-          setScrollOffset(prev => {
+          setScrollOffset((prev) => {
             const newOffset = prev + deltaY * 1.5; // Faster touch scroll
-            return Math.max(0, Math.min(newOffset, 600));
+            const maxScroll = 600;
+
+            // If trying to scroll beyond bounds, add bounce effect
+            if (newOffset < 0) {
+              const bounceAmount = Math.min(Math.abs(newOffset), 50); // Max 50px bounce
+              setBounceOffset(-bounceAmount);
+              // Auto-return bounce after short delay
+              setTimeout(() => setBounceOffset(0), 150);
+              return 0;
+            } else if (newOffset > maxScroll) {
+              const bounceAmount = Math.min(newOffset - maxScroll, 50); // Max 50px bounce
+              setBounceOffset(bounceAmount);
+              // Auto-return bounce after short delay
+              setTimeout(() => setBounceOffset(0), 150);
+              return maxScroll;
+            }
+
+            return newOffset;
           });
           lastTouchY = currentTouchY;
         }
       };
-      
+
       // Add event listeners with capture to ensure they run first
-      window.addEventListener('wheel', handleWheel, { passive: false, capture: true });
-      window.addEventListener('touchstart', handleTouchStart, { passive: false, capture: true });
-      window.addEventListener('touchmove', handleTouchMove, { passive: false, capture: true });
-      
+      window.addEventListener("wheel", handleWheel, {
+        passive: false,
+        capture: true,
+      });
+      window.addEventListener("touchstart", handleTouchStart, {
+        passive: false,
+        capture: true,
+      });
+      window.addEventListener("touchmove", handleTouchMove, {
+        passive: false,
+        capture: true,
+      });
+
       return () => {
         document.body.style.overflow = "auto";
         document.documentElement.style.overflow = "auto";
-        window.removeEventListener('wheel', handleWheel, { capture: true });
-        window.removeEventListener('touchstart', handleTouchStart, { capture: true });
-        window.removeEventListener('touchmove', handleTouchMove, { capture: true });
+        window.removeEventListener("wheel", handleWheel, { capture: true });
+        window.removeEventListener("touchstart", handleTouchStart, {
+          capture: true,
+        });
+        window.removeEventListener("touchmove", handleTouchMove, {
+          capture: true,
+        });
       };
     }
   }, [showReadView, canEdit, thread, hasPassed]);
@@ -439,7 +487,11 @@ export default function NotePage() {
           padding: "0 20px",
         }}
       >
-        <Header showAbout={showAbout} onAboutChange={setShowAbout} defaultMusicOn={true} />
+        <Header
+          showAbout={showAbout}
+          onAboutChange={setShowAbout}
+          defaultMusicOn={true}
+        />
         <div
           style={{
             fontFamily: "var(--font-sans)",
@@ -468,7 +520,11 @@ export default function NotePage() {
           padding: "0 20px",
         }}
       >
-        <Header showAbout={showAbout} onAboutChange={setShowAbout} defaultMusicOn={true} />
+        <Header
+          showAbout={showAbout}
+          onAboutChange={setShowAbout}
+          defaultMusicOn={true}
+        />
 
         {/* Main Content */}
         <div
@@ -537,7 +593,11 @@ export default function NotePage() {
           background: "var(--cream)",
         }}
       >
-        <Header showAbout={showAbout} onAboutChange={setShowAbout} defaultMusicOn={true} />
+        <Header
+          showAbout={showAbout}
+          onAboutChange={setShowAbout}
+          defaultMusicOn={true}
+        />
 
         {/* Fixed Text Content */}
         <div
@@ -567,11 +627,14 @@ export default function NotePage() {
         <div
           style={{
             position: "absolute",
-            top: `${300 - scrollOffset}px`,
+            top: `${300 - scrollOffset + bounceOffset}px`,
             left: "50%",
             transform: "translateX(-50%)",
             zIndex: 100,
-            transition: "top 0.1s ease-out",
+            transition:
+              bounceOffset !== 0
+                ? "top 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+                : "top 0.1s ease-out",
             width: "100%",
             height: (() => {
               // Calculate total height based on actual overlap amounts
@@ -590,191 +653,191 @@ export default function NotePage() {
             })(),
           }}
         >
-            {/* Main Question Note */}
-            <div
-              style={{
-                position: "absolute",
-                top: "0px",
-                left: "50%",
-                transform: `translateX(-50%) translate(${textOffset.x}px, ${textOffset.y}px)`,
-                zIndex: 100,
-              }}
-            >
-              <FlippableNote
-                width={320}
-                height={320}
-                background={ORANGE_NOTE_COLOR.bg}
-                noteColor={ORANGE_NOTE_COLOR}
-                authorName={thread.responses[0]?.authorName || ""}
-                frontContent={
+          {/* Main Question Note */}
+          <div
+            style={{
+              position: "absolute",
+              top: "0px",
+              left: "50%",
+              transform: `translateX(-50%) translate(${textOffset.x}px, ${textOffset.y}px)`,
+              zIndex: 100,
+            }}
+          >
+            <FlippableNote
+              width={320}
+              height={320}
+              background={ORANGE_NOTE_COLOR.bg}
+              noteColor={ORANGE_NOTE_COLOR}
+              authorName={thread.responses[0]?.authorName || ""}
+              frontContent={
+                <div
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    padding: "0",
+                    boxSizing: "border-box",
+                  }}
+                >
+                  {/* Question text */}
                   <div
                     style={{
-                      width: "100%",
-                      height: "100%",
+                      fontFamily: "var(--font-handwritten)",
+                      fontSize: "18px",
+                      lineHeight: "1.4",
+                      color: ORANGE_NOTE_COLOR.secondary,
+                      textAlign: "center",
+                      overflow: "hidden",
+                      wordBreak: "break-word",
+                      flex: 1,
                       display: "flex",
-                      flexDirection: "column",
-                      justifyContent: "space-between",
-                      padding: "0",
-                      boxSizing: "border-box",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginTop: "50px",
+                      marginBottom: "19px",
                     }}
                   >
-                    {/* Question text */}
+                    {thread.question}
+                  </div>
+
+                  {/* Signature at bottom */}
+                  {thread.responses[0]?.authorName && (
                     <div
                       style={{
-                        fontFamily: "var(--font-handwritten)",
-                        fontSize: "18px",
-                        lineHeight: "1.4",
-                        color: ORANGE_NOTE_COLOR.secondary,
-                        textAlign: "center",
-                        overflow: "hidden",
-                        wordBreak: "break-word",
-                        flex: 1,
+                        height: "34px",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        marginTop: "50px",
-                        marginBottom: "19px",
+                        transform: "scale(0.33)",
+                        transformOrigin: "center",
+                        filter: ORANGE_NOTE_COLOR.filter,
+                        marginBottom: "10px",
                       }}
-                    >
-                      {thread.question}
-                    </div>
-
-                    {/* Signature at bottom */}
-                    {thread.responses[0]?.authorName && (
-                      <div
-                        style={{
-                          height: "34px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          transform: "scale(0.33)",
-                          transformOrigin: "center",
-                          filter: ORANGE_NOTE_COLOR.filter,
-                          marginBottom: "10px",
-                        }}
-                        dangerouslySetInnerHTML={{
-                          __html: thread.responses[0].authorName,
-                        }}
-                      />
-                    )}
-                  </div>
-                }
-              />
-            </div>
-
-            {/* Existing Response Notes */}
-            {thread.responses.length > 1 &&
-              thread.responses.slice(1).map((response, index) => {
-                if (!response.drawingData || response.drawingData.trim() === "")
-                  return null;
-
-                const offset =
-                  existingResponseOffsets[index + 1] ||
-                  (() => {
-                    // Get previous color for adjacent check (skip orange question note)
-                    const prevColor =
-                      index > 0
-                        ? existingResponseOffsets[index]?.color
-                        : ORANGE_NOTE_COLOR; // Exclude orange for first response
-                    return {
-                      x: getRandomXOffset(response.id + "xoffset"),
-                      y: 0,
-                      rotation: 0,
-                      color: getRandomColor(response.id + "color", prevColor),
-                    };
-                  })();
-
-                // Calculate overlap for this note (-13 to -26px)
-                const overlapSeed = seededRandom(response.id + "overlap");
-                const overlap = 13 + overlapSeed * 13; // 13-26px overlap
-
-                // Calculate cumulative top position
-                let cumulativeTop = 320; // Start after the question note
-                for (let i = 0; i < index; i++) {
-                  const prevSeed = seededRandom(
-                    (thread.responses[i + 1]?.id || "default") + "overlap"
-                  );
-                  const prevOverlap = 13 + prevSeed * 13;
-                  cumulativeTop += 320 - prevOverlap;
-                }
-                cumulativeTop -= overlap;
-
-                return (
-                  <div
-                    key={response.id}
-                    style={{
-                      position: "absolute",
-                      top: `${cumulativeTop}px`,
-                      left: "50%",
-                      transform: `translateX(-50%) translate(${offset.x}px, 0)`,
-                      zIndex: 100 + index + 1,
-                    }}
-                  >
-                    <FlippableNote
-                      width={320}
-                      height={320}
-                      background={offset.color.bg}
-                      authorName={response.authorName || ""}
-                      frontContent={
-                        // Check if it's SVG, old image data, or text
-                        response.drawingData.startsWith("<svg") ? (
-                          <div
-                            style={{
-                              width: "240px",
-                              height: "240px",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                            }}
-                            dangerouslySetInnerHTML={{
-                              __html: response.drawingData,
-                            }}
-                          />
-                        ) : response.drawingData.startsWith("data:image") ? (
-                          <div
-                            style={{
-                              width: "240px",
-                              height: "240px",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              backgroundImage: `url(${response.drawingData})`,
-                              backgroundSize: "contain",
-                              backgroundRepeat: "no-repeat",
-                              backgroundPosition: "center",
-                            }}
-                          />
-                        ) : (
-                          <SignedNote
-                            drawingData={response.drawingData}
-                            authorName={response.authorName || ""}
-                            noteColor={offset.color}
-                            shouldShowSignature={(() => {
-                              // In read view, we know the user has already responded
-                              // Current user's position in chain (they've already responded)
-                              const currentUserIndex =
-                                thread.responses.length - 1;
-                              const responseIndex = index + 1; // Convert to absolute index in responses array
-
-                              // Show signature (no crossout) if:
-                              // 1. It's the current user's note (responseIndex === currentUserIndex)
-                              // 2. It's the note before current user (responseIndex === currentUserIndex - 1)
-                              // 3. It's the note after current user (responseIndex === currentUserIndex + 1)
-                              return (
-                                responseIndex === currentUserIndex || // Current user's note
-                                responseIndex === currentUserIndex - 1 || // Previous person (mutual)
-                                responseIndex === currentUserIndex + 1 // Next person (mutual)
-                              );
-                            })()}
-                            crossoutStroke={getCrossoutStroke(response.id)}
-                          />
-                        )
-                      }
+                      dangerouslySetInnerHTML={{
+                        __html: thread.responses[0].authorName,
+                      }}
                     />
-                  </div>
-                );
-              })}
+                  )}
+                </div>
+              }
+            />
           </div>
+
+          {/* Existing Response Notes */}
+          {thread.responses.length > 1 &&
+            thread.responses.slice(1).map((response, index) => {
+              if (!response.drawingData || response.drawingData.trim() === "")
+                return null;
+
+              const offset =
+                existingResponseOffsets[index + 1] ||
+                (() => {
+                  // Get previous color for adjacent check (skip orange question note)
+                  const prevColor =
+                    index > 0
+                      ? existingResponseOffsets[index]?.color
+                      : ORANGE_NOTE_COLOR; // Exclude orange for first response
+                  return {
+                    x: getRandomXOffset(response.id + "xoffset"),
+                    y: 0,
+                    rotation: 0,
+                    color: getRandomColor(response.id + "color", prevColor),
+                  };
+                })();
+
+              // Calculate overlap for this note (-13 to -26px)
+              const overlapSeed = seededRandom(response.id + "overlap");
+              const overlap = 13 + overlapSeed * 13; // 13-26px overlap
+
+              // Calculate cumulative top position
+              let cumulativeTop = 320; // Start after the question note
+              for (let i = 0; i < index; i++) {
+                const prevSeed = seededRandom(
+                  (thread.responses[i + 1]?.id || "default") + "overlap"
+                );
+                const prevOverlap = 13 + prevSeed * 13;
+                cumulativeTop += 320 - prevOverlap;
+              }
+              cumulativeTop -= overlap;
+
+              return (
+                <div
+                  key={response.id}
+                  style={{
+                    position: "absolute",
+                    top: `${cumulativeTop}px`,
+                    left: "50%",
+                    transform: `translateX(-50%) translate(${offset.x}px, 0)`,
+                    zIndex: 100 + index + 1,
+                  }}
+                >
+                  <FlippableNote
+                    width={320}
+                    height={320}
+                    background={offset.color.bg}
+                    authorName={response.authorName || ""}
+                    frontContent={
+                      // Check if it's SVG, old image data, or text
+                      response.drawingData.startsWith("<svg") ? (
+                        <div
+                          style={{
+                            width: "240px",
+                            height: "240px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                          dangerouslySetInnerHTML={{
+                            __html: response.drawingData,
+                          }}
+                        />
+                      ) : response.drawingData.startsWith("data:image") ? (
+                        <div
+                          style={{
+                            width: "240px",
+                            height: "240px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            backgroundImage: `url(${response.drawingData})`,
+                            backgroundSize: "contain",
+                            backgroundRepeat: "no-repeat",
+                            backgroundPosition: "center",
+                          }}
+                        />
+                      ) : (
+                        <SignedNote
+                          drawingData={response.drawingData}
+                          authorName={response.authorName || ""}
+                          noteColor={offset.color}
+                          shouldShowSignature={(() => {
+                            // In read view, we know the user has already responded
+                            // Current user's position in chain (they've already responded)
+                            const currentUserIndex =
+                              thread.responses.length - 1;
+                            const responseIndex = index + 1; // Convert to absolute index in responses array
+
+                            // Show signature (no crossout) if:
+                            // 1. It's the current user's note (responseIndex === currentUserIndex)
+                            // 2. It's the note before current user (responseIndex === currentUserIndex - 1)
+                            // 3. It's the note after current user (responseIndex === currentUserIndex + 1)
+                            return (
+                              responseIndex === currentUserIndex || // Current user's note
+                              responseIndex === currentUserIndex - 1 || // Previous person (mutual)
+                              responseIndex === currentUserIndex + 1 // Next person (mutual)
+                            );
+                          })()}
+                          crossoutStroke={getCrossoutStroke(response.id)}
+                        />
+                      )
+                    }
+                  />
+                </div>
+              );
+            })}
+        </div>
 
         {/* Fixed Bottom Button */}
         <div
@@ -822,135 +885,145 @@ export default function NotePage() {
         justifyContent: hasPassed ? "center" : "initial",
       }}
     >
-      <Header showAbout={showAbout} onAboutChange={setShowAbout} defaultMusicOn={true} />
+      <Header
+        showAbout={showAbout}
+        onAboutChange={setShowAbout}
+        defaultMusicOn={true}
+      />
 
       {/* Main Content Container */}
       <div>
         {/* Fixed Top Text Content - only show in edit mode */}
-      {canEdit && !hasPassed && (
-        <div
-          style={{
-            position: "absolute",
-            top: "120px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 10,
-            textAlign: "center",
-            padding: "0 20px",
-            maxWidth: "100vw",
-            boxSizing: "border-box",
-          }}
-        >
+        {canEdit && !hasPassed && (
           <div
             style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: "0px", // Zero spacing between signature and text
+              position: "absolute",
+              top: "120px",
+              left: "50%",
+              transform: "translateX(-50%)",
+              zIndex: 10,
+              textAlign: "center",
+              padding: "0 20px",
+              maxWidth: "100vw",
+              boxSizing: "border-box",
             }}
           >
-            {/* Previous person's signature and "passed you a note." */}
             <div
               style={{
-                opacity: 0,
-                animation: "fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
-                animationDelay: "0s",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "0px", // Zero spacing between signature and text
               }}
             >
-              {thread.responses.length > 0 &&
-                thread.responses[thread.responses.length - 1]?.authorName && (
-                  <div
-                    style={{
-                      transform: "scale(0.33)",
-                      transformOrigin: "center",
-                      filter: "brightness(0) saturate(100%) invert(0%)", // Make it black
-                    }}
-                    dangerouslySetInnerHTML={{
-                      __html:
-                        thread.responses[thread.responses.length - 1].authorName,
-                    }}
-                  />
-                )}
-
-              {/* Text below signature */}
+              {/* Previous person's signature and "passed you a note." */}
               <div
                 style={{
-                  fontFamily: "var(--font-sans)",
-                  fontWeight: "500",
-                  fontSize: "16px",
-                  lineHeight: "22px",
-                  color: "var(--text-dark)",
-                  display: "block", // forces normal text layout
-                  whiteSpace: "normal", // allows wrapping and <br />s
+                  opacity: 0,
+                  animation:
+                    "fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
+                  animationDelay: "0s",
                 }}
               >
-                passed you a note.
+                {thread.responses.length > 0 &&
+                  thread.responses[thread.responses.length - 1]?.authorName && (
+                    <div
+                      style={{
+                        transform: "scale(0.33)",
+                        transformOrigin: "center",
+                        filter: "brightness(0) saturate(100%) invert(0%)", // Make it black
+                      }}
+                      dangerouslySetInnerHTML={{
+                        __html:
+                          thread.responses[thread.responses.length - 1]
+                            .authorName,
+                      }}
+                    />
+                  )}
+
+                {/* Text below signature */}
+                <div
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontWeight: "500",
+                    fontSize: "16px",
+                    lineHeight: "22px",
+                    color: "var(--text-dark)",
+                    display: "block", // forces normal text layout
+                    whiteSpace: "normal", // allows wrapping and <br />s
+                  }}
+                >
+                  passed you a note.
+                </div>
+              </div>
+
+              {/* Step 1 */}
+              <div
+                style={{
+                  opacity: 0,
+                  animation:
+                    "fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
+                  animationDelay: "2s",
+                  fontFamily: "var(--font-sans)",
+                  fontSize: "16px",
+                  lineHeight: "22px",
+                  color: "#989797",
+                  fontWeight: "500",
+                  marginTop: "24px",
+                }}
+              >
+                1. read the question
+              </div>
+
+              {/* Step 2 */}
+              <div
+                style={{
+                  opacity: 0,
+                  animation:
+                    "fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
+                  animationDelay: "2.5s",
+                  fontFamily: "var(--font-sans)",
+                  fontSize: "16px",
+                  lineHeight: "22px",
+                  color: "#989797",
+                  fontWeight: "500",
+                }}
+              >
+                2. reflect for 30 sec
+              </div>
+
+              {/* Step 3 */}
+              <div
+                style={{
+                  opacity: 0,
+                  animation:
+                    "fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
+                  animationDelay: "3s",
+                  fontFamily: "var(--font-sans)",
+                  fontSize: "16px",
+                  lineHeight: "22px",
+                  color: "#989797",
+                  fontWeight: "500",
+                }}
+              >
+                3. answer when you&apos;re ready
               </div>
             </div>
-
-            {/* Step 1 */}
-            <div
-              style={{
-                opacity: 0,
-                animation: "fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
-                animationDelay: "0.5s",
-                fontFamily: "var(--font-sans)",
-                fontSize: "16px",
-                lineHeight: "22px",
-                color: "#989797",
-                fontWeight: "500",
-                marginTop: "24px",
-              }}
-            >
-              1. read the question
-            </div>
-
-            {/* Step 2 */}
-            <div
-              style={{
-                opacity: 0,
-                animation: "fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
-                animationDelay: "1s",
-                fontFamily: "var(--font-sans)",
-                fontSize: "16px",
-                lineHeight: "22px",
-                color: "#989797",
-                fontWeight: "500",
-              }}
-            >
-              2. reflect for 30 sec
-            </div>
-
-            {/* Step 3 */}
-            <div
-              style={{
-                opacity: 0,
-                animation: "fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
-                animationDelay: "1.5s",
-                fontFamily: "var(--font-sans)",
-                fontSize: "16px",
-                lineHeight: "22px",
-                color: "#989797",
-                fontWeight: "500",
-              }}
-            >
-              3. answer when you&apos;re ready
-            </div>
           </div>
-        </div>
-      )}
+        )}
         {/* Scrollable Note Container */}
         {!slideAnimationComplete && (
           <div
             style={{
               position: "absolute",
-              top: `${300 - scrollOffset}px`,
+              top: `${300 - scrollOffset + bounceOffset}px`,
               left: "50%",
               zIndex: 100,
               width: "100%",
               opacity: 0,
-              animation: "fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
-              animationDelay: "2s",
+              animation:
+                "fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
+              animationDelay: "5s",
               height: (() => {
                 // Calculate total height based on actual overlap amounts
                 let totalHeight = 320; // Base question note height
@@ -975,8 +1048,14 @@ export default function NotePage() {
 
                 return `${totalHeight}px`;
               })(),
-              transform: notesSlideOut ? "translateX(-50%) translateY(-100vh)" : "translateX(-50%)",
-              transition: notesSlideOut ? "transform 0.6s ease-in-out" : "top 0.1s ease-out",
+              transform: notesSlideOut
+                ? "translateX(-50%) translateY(-100vh)"
+                : "translateX(-50%)",
+              transition: notesSlideOut
+                ? "transform 0.6s ease-in-out"
+                : bounceOffset !== 0
+                ? "top 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+                : "top 0.1s ease-out",
             }}
           >
             {/* Main Question Note */}
@@ -1219,7 +1298,7 @@ export default function NotePage() {
                   top: `${(() => {
                     // Calculate position after all notes
                     let totalTop = 320; // Start after the question note
-                    
+
                     // Add height for existing responses
                     for (let i = 0; i < thread.responses.length - 1; i++) {
                       const overlapSeed = seededRandom(
@@ -1228,7 +1307,7 @@ export default function NotePage() {
                       const overlap = 13 + overlapSeed * 13; // 13-26px overlap
                       totalTop += 320 - overlap;
                     }
-                    
+
                     // Add height for active response note if editing
                     if (canEdit) {
                       const activeSeed = seededRandom(
@@ -1237,7 +1316,7 @@ export default function NotePage() {
                       const activeOverlap = 13 + activeSeed * 13;
                       totalTop += 320 - activeOverlap;
                     }
-                    
+
                     return totalTop + 40; // Add 40px spacing after notes
                   })()}px`,
                   left: "50%",
@@ -1248,108 +1327,108 @@ export default function NotePage() {
                   gap: "12px",
                 }}
               >
-            {/* Back button - only show when flipped */}
-            {flippedNotes["active-note"] && (
-              <button
-                onClick={() =>
-                  setFlippedNotes((prev) => ({
-                    ...prev,
-                    "active-note": false,
-                  }))
-                }
-                style={{
-                  background: "#E5E1DE",
-                  border: "none",
-                  fontFamily: "var(--font-sans)",
-                  fontWeight: "500",
-                  fontSize: "14px",
-                  lineHeight: "18px",
-                  color: "black",
-                  cursor: "pointer",
-                  padding: "8px 10px",
-                }}
-              >
-                &lt;
-              </button>
-            )}
+                {/* Back button - only show when flipped */}
+                {flippedNotes["active-note"] && (
+                  <button
+                    onClick={() =>
+                      setFlippedNotes((prev) => ({
+                        ...prev,
+                        "active-note": false,
+                      }))
+                    }
+                    style={{
+                      background: "#E5E1DE",
+                      border: "none",
+                      fontFamily: "var(--font-sans)",
+                      fontWeight: "500",
+                      fontSize: "14px",
+                      lineHeight: "18px",
+                      color: "black",
+                      cursor: "pointer",
+                      padding: "8px 10px",
+                    }}
+                  >
+                    &lt;
+                  </button>
+                )}
 
-            {/* Clear button - always show when flipped */}
-            {flippedNotes["active-note"] && (
-              <button
-                onClick={() => {
-                  if (activeNoteRef.current) {
-                    activeNoteRef.current.handleClear();
+                {/* Clear button - always show when flipped */}
+                {flippedNotes["active-note"] && (
+                  <button
+                    onClick={() => {
+                      if (activeNoteRef.current) {
+                        activeNoteRef.current.handleClear();
+                      }
+                    }}
+                    style={{
+                      background: "#E5E1DE",
+                      border: "none",
+                      fontFamily: "var(--font-sans)",
+                      fontWeight: "500",
+                      fontSize: "14px",
+                      lineHeight: "18px",
+                      color: "black",
+                      cursor: "pointer",
+                      padding: "8px 10px",
+                    }}
+                  >
+                    clear
+                  </button>
+                )}
+
+                {/* Main action button */}
+                <button
+                  onClick={async () => {
+                    if (!flippedNotes["active-note"]) {
+                      // If not flipped, flip to signing screen
+                      setFlippedNotes((prev) => ({
+                        ...prev,
+                        "active-note": true,
+                      }));
+                    } else {
+                      // If flipped and signed, pass the note
+                      await passNote();
+                    }
+                  }}
+                  disabled={
+                    isSubmitting ||
+                    !typedResponse.trim() ||
+                    (flippedNotes["active-note"] && !authorNameDrawing.trim())
                   }
-                }}
-                style={{
-                  background: "#E5E1DE",
-                  border: "none",
-                  fontFamily: "var(--font-sans)",
-                  fontWeight: "500",
-                  fontSize: "14px",
-                  lineHeight: "18px",
-                  color: "black",
-                  cursor: "pointer",
-                  padding: "8px 10px",
-                }}
-              >
-                clear
-              </button>
-            )}
-
-            {/* Main action button */}
-            <button
-              onClick={async () => {
-                if (!flippedNotes["active-note"]) {
-                  // If not flipped, flip to signing screen
-                  setFlippedNotes((prev) => ({
-                    ...prev,
-                    "active-note": true,
-                  }));
-                } else {
-                  // If flipped and signed, pass the note
-                  await passNote();
-                }
-              }}
-              disabled={
-                isSubmitting ||
-                !typedResponse.trim() ||
-                (flippedNotes["active-note"] && !authorNameDrawing.trim())
-              }
-              style={{
-                background:
-                  isSubmitting ||
-                  !typedResponse.trim() ||
-                  (flippedNotes["active-note"] && !authorNameDrawing.trim())
-                    ? "#E5E1DE"
-                    : "#FF5E01",
-                border: "none",
-                fontFamily: "var(--font-sans)",
-                fontWeight: "500",
-                fontSize: "14px",
-                lineHeight: "18px",
-                color:
-                  isSubmitting ||
-                  !typedResponse.trim() ||
-                  (flippedNotes["active-note"] && !authorNameDrawing.trim())
-                    ? "black"
-                    : "white",
-                cursor:
-                  isSubmitting ||
-                  !typedResponse.trim() ||
-                  (flippedNotes["active-note"] && !authorNameDrawing.trim())
-                    ? "default"
-                    : "pointer",
-                padding: "8px 10px",
-              }}
-            >
-              {isSubmitting
-                ? "sending your note..."
-                : !flippedNotes["active-note"]
-                ? "1. sign this note >"
-                : "2. pass this note >"}
-            </button>
-            </div>
+                  style={{
+                    background:
+                      isSubmitting ||
+                      !typedResponse.trim() ||
+                      (flippedNotes["active-note"] && !authorNameDrawing.trim())
+                        ? "#E5E1DE"
+                        : "#FF5E01",
+                    border: "none",
+                    fontFamily: "var(--font-sans)",
+                    fontWeight: "500",
+                    fontSize: "14px",
+                    lineHeight: "18px",
+                    color:
+                      isSubmitting ||
+                      !typedResponse.trim() ||
+                      (flippedNotes["active-note"] && !authorNameDrawing.trim())
+                        ? "black"
+                        : "white",
+                    cursor:
+                      isSubmitting ||
+                      !typedResponse.trim() ||
+                      (flippedNotes["active-note"] && !authorNameDrawing.trim())
+                        ? "default"
+                        : "pointer",
+                    padding: "8px 10px",
+                  }}
+                >
+                  {isSubmitting
+                    ? "sending your note..."
+                    : !flippedNotes["active-note"]
+                    ? "1. sign this note >"
+                    : "2. pass this note >"}
+                </button>
+              </div>
             )}
           </div>
         )}
