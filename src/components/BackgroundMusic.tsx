@@ -78,17 +78,8 @@ export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
             widget.toggle(); // Start playing
             setTimeout(() => {
               widget.toggle(); // Stop playing
-              setHasSecretlyPrimed(true);
               console.log('🤫 Widget primed and ready!');
-              
-              // If music should be playing by default, start it now that widget is primed
-              if (isPlaying) {
-                console.log('🎵 Starting music after priming because defaultMusicOn is true');
-                setTimeout(() => {
-                  widget.setVolume(70);
-                  widget.play();
-                }, 100); // Small delay to ensure priming is complete
-              }
+              setHasSecretlyPrimed(true);
             }, 100); // Very quick toggle
           }
         }, 500); // Wait a bit for widget to be fully ready
@@ -111,24 +102,36 @@ export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
         console.log('SoundCloud paused');
       });
     }
-  }, [isLoaded, hasSecretlyPrimed, isPlaying]);
+  }, [isLoaded, hasSecretlyPrimed]);
 
   useEffect(() => {
+    console.log('🎵 Play/pause useEffect triggered:', { isPlaying, isWidgetReady, hasSecretlyPrimed });
+    
     if (widgetRef.current && isWidgetReady && hasSecretlyPrimed) {
-      // Add a small delay to ensure widget is fully ready
+      console.log('🎵 All conditions met, scheduling music action...');
+      
+      // Give extra time after priming to ensure widget is fully ready
       const timer = setTimeout(() => {
+        console.log('🎵 Executing music action, isPlaying:', isPlaying);
+        
         if (isPlaying) {
-          // Now that widget is primed, use simple play/pause
-          console.log('Widget is primed - using regular play');
+          console.log('🎵 Calling widget.play()');
           widgetRef.current!.setVolume(70);
           widgetRef.current!.play();
         } else {
-          console.log('Pausing');
+          console.log('🎵 Calling widget.pause()');
           widgetRef.current!.pause();
         }
-      }, 50); // Shorter delay since widget is primed
+      }, 500); // Much longer delay to ensure priming is complete
 
       return () => clearTimeout(timer);
+    } else {
+      console.log('🎵 Conditions not met yet:', { 
+        hasWidget: !!widgetRef.current, 
+        isWidgetReady, 
+        hasSecretlyPrimed, 
+        isPlaying 
+      });
     }
   }, [isPlaying, isWidgetReady, hasSecretlyPrimed]);
 

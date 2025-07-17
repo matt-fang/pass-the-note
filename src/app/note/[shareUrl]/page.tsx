@@ -97,7 +97,6 @@ export default function NotePage() {
   );
   const [typedResponse, setTypedResponse] = useState("");
   const [generatedShareUrl, setGeneratedShareUrl] = useState<string>("");
-  const [scrollOffset, setScrollOffset] = useState(0);
   const activeNoteRef = useRef<FlippableNoteRef>(null);
 
   // Disable scrolling when in "passed" state
@@ -114,70 +113,6 @@ export default function NotePage() {
     };
   }, [hasPassed]);
 
-  // Custom scroll handler for both read view and editing view
-  useEffect(() => {
-    if ((showReadView || canEdit) && thread && !hasPassed) {
-      // Disable all scrolling
-      document.body.style.overflow = "hidden";
-      document.documentElement.style.overflow = "hidden";
-
-      const handleWheel = (e: WheelEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setScrollOffset((prev) => {
-          const newOffset = prev + e.deltaY * 0.5; // Slower scroll
-          return Math.max(0, Math.min(newOffset, 600)); // Limit scroll range
-        });
-      };
-
-      let lastTouchY = 0;
-      const handleTouchStart = (e: TouchEvent) => {
-        if (e.touches.length === 1) {
-          lastTouchY = e.touches[0].clientY;
-        }
-      };
-
-      const handleTouchMove = (e: TouchEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (e.touches.length === 1) {
-          const currentTouchY = e.touches[0].clientY;
-          const deltaY = lastTouchY - currentTouchY;
-          setScrollOffset((prev) => {
-            const newOffset = prev + deltaY * 1.5; // Faster touch scroll
-            return Math.max(0, Math.min(newOffset, 600));
-          });
-          lastTouchY = currentTouchY;
-        }
-      };
-
-      // Add event listeners with capture to ensure they run first
-      window.addEventListener("wheel", handleWheel, {
-        passive: false,
-        capture: true,
-      });
-      window.addEventListener("touchstart", handleTouchStart, {
-        passive: false,
-        capture: true,
-      });
-      window.addEventListener("touchmove", handleTouchMove, {
-        passive: false,
-        capture: true,
-      });
-
-      return () => {
-        document.body.style.overflow = "auto";
-        document.documentElement.style.overflow = "auto";
-        window.removeEventListener("wheel", handleWheel, { capture: true });
-        window.removeEventListener("touchstart", handleTouchStart, {
-          capture: true,
-        });
-        window.removeEventListener("touchmove", handleTouchMove, {
-          capture: true,
-        });
-      };
-    }
-  }, [showReadView, canEdit, thread, hasPassed]);
 
   // Deterministic random function based on string input
   const seededRandom = (seed: string): number => {
@@ -549,13 +484,16 @@ export default function NotePage() {
     return (
       <div
         style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100vw",
-          height: "100vh",
-          overflow: "hidden",
+          minHeight: "100vh",
+          overflow: "auto",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "flex-start",
           background: "var(--cream)",
+          padding: "0 20px",
+          paddingTop: "100px",
+          paddingBottom: "120px",
         }}
       >
         <Header
@@ -564,57 +502,53 @@ export default function NotePage() {
           defaultMusicOn={true}
         />
 
-        {/* Fixed Text Content */}
+        {/* Main Content */}
         <div
           style={{
-            position: "absolute",
-            top: "120px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 10,
-            textAlign: "center",
-            padding: "0 20px",
-            maxWidth: "100vw",
-            boxSizing: "border-box",
-            fontFamily: "var(--font-sans)",
-            fontWeight: "500",
-            fontSize: "16px",
-            lineHeight: "22px",
-            color: "var(--text-dark)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "40px",
           }}
         >
-          you&apos;ve already responded to this note.
-          <br />
-          here&apos;s the conversation so far.
-        </div>
+          {/* Text above note */}
+          <div
+            style={{
+              textAlign: "center",
+              fontFamily: "var(--font-sans)",
+              fontWeight: "500",
+              fontSize: "16px",
+              lineHeight: "22px",
+              color: "var(--text-dark)",
+            }}
+          >
+            you&apos;ve already responded to this note.
+            <br />
+            here&apos;s the conversation so far.
+          </div>
 
-        {/* Scrollable Note Container */}
-        <div
-          style={{
-            position: "absolute",
-            top: `${300 - scrollOffset}px`,
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 100,
-            transition: "top 0.1s ease-out",
-            width: "100%",
-            height: (() => {
-              // Calculate total height based on actual overlap amounts
-              let totalHeight = 320; // Base question note height
+          {/* Note Container */}
+          <div
+            style={{
+              position: "relative",
+              width: "100%",
+              height: (() => {
+                // Calculate total height based on actual overlap amounts
+                let totalHeight = 320; // Base question note height
 
-              // Add height for existing responses
-              for (let i = 0; i < thread.responses.length - 1; i++) {
-                const overlapSeed = seededRandom(
-                  (thread.responses[i + 1]?.id || "default") + "overlap"
-                );
-                const overlap = 13 + overlapSeed * 13; // 13-26px overlap
-                totalHeight += 320 - overlap;
-              }
+                // Add height for existing responses
+                for (let i = 0; i < thread.responses.length - 1; i++) {
+                  const overlapSeed = seededRandom(
+                    (thread.responses[i + 1]?.id || "default") + "overlap"
+                  );
+                  const overlap = 13 + overlapSeed * 13; // 13-26px overlap
+                  totalHeight += 320 - overlap;
+                }
 
-              return `${totalHeight}px`;
-            })(),
-          }}
-        >
+                return `${totalHeight}px`;
+              })(),
+            }}
+          >
           {/* Main Question Note */}
           <div
             style={{
@@ -801,32 +735,29 @@ export default function NotePage() {
             })}
         </div>
 
-        {/* Fixed Bottom Button */}
-        <div
-          style={{
-            position: "fixed",
-            bottom: "40px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 50,
-          }}
-        >
-          <button
-            onClick={() => (window.location.href = "/")}
+          {/* Bottom button */}
+          <div
             style={{
-              background: "#FF5E01",
-              border: "none",
-              fontFamily: "var(--font-sans)",
-              fontWeight: "500",
-              fontSize: "14px",
-              lineHeight: "18px",
-              color: "white",
-              cursor: "pointer",
-              padding: "8px 10px",
+              marginTop: "40px",
             }}
           >
-            write your own note &gt;
-          </button>
+            <button
+              onClick={() => (window.location.href = "/")}
+              style={{
+                background: "#FF5E01",
+                border: "none",
+                fontFamily: "var(--font-sans)",
+                fontWeight: "500",
+                fontSize: "14px",
+                lineHeight: "18px",
+                color: "white",
+                cursor: "pointer",
+                padding: "8px 10px",
+              }}
+            >
+              write your own note &gt;
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -835,16 +766,17 @@ export default function NotePage() {
   return (
     <div
       style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100vh",
-        overflow: "hidden",
+        minHeight: "100vh",
+        height: hasPassed ? "100vh" : "auto",
+        overflow: hasPassed ? "hidden" : "auto",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: hasPassed ? "center" : "flex-start",
         background: "var(--cream)",
-        display: hasPassed ? "flex" : "block",
-        alignItems: hasPassed ? "center" : "initial",
-        justifyContent: hasPassed ? "center" : "initial",
+        padding: hasPassed ? "0" : "0 20px",
+        paddingTop: hasPassed ? "0" : "100px",
+        paddingBottom: hasPassed ? "0" : "120px",
       }}
     >
       <Header
@@ -853,139 +785,131 @@ export default function NotePage() {
         defaultMusicOn={true}
       />
 
-      {/* Main Content Container */}
-      <div>
-        {/* Fixed Top Text Content - only show in edit mode */}
-        {canEdit && !hasPassed && (
+      {/* Main Content */}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: "40px",
+        }}
+      >
+        {/* Text above note */}
+        {canEdit && (
           <div
             style={{
-              position: "absolute",
-              top: "120px",
-              left: "50%",
-              transform: "translateX(-50%)",
-              zIndex: 10,
               textAlign: "center",
-              padding: "0 20px",
-              maxWidth: "100vw",
-              boxSizing: "border-box",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "0px", // Zero spacing between signature and text
+              marginBottom: "38px",
             }}
           >
+            {/* Previous person's signature and "passed you a note." */}
             <div
               style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: "0px", // Zero spacing between signature and text
+                opacity: 0,
+                animation:
+                  "fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
+                animationDelay: "0s",
               }}
             >
-              {/* Previous person's signature and "passed you a note." */}
+              {thread.responses.length > 0 &&
+                thread.responses[thread.responses.length - 1]?.authorName && (
+                  <div
+                    style={{
+                      transform: "scale(0.33)",
+                      transformOrigin: "center",
+                      filter: "brightness(0) saturate(100%) invert(0%)", // Make it black
+                    }}
+                    dangerouslySetInnerHTML={{
+                      __html:
+                        thread.responses[thread.responses.length - 1]
+                          .authorName,
+                    }}
+                  />
+                )}
+
+              {/* Text below signature */}
               <div
                 style={{
-                  opacity: 0,
-                  animation:
-                    "fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
-                  animationDelay: "0s",
-                }}
-              >
-                {thread.responses.length > 0 &&
-                  thread.responses[thread.responses.length - 1]?.authorName && (
-                    <div
-                      style={{
-                        transform: "scale(0.33)",
-                        transformOrigin: "center",
-                        filter: "brightness(0) saturate(100%) invert(0%)", // Make it black
-                      }}
-                      dangerouslySetInnerHTML={{
-                        __html:
-                          thread.responses[thread.responses.length - 1]
-                            .authorName,
-                      }}
-                    />
-                  )}
-
-                {/* Text below signature */}
-                <div
-                  style={{
-                    fontFamily: "var(--font-sans)",
-                    fontWeight: "500",
-                    fontSize: "16px",
-                    lineHeight: "22px",
-                    color: "var(--text-dark)",
-                    display: "block", // forces normal text layout
-                    whiteSpace: "normal", // allows wrapping and <br />s
-                  }}
-                >
-                  passed you a note.
-                </div>
-              </div>
-
-              {/* Step 1 */}
-              <div
-                style={{
-                  opacity: 0,
-                  animation:
-                    "fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
-                  animationDelay: "2s",
                   fontFamily: "var(--font-sans)",
+                  fontWeight: "500",
                   fontSize: "16px",
                   lineHeight: "22px",
-                  color: "#989797",
-                  fontWeight: "500",
-                  marginTop: "24px",
+                  color: "var(--text-dark)",
+                  display: "block", // forces normal text layout
+                  whiteSpace: "normal", // allows wrapping and <br />s
                 }}
               >
-                1. read the question
+                passed you a note.
               </div>
+            </div>
 
-              {/* Step 2 */}
-              <div
-                style={{
-                  opacity: 0,
-                  animation:
-                    "fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
-                  animationDelay: "3s",
-                  fontFamily: "var(--font-sans)",
-                  fontSize: "16px",
-                  lineHeight: "22px",
-                  color: "#989797",
-                  fontWeight: "500",
-                }}
-              >
-                2. reflect for 30 sec
-              </div>
+            {/* Step 1 */}
+            <div
+              style={{
+                opacity: 0,
+                animation:
+                  "fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
+                animationDelay: "1s",
+                fontFamily: "var(--font-sans)",
+                fontSize: "16px",
+                lineHeight: "22px",
+                color: "#989797",
+                fontWeight: "500",
+                marginTop: "24px",
+              }}
+            >
+              1. read the question
+            </div>
 
-              {/* Step 3 */}
-              <div
-                style={{
-                  opacity: 0,
-                  animation:
-                    "fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
-                  animationDelay: "4s",
-                  fontFamily: "var(--font-sans)",
-                  fontSize: "16px",
-                  lineHeight: "22px",
-                  color: "#989797",
-                  fontWeight: "500",
-                }}
-              >
-                3. answer when you&apos;re ready
-              </div>
+            {/* Step 2 */}
+            <div
+              style={{
+                opacity: 0,
+                animation:
+                  "fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
+                animationDelay: "2s",
+                fontFamily: "var(--font-sans)",
+                fontSize: "16px",
+                lineHeight: "22px",
+                color: "#989797",
+                fontWeight: "500",
+              }}
+            >
+              2. reflect for 30 sec
+            </div>
+
+            {/* Step 3 */}
+            <div
+              style={{
+                opacity: 0,
+                animation:
+                  "fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
+                animationDelay: "3s",
+                fontFamily: "var(--font-sans)",
+                fontSize: "16px",
+                lineHeight: "22px",
+                color: "#989797",
+                fontWeight: "500",
+              }}
+            >
+              3. answer when you&apos;re ready
             </div>
           </div>
         )}
-        {/* Scrollable Note Container */}
+        {/* Note Container - Absolute Positioned for Overlap */}
         {!slideAnimationComplete && (
           <div
             style={{
-              position: "absolute",
-              top: `${300 - scrollOffset}px`,
-              left: "50%",
-              zIndex: 100,
+              position: "relative",
               width: "100%",
               opacity: 0,
               animation:
                 "fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
-              animationDelay: "6s",
+              animationDelay: "4s",
               height: (() => {
                 // Calculate total height based on actual overlap amounts
                 let totalHeight = 320; // Base question note height
@@ -1010,12 +934,8 @@ export default function NotePage() {
 
                 return `${totalHeight}px`;
               })(),
-              transform: notesSlideOut
-                ? "translateX(-50%) translateY(-100vh)"
-                : "translateX(-50%)",
-              transition: notesSlideOut
-                ? "transform 0.6s ease-in-out"
-                : "top 0.1s ease-out",
+              transform: notesSlideOut ? "translateY(-100vh)" : "translateY(0)",
+              transition: "transform 0.6s ease-in-out",
             }}
           >
             {/* Main Question Note */}
@@ -1250,43 +1170,18 @@ export default function NotePage() {
                 );
               })()}
 
-            {/* Bottom Buttons - positioned after the active note */}
-            {canEdit && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: `${(() => {
-                    // Calculate position after all notes
-                    let totalTop = 320; // Start after the question note
-
-                    // Add height for existing responses
-                    for (let i = 0; i < thread.responses.length - 1; i++) {
-                      const overlapSeed = seededRandom(
-                        (thread.responses[i + 1]?.id || "default") + "overlap"
-                      );
-                      const overlap = 13 + overlapSeed * 13; // 13-26px overlap
-                      totalTop += 320 - overlap;
-                    }
-
-                    // Add height for active response note if editing
-                    if (canEdit) {
-                      const activeSeed = seededRandom(
-                        thread.id + "active-response"
-                      );
-                      const activeOverlap = 13 + activeSeed * 13;
-                      totalTop += 320 - activeOverlap;
-                    }
-
-                    return totalTop + 40; // Add 40px spacing after notes
-                  })()}px`,
-                  left: "50%",
-                  transform: "translateX(-50%)",
-                  zIndex: 50,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "12px",
-                }}
-              >
+          </div>
+        )}
+        {/* Bottom buttons - always show when editing */}
+        {canEdit && !hasPassed && (
+          <div
+            style={{
+              marginTop: "40px",
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+            }}
+          >
                 {/* Back button - only show when flipped */}
                 {flippedNotes["active-note"] && (
                   <button
@@ -1388,10 +1283,9 @@ export default function NotePage() {
                     ? "1. sign this note >"
                     : "2. pass this note >"}
                 </button>
-              </div>
-            )}
           </div>
         )}
+      </div>
         {/* Passed state - shows after note is passed */}
         {hasPassed && (
           <div
@@ -1485,7 +1379,6 @@ export default function NotePage() {
             </div>
           </div>
         )}
-      </div>
     </div>
   );
 }
