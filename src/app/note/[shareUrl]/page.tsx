@@ -845,51 +845,92 @@ export default function NotePage() {
               gap: "0px", // Zero spacing between signature and text
             }}
           >
-            {/* Previous person's signature */}
-            {thread.responses.length > 0 &&
-              thread.responses[thread.responses.length - 1]?.authorName && (
-                <div
-                  style={{
-                    transform: "scale(0.33)",
-                    transformOrigin: "center",
-                    filter: "brightness(0) saturate(100%) invert(0%)", // Make it black
-                  }}
-                  dangerouslySetInnerHTML={{
-                    __html:
-                      thread.responses[thread.responses.length - 1].authorName,
-                  }}
-                />
-              )}
-
-            {/* Text below signature */}
+            {/* Previous person's signature and "passed you a note." */}
             <div
               style={{
-                fontFamily: "var(--font-sans)",
-                fontWeight: "500",
-                fontSize: "16px",
-                lineHeight: "22px",
-                color: "var(--text-dark)",
-                display: "block", // forces normal text layout
-                whiteSpace: "normal", // allows wrapping and <br />s
+                opacity: 0,
+                animation: "fadeIn 0.5s ease-in-out forwards",
+                animationDelay: "0s",
               }}
             >
-              passed you a note.
+              {thread.responses.length > 0 &&
+                thread.responses[thread.responses.length - 1]?.authorName && (
+                  <div
+                    style={{
+                      transform: "scale(0.33)",
+                      transformOrigin: "center",
+                      filter: "brightness(0) saturate(100%) invert(0%)", // Make it black
+                    }}
+                    dangerouslySetInnerHTML={{
+                      __html:
+                        thread.responses[thread.responses.length - 1].authorName,
+                    }}
+                  />
+                )}
+
+              {/* Text below signature */}
+              <div
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontWeight: "500",
+                  fontSize: "16px",
+                  lineHeight: "22px",
+                  color: "var(--text-dark)",
+                  display: "block", // forces normal text layout
+                  whiteSpace: "normal", // allows wrapping and <br />s
+                }}
+              >
+                passed you a note.
+              </div>
             </div>
+
+            {/* Step 1 */}
             <div
               style={{
+                opacity: 0,
+                animation: "fadeIn 0.5s ease-in-out forwards",
+                animationDelay: "2s",
                 fontFamily: "var(--font-sans)",
                 fontSize: "16px",
                 lineHeight: "22px",
                 color: "#989797",
                 fontWeight: "500",
-                display: "block", // forces normal text layout
-                whiteSpace: "normal", // allows wrapping and <br />s
                 marginTop: "24px",
+              }}
+            >
+              1. read the question
+            </div>
+
+            {/* Step 2 */}
+            <div
+              style={{
+                opacity: 0,
+                animation: "fadeIn 0.5s ease-in-out forwards",
+                animationDelay: "4s",
+                fontFamily: "var(--font-sans)",
+                fontSize: "16px",
+                lineHeight: "22px",
+                color: "#989797",
+                fontWeight: "500",
+              }}
+            >
+              2. reflect for 30 sec
+            </div>
+
+            {/* Step 3 */}
+            <div
+              style={{
+                opacity: 0,
+                animation: "fadeIn 0.5s ease-in-out forwards",
+                animationDelay: "6s",
+                fontFamily: "var(--font-sans)",
+                fontSize: "16px",
+                lineHeight: "22px",
+                color: "#989797",
+                fontWeight: "500",
                 marginBottom: "38px",
               }}
             >
-              1. read the question<br />
-              2. reflect for 30 sec<br />
               3. answer when you&apos;re ready
             </div>
           </div>
@@ -900,6 +941,9 @@ export default function NotePage() {
             style={{
               position: "relative",
               width: "100%",
+              opacity: 0,
+              animation: "fadeIn 0.5s ease-in-out forwards",
+              animationDelay: "8s",
               height: (() => {
                 // Calculate total height based on actual overlap amounts
                 let totalHeight = 320; // Base question note height
