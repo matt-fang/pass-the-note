@@ -396,13 +396,19 @@ export default function NotePage() {
         />
         <div
           style={{
+            textAlign: "center",
+            alignItems: "center",
             fontFamily: "var(--font-sans)",
             fontSize: "16px",
             lineHeight: "22px",
-            color: "var(--text-dark)",
+            color: "#989797",
+            fontWeight: "500",
+            marginTop: "24px",
+            display: "block",
           }}
         >
-          loading...
+          “What happens when people open their hearts?" <br />
+          "They get better.” <br />― Haruki Murakami
         </div>
       </div>
     );
