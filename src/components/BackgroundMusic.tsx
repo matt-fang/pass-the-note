@@ -91,12 +91,12 @@ export default function BackgroundMusic({ isPlaying, shouldShuffle = false }: Ba
         // SECRET PRIMING: More aggressive priming for mobile
         setTimeout(() => {
           console.log("🤫 Secretly priming widget...");
-
+          
           // First prime: play for a moment
           widget.play();
           setTimeout(() => {
             widget.pause();
-
+            
             // Second prime: play again briefly to ensure it works
             setTimeout(() => {
               widget.play();
@@ -178,10 +178,9 @@ export default function BackgroundMusic({ isPlaying, shouldShuffle = false }: Ba
           frameBorder="no"
           allow="autoplay; fullscreen"
           sandbox="allow-scripts allow-same-origin allow-presentation"
-          src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/playlists/1923384855&color=%23664729&auto_play=true&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true"
+          src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/playlists/1901967227&color=%23664729&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true&buying=false&liking=false&download=false&sharing=false"
         />
       )}
-      s
     </div>
   );
 }
