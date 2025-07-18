@@ -33,7 +33,10 @@ declare global {
   }
 }
 
-export default function BackgroundMusic({ isPlaying, shouldShuffle = false }: BackgroundMusicProps) {
+export default function BackgroundMusic({
+  isPlaying,
+  shouldShuffle = false,
+}: BackgroundMusicProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isWidgetReady, setIsWidgetReady] = useState(false);
   const [isWidgetPrimed, setIsWidgetPrimed] = useState(false);
@@ -54,7 +57,9 @@ export default function BackgroundMusic({ isPlaying, shouldShuffle = false }: Ba
       widgetRef.current.getSounds((sounds) => {
         if (sounds && sounds.length > 1) {
           const randomIndex = Math.floor(Math.random() * sounds.length);
-          console.log(`Shuffling to track ${randomIndex + 1} of ${sounds.length}`);
+          console.log(
+            `Shuffling to track ${randomIndex + 1} of ${sounds.length}`
+          );
           widgetRef.current!.skip(randomIndex);
         }
       });
@@ -91,7 +96,7 @@ export default function BackgroundMusic({ isPlaying, shouldShuffle = false }: Ba
         // Widget ready - no auto priming
         setIsWidgetPrimed(true);
         console.log("Widget ready!");
-        
+
         // Shuffle playlist if requested
         if (shouldShuffle) {
           setTimeout(() => {
@@ -159,7 +164,7 @@ export default function BackgroundMusic({ isPlaying, shouldShuffle = false }: Ba
           height="166"
           allow="autoplay; fullscreen"
           sandbox="allow-scripts allow-same-origin allow-presentation"
-          src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/playlists/1901967227&color=%23664729&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true&buying=false&liking=false&download=false&sharing=false"
+          src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/playlists/1923384855&color=%23664729&auto_play=true&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true"
         />
       )}
     </div>
