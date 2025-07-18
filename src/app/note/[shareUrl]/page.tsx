@@ -731,20 +731,17 @@ export default function NotePage() {
                             authorName={response.authorName || ""}
                             noteColor={offset.color}
                             shouldShowSignature={(() => {
-                              // Use ownerIndex to determine which response belongs to this share URL owner
-                              if (ownerIndex === null) return false;
-                              
-                              const responseIndex = index + 1; // Convert to absolute index in responses array
-
-                              // Show signature (no crossout) if:
-                              // 1. It's the current user's note (responseIndex === ownerIndex)
-                              // 2. It's the note before current user (responseIndex === ownerIndex - 1)  
-                              // 3. It's the note after current user (responseIndex === ownerIndex + 1)
-                              return (
-                                responseIndex === ownerIndex || // Current user's note
-                                responseIndex === ownerIndex - 1 || // Previous person (mutual)
-                                responseIndex === ownerIndex + 1 // Next person (mutual)
-                              );
+                              // Use ownerIndex if available, otherwise fallback to old logic
+                              if (ownerIndex !== null) {
+                                const responseIndex = index + 1;
+                                return (
+                                  responseIndex === ownerIndex ||
+                                  responseIndex === ownerIndex - 1 ||
+                                  responseIndex === ownerIndex + 1
+                                );
+                              }
+                              // Fallback: show all signatures for legacy data
+                              return true;
                             })()}
                             crossoutStroke={getCrossoutStroke(response.id)}
                           />
@@ -1122,18 +1119,16 @@ export default function NotePage() {
                             authorName={response.authorName || ""}
                             noteColor={offset.color}
                             shouldShowSignature={(() => {
-                              // Use ownerIndex to determine adjacency to this share URL owner
-                              if (ownerIndex === null) return false;
-                              
-                              const responseIndex = index + 1; // Convert to absolute index in responses array
-
-                              // Show signature (no crossout) if:
-                              // 1. It's the note before current user (responseIndex === ownerIndex - 1)
-                              // 2. It's the note after current user (responseIndex === ownerIndex + 1)
-                              return (
-                                responseIndex === ownerIndex - 1 || // Previous person (mutual)
-                                responseIndex === ownerIndex + 1 // Next person (mutual)
-                              );
+                              // Use ownerIndex if available, otherwise fallback to old logic
+                              if (ownerIndex !== null) {
+                                const responseIndex = index + 1;
+                                return (
+                                  responseIndex === ownerIndex - 1 ||
+                                  responseIndex === ownerIndex + 1
+                                );
+                              }
+                              // Fallback: show all signatures for legacy data
+                              return true;
                             })()}
                             crossoutStroke={getCrossoutStroke(response.id)}
                           />

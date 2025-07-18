@@ -31,7 +31,7 @@ model Response {
   authorName    String?     // Optional name for the responder
   createdAt     DateTime    @default(now())
   shareUrl      String      @unique // Unique URL for sharing to next person
-  ownerIndex    Int         // The response position this share URL is permanently tied to
+  ownerIndex    Int?        // The response position this share URL is permanently tied to
   isUsed        Boolean     @default(false) // Whether this share URL has been used to create a response
   // Note positioning and styling data
   positionX     Float       @default(0)
