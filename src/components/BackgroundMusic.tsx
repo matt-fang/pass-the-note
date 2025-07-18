@@ -36,7 +36,7 @@ declare global {
 export default function BackgroundMusic({ isPlaying, shouldShuffle = false }: BackgroundMusicProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isWidgetReady, setIsWidgetReady] = useState(false);
-  const [hasSecretlyPrimed, setHasSecretlyPrimed] = useState(false);
+  const [isWidgetPrimed, setIsWidgetPrimed] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const widgetRef = useRef<{
     play: () => void;
@@ -74,7 +74,7 @@ export default function BackgroundMusic({ isPlaying, shouldShuffle = false }: Ba
   }, []);
 
   useEffect(() => {
-    if (isLoaded && iframeRef.current && window.SC && !hasSecretlyPrimed) {
+    if (isLoaded && iframeRef.current && window.SC && !isWidgetPrimed) {
       const widget = window.SC.Widget(iframeRef.current);
       widgetRef.current = widget;
 
@@ -88,8 +88,8 @@ export default function BackgroundMusic({ isPlaying, shouldShuffle = false }: Ba
         widget.setVolume(70);
         setIsWidgetReady(true);
 
-        // Widget ready - no priming needed
-        setHasSecretlyPrimed(true);
+        // Widget ready - no auto priming
+        setIsWidgetPrimed(true);
         console.log("Widget ready!");
         
         // Shuffle playlist if requested
@@ -121,23 +121,23 @@ export default function BackgroundMusic({ isPlaying, shouldShuffle = false }: Ba
   }, [isLoaded]); // hasSecretlyPrimed intentionally omitted to prevent race condition
 
   useEffect(() => {
-    if (widgetRef.current && isWidgetReady && hasSecretlyPrimed) {
+    if (widgetRef.current && isWidgetReady && isWidgetPrimed) {
       // Add a small delay to ensure widget is fully ready
       const timer = setTimeout(() => {
         if (isPlaying) {
-          // Now that widget is primed, use simple play/pause
-          console.log("Widget is primed - using regular play");
+          // User has clicked to play - activate audio context and play
+          console.log("User wants to play music");
           widgetRef.current!.setVolume(70);
           widgetRef.current!.play();
         } else {
           console.log("Pausing");
           widgetRef.current!.pause();
         }
-      }, 100); // Slightly longer delay for better reliability
+      }, 100);
 
       return () => clearTimeout(timer);
     }
-  }, [isPlaying, isWidgetReady, hasSecretlyPrimed]);
+  }, [isPlaying, isWidgetReady, isWidgetPrimed]);
 
   return (
     <div
@@ -157,9 +157,7 @@ export default function BackgroundMusic({ isPlaying, shouldShuffle = false }: Ba
           id="soundcloud-player"
           width="100%"
           height="166"
-          scrolling="no"
-          frameBorder="no"
-          allow="fullscreen"
+          allow="autoplay; fullscreen"
           sandbox="allow-scripts allow-same-origin allow-presentation"
           src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/playlists/1901967227&color=%23664729&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true&buying=false&liking=false&download=false&sharing=false"
         />
