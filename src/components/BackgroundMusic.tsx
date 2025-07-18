@@ -21,7 +21,7 @@ declare global {
           setVolume: (volume: number) => void;
           getVolume: (callback: (volume: number) => void) => void;
           skip: (soundIndex: number) => void;
-          getSounds: (callback: (sounds: any[]) => void) => void;
+          getSounds: (callback: (sounds: unknown[]) => void) => void;
         };
         Events: {
           READY: string;
@@ -46,7 +46,7 @@ export default function BackgroundMusic({ isPlaying, shouldShuffle = false }: Ba
     getVolume: (callback: (volume: number) => void) => void;
     bind: (event: string, callback: () => void) => void;
     skip: (soundIndex: number) => void;
-    getSounds: (callback: (sounds: any[]) => void) => void;
+    getSounds: (callback: (sounds: unknown[]) => void) => void;
   } | null>(null);
 
   const shufflePlaylist = () => {

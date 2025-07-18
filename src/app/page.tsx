@@ -92,7 +92,7 @@ export default function Home() {
     };
 
     loadInitialNote();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   // Check if mobile on mount and resize
   useEffect(() => {
