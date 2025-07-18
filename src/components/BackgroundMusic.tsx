@@ -88,33 +88,16 @@ export default function BackgroundMusic({ isPlaying, shouldShuffle = false }: Ba
         widget.setVolume(70);
         setIsWidgetReady(true);
 
-        // SECRET PRIMING: More aggressive priming for mobile
-        setTimeout(() => {
-          console.log("🤫 Secretly priming widget...");
-          
-          // First prime: play for a moment
-          widget.play();
+        // Widget ready - no priming needed
+        setHasSecretlyPrimed(true);
+        console.log("Widget ready!");
+        
+        // Shuffle playlist if requested
+        if (shouldShuffle) {
           setTimeout(() => {
-            widget.pause();
-            
-            // Second prime: play again briefly to ensure it works
-            setTimeout(() => {
-              widget.play();
-              setTimeout(() => {
-                widget.pause();
-                setHasSecretlyPrimed(true);
-                console.log("🤫 Widget double-primed and ready!");
-                
-                // Shuffle playlist if requested
-                if (shouldShuffle) {
-                  setTimeout(() => {
-                    shufflePlaylist();
-                  }, 500);
-                }
-              }, 150); // Slightly longer to ensure audio context starts
-            }, 100);
-          }, 150);
-        }, 800); // Longer wait for widget to be fully ready
+            shufflePlaylist();
+          }, 500);
+        }
       });
 
       // Add event listeners for play/pause to track state
@@ -176,7 +159,7 @@ export default function BackgroundMusic({ isPlaying, shouldShuffle = false }: Ba
           height="166"
           scrolling="no"
           frameBorder="no"
-          allow="autoplay; fullscreen"
+          allow="fullscreen"
           sandbox="allow-scripts allow-same-origin allow-presentation"
           src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/playlists/1901967227&color=%23664729&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true&buying=false&liking=false&download=false&sharing=false"
         />
