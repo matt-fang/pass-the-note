@@ -402,6 +402,7 @@ export default function NotePage() {
           showAbout={showAbout}
           onAboutChange={setShowAbout}
           defaultMusicOn={false}
+          shouldShuffle={true}
         />
         <div
           style={{
@@ -445,6 +446,7 @@ export default function NotePage() {
           showAbout={showAbout}
           onAboutChange={setShowAbout}
           defaultMusicOn={false}
+          shouldShuffle={true}
         />
 
         {/* Main Content */}
@@ -521,6 +523,7 @@ export default function NotePage() {
           showAbout={showAbout}
           onAboutChange={setShowAbout}
           defaultMusicOn={false}
+          shouldShuffle={true}
         />
 
         {/* Main Content */}

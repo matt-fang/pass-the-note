@@ -300,6 +300,7 @@ export default function Home() {
         showAbout={showAbout}
         onAboutChange={setShowAbout}
         defaultMusicOn={false}
+        shouldShuffle={true}
       />
 
       {/* Main Content */}

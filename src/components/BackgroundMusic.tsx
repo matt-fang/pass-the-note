@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from "react";
 interface BackgroundMusicProps {
   isPlaying: boolean;
   onToggle: () => void;
+  shouldShuffle?: boolean;
 }
 
 // Extend Window interface to include SC property
@@ -19,6 +20,8 @@ declare global {
           toggle: () => void;
           setVolume: (volume: number) => void;
           getVolume: (callback: (volume: number) => void) => void;
+          skip: (soundIndex: number) => void;
+          getSounds: (callback: (sounds: any[]) => void) => void;
         };
         Events: {
           READY: string;
@@ -30,7 +33,7 @@ declare global {
   }
 }
 
-export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
+export default function BackgroundMusic({ isPlaying, shouldShuffle = false }: BackgroundMusicProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isWidgetReady, setIsWidgetReady] = useState(false);
   const [hasSecretlyPrimed, setHasSecretlyPrimed] = useState(false);
@@ -42,7 +45,21 @@ export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
     setVolume: (volume: number) => void;
     getVolume: (callback: (volume: number) => void) => void;
     bind: (event: string, callback: () => void) => void;
+    skip: (soundIndex: number) => void;
+    getSounds: (callback: (sounds: any[]) => void) => void;
   } | null>(null);
+
+  const shufflePlaylist = () => {
+    if (widgetRef.current) {
+      widgetRef.current.getSounds((sounds) => {
+        if (sounds && sounds.length > 1) {
+          const randomIndex = Math.floor(Math.random() * sounds.length);
+          console.log(`Shuffling to track ${randomIndex + 1} of ${sounds.length}`);
+          widgetRef.current!.skip(randomIndex);
+        }
+      });
+    }
+  };
 
   useEffect(() => {
     // Load the SoundCloud widget API
@@ -87,6 +104,13 @@ export default function BackgroundMusic({ isPlaying }: BackgroundMusicProps) {
                 widget.pause();
                 setHasSecretlyPrimed(true);
                 console.log("🤫 Widget double-primed and ready!");
+                
+                // Shuffle playlist if requested
+                if (shouldShuffle) {
+                  setTimeout(() => {
+                    shufflePlaylist();
+                  }, 500);
+                }
               }, 150); // Slightly longer to ensure audio context starts
             }, 100);
           }, 150);

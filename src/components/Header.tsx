@@ -7,9 +7,10 @@ interface HeaderProps {
   showAbout?: boolean;
   onAboutChange?: (show: boolean) => void;
   defaultMusicOn?: boolean;
+  shouldShuffle?: boolean;
 }
 
-export default function Header({ showAbout = false, onAboutChange, defaultMusicOn = false }: HeaderProps) {
+export default function Header({ showAbout = false, onAboutChange, defaultMusicOn = false, shouldShuffle = false }: HeaderProps) {
   const [isMobile, setIsMobile] = useState(false);
   const [isPlaying, setIsPlaying] = useState(defaultMusicOn);
 
@@ -30,7 +31,7 @@ export default function Header({ showAbout = false, onAboutChange, defaultMusicO
   return (
     <>
       {/* Background Music */}
-      <BackgroundMusic isPlaying={isPlaying} onToggle={toggleMusic} />
+      <BackgroundMusic isPlaying={isPlaying} onToggle={toggleMusic} shouldShuffle={shouldShuffle} />
       
       {/* Header */}
       <div style={{
