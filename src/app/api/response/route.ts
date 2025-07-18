@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
         drawingData,
         authorName: authorName || 'Anonymous',
         shareUrl: newShareUrl,
-        ownerIndex: currentResponsesCount, // This response will be at index currentResponsesCount
+        ownerIndex: currentResponsesCount + 1, // This share URL will own the NEXT response position
         isUsed: true, // Mark as used since we're creating the actual response
         positionX: positionX || 0,
         positionY: positionY || 0,
